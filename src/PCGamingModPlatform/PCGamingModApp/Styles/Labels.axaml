@@ -17,11 +17,6 @@
     </Border>
   </Design.PreviewWith>
 
-  <!-- Add Styles Here -->
-  <Style Selector="Label">
-    <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}"></Setter>
-  </Style>
-
   <Style Selector="Label.normal">
     <Setter Property="FontSize" Value="24"></Setter>
     <Setter Property="Padding" Value="0"></Setter>

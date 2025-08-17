@@ -4,10 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:PCGamingModApp.ViewModels"
-             x:DataType="vm:GameSettingsPageViewModel"
-             x:Class="PCGamingModApp.Views.GameSettingsPageView">
+             x:DataType="vm:DeveloperSettingsPageViewModel"
+             x:Class="PCGamingModApp.Views.DeveloperSettingsPageView">
   <Design.DataContext>
-    <vm:GameSettingsPageViewModel />
+    <vm:DeveloperSettingsPageViewModel />
   </Design.DataContext>
 
   <Grid RowDefinitions="Auto, *">

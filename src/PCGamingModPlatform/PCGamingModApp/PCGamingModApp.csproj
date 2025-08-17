@@ -6,6 +6,11 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <Title>PC Gaming Mod App</Title>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/ff2009/pc-gaming-mod-platform</RepositoryUrl>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +35,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\AddOnsPageView.axaml.cs">
+      <DependentUpon>AddOnsPageView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\AboutPageView.axaml.cs">
+      <DependentUpon>AboutPageView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\GameListMenuView.axaml.cs">
+      <DependentUpon>GameListMenuView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\SystemPageView.axaml.cs">
+      <DependentUpon>SystemPageView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\DeveloperSettingsPageView.axaml.cs">
+      <DependentUpon>DeveloperSettingsPageView.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\HomePageView.axaml.cs">
       <DependentUpon>HomePageView.axaml</DependentUpon>
     </Compile>

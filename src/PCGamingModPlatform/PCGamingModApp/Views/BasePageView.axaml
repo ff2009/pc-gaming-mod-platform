@@ -11,7 +11,7 @@
   </Design.DataContext>
 
   <Grid RowDefinitions="Auto, *">
-    <Label Grid.Row="0" Classes="h2" FontWeight="Black" Content="{Binding PageTitle}" />
+    <Label Grid.Row="0" Classes="h1" Content="{Binding PageTitle}" />
 
   </Grid>
 </UserControl>

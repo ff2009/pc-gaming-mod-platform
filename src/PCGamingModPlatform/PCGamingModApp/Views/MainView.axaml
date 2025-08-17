@@ -58,7 +58,7 @@
     </Button>
 
     <!-- Main Content section -->
-    <ContentControl Grid.Column="2" Grid.RowSpan="2" Content="{Binding CurrentPage}"></ContentControl>
+    <ContentControl Grid.Column="2" Grid.RowSpan="4" Content="{Binding CurrentPage}"></ContentControl>
 
 
   </Grid>

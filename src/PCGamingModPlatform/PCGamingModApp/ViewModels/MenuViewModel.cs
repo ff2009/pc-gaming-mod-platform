@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using PCGamingModApp.MainApp;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,9 @@ public partial class MenuViewModel : ContextViewModel
 {
     private readonly MainViewModel _mainViewModel;
     private readonly PageFactory _pageFactory;
+
+    [ObservableProperty]
+    private bool isDeveloperSettingsVisible;
 
     /// <summary>
     /// Design-time only constructor
@@ -31,5 +35,15 @@ public partial class MenuViewModel : ContextViewModel
 
     [RelayCommand]
     private void GoToGameSettings() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<GameSettingsPageViewModel>();
+
+    [RelayCommand]
+    private void GoToSystem() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<SystemPageViewModel>();
+
+    [RelayCommand]
+    private void GoToAbout() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<AboutPageViewModel>();
+    
+
+    [RelayCommand]
+    private void GoToDeveloperSettings() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<DeveloperSettingsPageViewModel>();
 
 }

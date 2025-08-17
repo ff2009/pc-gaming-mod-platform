@@ -13,4 +13,6 @@ public enum ApplicationPageNames
     Sync = 1005,
     System = 1006,
     About = 1007,
+
+    DeveloperSettings = 5001,
 }

@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="clr-namespace:PCGamingModApp.ViewModels"
+             x:DataType="vm:AboutPageViewModel"
+             x:Class="PCGamingModApp.Views.AboutPageView">
+  <Design.DataContext>
+    <vm:AboutPageViewModel />
+  </Design.DataContext>
+
+  <Grid RowDefinitions="Auto, *">
+    <Label Grid.Row="0" Classes="h1" Content="{Binding PageTitle}" />
+    <StackPanel Grid.Row="1" VerticalAlignment="Center">
+      <Label HorizontalAlignment="Center" Content="Cross-platform app for managing mods for your favorite games." />
+      <Label HorizontalAlignment="Center" Content="Copyright © 2025 - PC Gaming Mod App" />
+      
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <Label Content="Repository:" />
+        <HyperlinkButton Content="https://github.com/ff2009/pc-gaming-mod-platform"
+                         NavigateUri="https://github.com/ff2009/pc-gaming-mod-platform"
+                         Padding="0"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <Label Content="Bugs:" />
+        <HyperlinkButton Content="https://github.com/ff2009/pc-gaming-mod-platform/issues"
+                         NavigateUri="https://github.com/ff2009/pc-gaming-mod-platform/issues"
+                         Padding="0"/>
+      </StackPanel>
+    </StackPanel>
+  </Grid>
+</UserControl>

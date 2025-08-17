@@ -25,15 +25,26 @@ public partial class App : Application
         collection.AddSingleton<MainViewModel>();
 
         collection.AddSingleton<MenuViewModel>();
+        collection.AddSingleton<GameListMenuViewModel>();
 
         collection.AddSingleton<HomePageViewModel>();
 
         collection.AddTransient<BasePageViewModel>();
         collection.AddTransient<GameSettingsPageViewModel>();
+        collection.AddTransient<AddOnsPageViewModel>();
+        collection.AddTransient<SystemPageViewModel>();
+        collection.AddTransient<AboutPageViewModel>();
+
+        collection.AddTransient<DeveloperSettingsPageViewModel>();
 
         collection.AddSingleton<Func<Type, PageViewModel>>(x => type => type switch {
+            _ when type == typeof(HomePageViewModel) => x.GetRequiredService<HomePageViewModel>(),
             _ when type == typeof(BasePageViewModel) => x.GetRequiredService<BasePageViewModel>(),
             _ when type == typeof(GameSettingsPageViewModel) => x.GetRequiredService<GameSettingsPageViewModel>(),
+            _ when type == typeof(AddOnsPageViewModel) => x.GetRequiredService<AddOnsPageViewModel>(),
+            _ when type == typeof(SystemPageViewModel) => x.GetRequiredService<SystemPageViewModel>(),
+            _ when type == typeof(AboutPageViewModel) => x.GetRequiredService<AboutPageViewModel>(),
+            _ when type == typeof(DeveloperSettingsPageViewModel) => x.GetRequiredService<DeveloperSettingsPageViewModel>(),
             _ => throw new InvalidOperationException($"Page of type {type?.FullName} has no view model"),
         });
 
