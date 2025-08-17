@@ -2,10 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using PCGamingModApp.MainApp;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PCGamingModApp.ViewModels;
 public partial class MenuViewModel : ContextViewModel
@@ -35,6 +31,9 @@ public partial class MenuViewModel : ContextViewModel
 
     [RelayCommand]
     private void GoToGameSettings() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<GameSettingsPageViewModel>();
+
+    [RelayCommand]
+    private void GoToAddOns() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<AddOnsPageViewModel>();
 
     [RelayCommand]
     private void GoToSystem() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<SystemPageViewModel>();

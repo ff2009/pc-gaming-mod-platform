@@ -13,7 +13,7 @@
   
   <Grid RowDefinitions="*, Auto">
     <StackPanel Spacing="12">
-      <Button CornerRadius="8" HorizontalAlignment="Stretch" Command="{Binding GoToBaseCommand}" >
+      <Button HorizontalAlignment="Stretch" Command="{Binding GoToBaseCommand}" >
         <StackPanel Orientation="Horizontal">
           <Label VerticalAlignment="Center" Classes="icon" Content="&#xe2c2;" />
           <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Base" />
@@ -31,7 +31,7 @@
           <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Launchers" />
         </StackPanel>
       </Button>
-      <Button HorizontalAlignment="Stretch">
+      <Button HorizontalAlignment="Stretch" Command="{Binding GoToAddOnsCommand}">
         <StackPanel Orientation="Horizontal">
           <Label VerticalAlignment="Center" Classes="icon" Content="&#xe596;" />
           <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Add-ons" />
@@ -39,7 +39,7 @@
       </Button>
       <Button HorizontalAlignment="Stretch">
         <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe1aa;"/>
+          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe1aa;" />
           <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Sync"/>
         </StackPanel>
       </Button>

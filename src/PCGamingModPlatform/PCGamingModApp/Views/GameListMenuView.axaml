@@ -2,16 +2,29 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="450"
              xmlns:vm="clr-namespace:PCGamingModApp.ViewModels"
-             x:DataType="vm:GameListViewModel"
-             x:Class="PCGamingModApp.Views.GameListView">
+             x:DataType="vm:GameListMenuViewModel"
+             x:Class="PCGamingModApp.Views.GameListMenuView">
   <Design.DataContext>
-    <vm:GameListViewModel />
+    <vm:GameListMenuViewModel />
   </Design.DataContext>
 
-  <Grid RowDefinitions="Auto, *">
-    <Label Grid.Row="0" Classes="h1" Content="{Binding PageTitle}" />
-
+  <Grid RowDefinitions="*, Auto">
+    <ListBox Grid.Row="0"
+             Background="Transparent"
+             ItemsSource="{Binding GameList}"
+             SelectedValueBinding="{Binding Id}"
+             SelectedValue="{Binding SelectedGameItem.Id}"
+             >
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="vm:GameItemViewModel">
+          <StackPanel Orientation="Horizontal">
+            <Image Source="avares://PCGamingModApp/Assets/avalonia-logo.ico" Width="24"/>
+            <Label Content="{Binding Title}" />
+          </StackPanel>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
   </Grid>
 </UserControl>

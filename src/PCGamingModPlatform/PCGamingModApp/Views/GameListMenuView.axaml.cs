@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace PCGamingModApp.Views;
 
-public partial class GameListView : UserControl
+public partial class GameListMenuView : UserControl
 {
-    public GameListView()
+    public GameListMenuView()
     {
         InitializeComponent();
     }

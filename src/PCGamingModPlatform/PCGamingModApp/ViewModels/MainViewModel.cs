@@ -20,7 +20,7 @@ public partial class MainViewModel : ViewModelBase
     /// </summary>
     public MainViewModel()
     {
-        CurrentContext = new MenuViewModel();
+        CurrentContext = new GameListMenuViewModel();
 
         CurrentPage = new BasePageViewModel();
     }
@@ -28,6 +28,8 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel(PageFactory pageFactory)
     {
         _pageFactory = pageFactory ?? throw new ArgumentNullException(nameof(pageFactory));
+
+        CurrentContext = new GameListMenuViewModel(this);
     }
 
 
