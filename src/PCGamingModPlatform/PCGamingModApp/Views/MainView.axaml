@@ -6,13 +6,54 @@
              xmlns:vm="clr-namespace:PCGamingModApp.ViewModels"
              xmlns:view="clr-namespace:PCGamingModApp.Views"
              x:DataType="vm:MainViewModel"
-             x:Class="PCGamingModApp.Views.MainView">
-  
+             x:Class="PCGamingModApp.Views.MainView"
+             Background="Transparent">
+
   <Design.DataContext>
     <vm:MainViewModel />
   </Design.DataContext>
 
-  <Grid>
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto, *" IsHitTestVisible="True">
+
+    <!-- Logo and app name -->
+    <StackPanel Orientation="Horizontal" 
+                VerticalAlignment="Center" 
+                Margin="8 0"
+                IsHitTestVisible="False">
+      <Image Source="avares://PCGamingModApp/Assets/avalonia-logo.ico" MaxWidth="16" />
+      <TextBlock Grid.Column="0"
+                 Grid.Row="0"
+                 Text="{Binding Greeting}"
+                 Margin="8 0"
+                 FontFamily="SegoeUI"
+                 FontSize="12"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Center"/>
+    </StackPanel> 
+    
+    <!-- Search bar -->
+    <StackPanel Grid.Row="0"
+                Grid.ColumnSpan="3"
+                Margin="8"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal" IsHitTestVisible="True">
+
+      <TextBox Watermark="Search..."
+               Width="300" 
+               IsHitTestVisible="True">
+        <TextBox.InnerLeftContent>
+          <Button Background="Transparent" Margin="8 0 0 0" Padding="0">
+            <Label Classes="icon-only" Content="&#xe30c;"/>
+          </Button>
+        </TextBox.InnerLeftContent>
+      </TextBox>
+    </StackPanel>
+
+    <!-- Context section -->
+    <ContentControl Grid.Column="0" Grid.Row="2" Content="{Binding CurrentContext}"></ContentControl>
+
+    <!-- Main Content section -->
+    <ContentControl Grid.Column="2" Grid.RowSpan="2" Content="{Binding CurrentPage}"></ContentControl>
   </Grid>
 </UserControl>
+

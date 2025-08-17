@@ -6,15 +6,31 @@
         xmlns:local="clr-namespace:PCGamingModApp.Views"
         xmlns:vm="clr-namespace:PCGamingModApp.ViewModels"
         x:Class="PCGamingModApp.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-        WindowStartupLocation="CenterScreen"
         x:DataType="local:MainWindow"
-        Title="PC Gaming Mod App">
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="PreferSystemChrome"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="PC Gaming Mod App"
+        TransparencyLevelHint="AcrylicBlur"
+        WindowStartupLocation="CenterScreen">
 
   <Design.DataContext>
     <vm:MainViewModel/>
   </Design.DataContext>
 
-  <local:MainView />
+  <Grid IsHitTestVisible="False">
+    <ExperimentalAcrylicBorder IsHitTestVisible="False">
+      <ExperimentalAcrylicBorder.Material>
+        <ExperimentalAcrylicMaterial
+            BackgroundSource="Digger"
+            TintColor="Black"
+            TintOpacity="1"
+            MaterialOpacity="0.65" />
+      </ExperimentalAcrylicBorder.Material>
+    </ExperimentalAcrylicBorder>
+    
+    <local:MainView/>
+  </Grid>
 
 </Window>
