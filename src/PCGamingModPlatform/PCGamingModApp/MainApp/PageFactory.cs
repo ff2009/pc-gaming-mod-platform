@@ -14,4 +14,5 @@ public class PageFactory(Func<Type, PageViewModel> factory)
 
         return viewModel;
     }
+
 }

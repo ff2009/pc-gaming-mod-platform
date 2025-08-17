@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="450"             
+             xmlns:vm="clr-namespace:PCGamingModApp.ViewModels"
+             x:DataType="vm:MenuViewModel"
+             x:Class="PCGamingModApp.Views.MenuView">
+
+  <Design.DataContext>
+    <vm:MenuViewModel />
+  </Design.DataContext>
+  
+  <Grid RowDefinitions="*, Auto">
+    <StackPanel Spacing="12">
+      <Button HorizontalAlignment="Stretch" Command="{Binding GoToBaseCommand}" >
+        <StackPanel Orientation="Horizontal">
+          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe2c2;" />
+          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Base" />
+        </StackPanel>
+      </Button>
+      <Button HorizontalAlignment="Stretch" Command="{Binding GoToGameSettingsCommand}">
+        <StackPanel Orientation="Horizontal">
+          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe26e;" />
+          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Games" />
+        </StackPanel>
+      </Button>
+      <Button HorizontalAlignment="Stretch">
+        <StackPanel Orientation="Horizontal">
+          <Label VerticalAlignment="Center" Classes="icon" Content="&#xead4;" />
+          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Launchers" />
+        </StackPanel>
+      </Button>
+      <Button HorizontalAlignment="Stretch">
+        <StackPanel Orientation="Horizontal">
+          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe596;" />
+          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Add-ons" />
+        </StackPanel>
+      </Button>
+      <Button HorizontalAlignment="Stretch">
+        <StackPanel Orientation="Horizontal">
+          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe1aa;"/>
+          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Sync"/>
+        </StackPanel>
+      </Button>
+      <Button HorizontalAlignment="Stretch">
+        <StackPanel Orientation="Horizontal">
+          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe5da;" />
+          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="System" />
+        </StackPanel>
+      </Button>
+      <Button HorizontalAlignment="Stretch">
+        <StackPanel Orientation="Horizontal">
+          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe2ce;" />
+          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="About" />
+        </StackPanel>
+      </Button>
+    </StackPanel>
+  </Grid>
+</UserControl>

@@ -8,7 +8,7 @@
         x:Class="PCGamingModApp.Views.MainWindow"
         x:DataType="local:MainWindow"
         Background="Transparent"
-        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaToDecorationsHint="False"
         ExtendClientAreaChromeHints="PreferSystemChrome"
         Icon="/Assets/avalonia-logo.ico"
         Title="PC Gaming Mod App"
@@ -19,7 +19,7 @@
     <vm:MainViewModel/>
   </Design.DataContext>
 
-  <Grid IsHitTestVisible="False">
+  <Grid>
     <ExperimentalAcrylicBorder IsHitTestVisible="False">
       <ExperimentalAcrylicBorder.Material>
         <ExperimentalAcrylicMaterial
