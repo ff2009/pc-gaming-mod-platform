@@ -17,9 +17,16 @@
              SelectedValueBinding="{Binding Id}"
              SelectedValue="{Binding SelectedGameItem.Id}"
              >
+      
+      <ListBox.ItemsPanel>
+        <ItemsPanelTemplate>
+          <VirtualizingStackPanel/>
+        </ItemsPanelTemplate>
+      </ListBox.ItemsPanel>
+
       <ListBox.ItemTemplate>
         <DataTemplate x:DataType="vm:GameItemViewModel">
-          <StackPanel Orientation="Horizontal">
+          <StackPanel Orientation="Horizontal" Margin="4 2">
             <Image Source="avares://PCGamingModApp/Assets/avalonia-logo.ico" Width="24"/>
             <Label Content="{Binding Title}" />
           </StackPanel>

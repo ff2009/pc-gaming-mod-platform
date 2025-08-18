@@ -1,0 +1,69 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Design.PreviewWith>
+    <Grid>
+      <ExperimentalAcrylicBorder IsHitTestVisible="False">
+        <ExperimentalAcrylicBorder.Material>
+          <ExperimentalAcrylicMaterial
+              BackgroundSource="Digger"
+              TintColor="Black"
+              TintOpacity="1"
+              MaterialOpacity="0.65" />
+        </ExperimentalAcrylicBorder.Material>
+      </ExperimentalAcrylicBorder>
+      
+      <Border Padding="20" Width="250" Height="300">
+        <!-- Add Controls for Previewer Here -->
+        <ListBox Background="Transparent">
+          <ListBoxItem>
+            <StackPanel Orientation="Horizontal" Margin="4 0">
+              <Image Source="/Assets/avalonia-logo.ico" Width="24" />
+              <Label Content="Back to Dinosaur Island" />
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem IsSelected="True">
+            <StackPanel Orientation="Horizontal" Margin="4 0">
+              <Image Source="/Assets/avalonia-logo.ico" Width="24" />
+              <Label Content="Crysis" />
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem>
+            <StackPanel Orientation="Horizontal" Margin="4 0">
+              <Image Source="/Assets/avalonia-logo.ico" Width="24" />
+              <Label Content="Crysis 2" />
+            </StackPanel>
+          </ListBoxItem>
+          <ListBoxItem IsEnabled="False">
+            <StackPanel Orientation="Horizontal" Margin="4 0">
+              <Image Source="/Assets/avalonia-logo.ico" Width="24" />
+              <Label Content="Crysis 3" />
+            </StackPanel>
+          </ListBoxItem>
+        </ListBox>
+      </Border>
+    </Grid>
+  </Design.PreviewWith>
+
+  <!-- Add Styles Here -->
+  <Style Selector="ListBoxItem">
+    <Setter Property="Margin" Value="0 2"/>
+    <Setter Property="Padding" Value="4"/>
+    <Setter Property="CornerRadius" Value="4"/>
+  </Style>
+
+  <Style Selector="ListBoxItem">
+    <!--  Selected State  -->
+    <Style Selector="^:selected">
+      <Style Selector="^ /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SystemControlHighlightListLowBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource SystemControlHighlightAltBaseHighBrush}" />
+      </Style>
+
+      <!--  Selected PointerOver State  -->
+      <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SystemControlHighlightListMediumBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource SystemControlHighlightAltBaseHighBrush}" />
+      </Style>
+    </Style>
+  </Style>
+</Styles>

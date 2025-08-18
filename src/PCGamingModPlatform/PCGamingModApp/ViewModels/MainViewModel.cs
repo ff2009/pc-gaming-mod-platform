@@ -20,7 +20,8 @@ public partial class MainViewModel : ViewModelBase
     /// </summary>
     public MainViewModel()
     {
-        CurrentContext = new GameListMenuViewModel();
+        if (!Avalonia.Controls.Design.IsDesignMode)
+            CurrentContext = new GameListMenuViewModel();
 
         CurrentPage = new BasePageViewModel();
     }
