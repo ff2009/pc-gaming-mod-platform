@@ -2,16 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Design.PreviewWith>
     <Grid>
-      <ExperimentalAcrylicBorder IsHitTestVisible="False">
-        <ExperimentalAcrylicBorder.Material>
-          <ExperimentalAcrylicMaterial
-              BackgroundSource="Digger"
-              TintColor="Black"
-              TintOpacity="1"
-              MaterialOpacity="0.65" />
-        </ExperimentalAcrylicBorder.Material>
-      </ExperimentalAcrylicBorder>
-      
       <Border Padding="20" Width="250" Height="300">
         <!-- Add Controls for Previewer Here -->
         <ListBox Background="Transparent">
@@ -52,18 +42,18 @@
   </Style>
 
   <Style Selector="ListBoxItem">
-    <!--  Selected State  -->
+    <!--  Selected State  --><!--
     <Style Selector="^:selected">
       <Style Selector="^ /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource SystemControlHighlightListLowBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource SystemControlHighlightAltBaseHighBrush}" />
       </Style>
 
-      <!--  Selected PointerOver State  -->
+      --><!--  Selected PointerOver State  --><!--
       <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource SystemControlHighlightListMediumBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource SystemControlHighlightAltBaseHighBrush}" />
       </Style>
-    </Style>
+    </Style>-->
   </Style>
 </Styles>

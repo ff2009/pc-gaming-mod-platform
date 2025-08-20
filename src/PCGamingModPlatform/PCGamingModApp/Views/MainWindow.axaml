@@ -12,7 +12,7 @@
         ExtendClientAreaChromeHints="PreferSystemChrome"
         Icon="/Assets/avalonia-logo.ico"
         Title="PC Gaming Mod App"
-        TransparencyLevelHint="AcrylicBlur"
+        TransparencyLevelHint="Mica, AcrylicBlur, Blur"
         WindowStartupLocation="CenterScreen">
 
   <Design.DataContext>
@@ -20,16 +20,6 @@
   </Design.DataContext>
 
   <Grid>
-    <ExperimentalAcrylicBorder IsHitTestVisible="False">
-      <ExperimentalAcrylicBorder.Material>
-        <ExperimentalAcrylicMaterial
-            BackgroundSource="Digger"
-            TintColor="Black"
-            TintOpacity="1"
-            MaterialOpacity="0.65" />
-      </ExperimentalAcrylicBorder.Material>
-    </ExperimentalAcrylicBorder>
-    
     <local:MainView/>
   </Grid>
 
