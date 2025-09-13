@@ -1,3 +1,5 @@
 <Solution>
+    <Project Path="..\..\tests\PCGamingModPlatform.Tests\PCGamingModPlatform.Tests\PCGamingModPlatform.Tests.csproj"
+             Type="Classic C#"/>
   <Project Path="PCGamingModApp/PCGamingModApp.csproj" />
 </Solution>

@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <Folder Include="Assets\Images\" />
-    <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
@@ -41,7 +40,7 @@
     <Compile Update="Views\AboutPageView.axaml.cs">
       <DependentUpon>AboutPageView.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\GameListMenuView.axaml.cs">
+      <Compile Update="Views\GameMenuView.axaml.cs">
       <DependentUpon>GameListMenuView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\SystemPageView.axaml.cs">
