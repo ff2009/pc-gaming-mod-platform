@@ -1,36 +1,38 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using PCGamingModApp.MainApp;
-using System;
 
 namespace PCGamingModApp.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private PageFactory _pageFactory;
+    private readonly PageFactory _pageFactory;
+    private readonly IServiceProvider _serviceProvider;
 
-    [ObservableProperty]
-    private ContextViewModel _currentContext;
+    [ObservableProperty] private ContextViewModel _currentContext;
 
-    [ObservableProperty]
-    private PageViewModel _currentPage;
+    [ObservableProperty] private PageViewModel _currentPage;
 
     /// <summary>
     /// Design-time only constructor
     /// </summary>
     public MainViewModel()
     {
-        if (!Avalonia.Controls.Design.IsDesignMode)
-            CurrentContext = new GameListMenuViewModel();
+        if (!Design.IsDesignMode)
+            CurrentContext = new GameMenuViewModel();
 
         CurrentPage = new BasePageViewModel();
     }
 
-    public MainViewModel(PageFactory pageFactory)
+    public MainViewModel(IServiceProvider serviceProvider, PageFactory pageFactory)
     {
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _pageFactory = pageFactory ?? throw new ArgumentNullException(nameof(pageFactory));
 
-        CurrentContext = new GameListMenuViewModel(this);
+        CurrentContext = _serviceProvider.GetRequiredService<GameMenuViewModel>();
     }
 
 

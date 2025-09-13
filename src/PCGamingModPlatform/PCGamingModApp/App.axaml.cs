@@ -1,14 +1,16 @@
+using System;
+using System.IO;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using PCGamingModApp.MainApp;
+using PCGamingModApp.Services.Implementations;
+using PCGamingModApp.Services.Interfaces;
 using PCGamingModApp.ViewModels;
 using PCGamingModApp.Views;
-using System;
-using System.Linq;
 
 namespace PCGamingModApp;
 
@@ -22,10 +24,18 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         var collection = new ServiceCollection();
+
+        collection.AddSingleton<IImageCache>(sp =>
+            new SimpleImageCache(Path.Combine(AppContext.BaseDirectory, "Assets", "Images")));
+
+        collection.AddTransient<ILauncherService, LauncherService>();
+
         collection.AddSingleton<MainViewModel>();
 
+        // UI ViewModels (transient – new instance per view)
         collection.AddSingleton<MenuViewModel>();
-        collection.AddSingleton<GameListMenuViewModel>();
+        collection.AddSingleton<GameMenuViewModel>();
+        collection.AddTransient<GameItemViewModel>(); // each row gets its own VM
 
         collection.AddSingleton<HomePageViewModel>();
 
@@ -37,14 +47,16 @@ public partial class App : Application
 
         collection.AddTransient<DeveloperSettingsPageViewModel>();
 
-        collection.AddSingleton<Func<Type, PageViewModel>>(x => type => type switch {
+        collection.AddSingleton<Func<Type, PageViewModel>>(x => type => type switch
+        {
             _ when type == typeof(HomePageViewModel) => x.GetRequiredService<HomePageViewModel>(),
             _ when type == typeof(BasePageViewModel) => x.GetRequiredService<BasePageViewModel>(),
             _ when type == typeof(GameSettingsPageViewModel) => x.GetRequiredService<GameSettingsPageViewModel>(),
             _ when type == typeof(AddOnsPageViewModel) => x.GetRequiredService<AddOnsPageViewModel>(),
             _ when type == typeof(SystemPageViewModel) => x.GetRequiredService<SystemPageViewModel>(),
             _ when type == typeof(AboutPageViewModel) => x.GetRequiredService<AboutPageViewModel>(),
-            _ when type == typeof(DeveloperSettingsPageViewModel) => x.GetRequiredService<DeveloperSettingsPageViewModel>(),
+            _ when type == typeof(DeveloperSettingsPageViewModel) => x
+                .GetRequiredService<DeveloperSettingsPageViewModel>(),
             _ => throw new InvalidOperationException($"Page of type {type?.FullName} has no view model"),
         });
 

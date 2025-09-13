@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="450"
+             xmlns:vm="clr-namespace:PCGamingModApp.ViewModels"
+             x:DataType="vm:GameMenuViewModel"
+             x:Class="PCGamingModApp.Views.GameMenuView">
+    <Design.DataContext>
+        <vm:GameMenuViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="*, Auto">
+        <ListBox Grid.Row="0"
+                 Background="Transparent"
+                 ItemsSource="{Binding Games}">
+
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type vm:GameItemViewModel}">
+                    <Border Padding="4">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto">
+                            <!-- Game icon (generic) -->
+                            <Image Width="32" Height="32"
+                                   Source="{Binding Icon}"
+                                   Margin="0,0,8,0" />
+
+                            <!-- Game name -->
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Name}"
+                                       VerticalAlignment="Center" />
+
+                            <!-- Store badge -->
+                            <Image Grid.Column="2"
+                                   Width="24" Height="24"
+                                   Source="{Binding Store, Converter={StaticResource StoreToIconConverter}}"
+                                   Margin="8,0" />
+
+                            <!-- Favorite star -->
+                            <Button Grid.Column="3"
+                                    Background="Transparent"
+                                    Command="{Binding ToggleFavoriteCommand}"
+                                    Content="{Binding IsFavorite}" />
+
+                            <!-- Play / Add button (visibility driven by IsInstalled) -->
+                            <Button Grid.Column="4"
+                                    Background="Transparent"
+                                    Command="{Binding PlayCommand}"
+                                    Content="▶"
+                                    IsVisible="{Binding IsInstalled}" />
+                            <Button Grid.Column="4"
+                                    Background="Transparent"
+                                    Command="{Binding AddCommand}"
+                                    Content="+"
+                                    IsVisible="{Binding !IsInstalled}" />
+
+                            <!-- Edit / Delete -->
+                            <StackPanel Grid.Column="5" Orientation="Horizontal" IsVisible="{Binding IsInstalled}">
+                                <Button Background="Transparent" Command="{Binding EditCommand}" Content="✎" />
+                                <Button Background="Transparent" Command="{Binding DeleteCommand}" Content="🗑" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>
