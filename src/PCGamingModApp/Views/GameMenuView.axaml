@@ -24,18 +24,22 @@
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:GameItemViewModel}">
                     <Border Padding="4">
-                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                             <!-- Game icon (generic) -->
                             <Image Width="32" Height="32"
                                    Source="{Binding Icon}"
                                    Margin="0,0,8,0" />
-                            
+
                             <!-- Store badge -->
                             <Image Grid.Column="0"
-                                   Width="14" Height="14"
-                                   Source="{Binding Store, Converter={StaticResource StoreToIconConverter}}"
-                                   Margin="20,20,0,0" />
-                            
+                                Width="14" Height="14"
+                                Source="{Binding Store, Converter={StaticResource StoreToIconConverter}}"
+                                Margin="20,20,0,0" >
+                                <Image.Effect>
+                                    <DropShadowEffect BlurRadius="4" OffsetX="0" OffsetY="0"/>
+                                </Image.Effect>
+                            </Image>
+
                             <!-- Game name -->
                             <TextBlock Grid.Column="1"
                                        Text="{Binding Name}"
@@ -44,26 +48,55 @@
                             <!-- Favorite star -->
                             <Button Grid.Column="2"
                                     Background="Transparent"
-                                    Command="{Binding ToggleFavoriteCommand}"
-                                    Content="{Binding IsFavorite}" />
+                                    Command="{Binding ToggleFavoriteCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Classes="icon-fill-only" Content="&#xe2aa;" IsVisible="{Binding IsFavorite}" />
+                                    <Label Classes="icon-only" Content="&#xe2aa;" IsVisible="{Binding !IsFavorite}" />
+                                </StackPanel>
+                            </Button>
 
-                            <!-- Play / Add button (visibility driven by IsInstalled) -->
-                            <Button Grid.Column="3"
-                                    Background="Transparent"
-                                    Command="{Binding PlayCommand}"
-                                    Content="▶"
-                                    IsVisible="{Binding IsInstalled}" />
-                            <Button Grid.Column="3"
-                                    Background="Transparent"
-                                    Command="{Binding AddCommand}"
-                                    Content="+"
-                                    IsVisible="{Binding !IsInstalled}" />
+                            <!-- Context button -->
+                            <Button Grid.Column="3" Background="Transparent">
+                                <Label Classes="icon-only" Content="&#xe208;" />
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <!-- Play button (visibility driven by IsInstalled) -->
+                                        <MenuItem Header="Play"
+                                                  Background="Transparent"
+                                                  Command="{Binding PlayCommand}"
+                                                  IsVisible="{Binding IsInstalled}">
+                                            <MenuItem.Icon>
+                                                <Label Classes="icon-only" Content="&#xe3d0;" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
 
-                            <!-- Edit / Delete -->
-                            <StackPanel Grid.Column="4" Orientation="Horizontal" IsVisible="{Binding IsInstalled}">
-                                <Button Background="Transparent" Command="{Binding EditCommand}" Content="✎" />
-                                <Button Background="Transparent" Command="{Binding DeleteCommand}" Content="🗑" />
-                            </StackPanel>
+                                        <!-- Add button (visibility driven by IsInstalled)-->
+                                        <MenuItem Header="Add"
+                                                  Command="{Binding AddCommand}"
+                                                  IsVisible="{Binding !IsInstalled}">
+                                            <MenuItem.Icon>
+                                                <Label Classes="icon-only" Content="&#xe3d4;" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        
+                                        <!-- Edit  button -->
+                                        <MenuItem Header="Edit"
+                                                  Command="{Binding EditCommand}">
+                                            <MenuItem.Icon>
+                                                <Label Classes="icon-only" Content="&#xe3b4;" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        
+                                        <!-- Delete button -->
+                                        <MenuItem Header="Delete"
+                                                  Command="{Binding DeleteCommand}">
+                                            <MenuItem.Icon>
+                                                <Label Classes="icon-only" Content="&#xe4a8;" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
                         </Grid>
                     </Border>
                 </DataTemplate>
