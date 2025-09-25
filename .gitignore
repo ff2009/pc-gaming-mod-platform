@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider cache/options directory
 .idea/
+
+# Sonarqube cache/options directory
+.sonarqube/
