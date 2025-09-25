@@ -45,7 +45,7 @@ public partial class GameMenuViewModel : ContextViewModel
         _imageCache = imageCache ?? throw new ArgumentNullException(nameof(imageCache));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-        OnDesignTimeConstructor();
+        LoadData();
     }
 
     private void OnDesignTimeConstructor()
@@ -54,22 +54,51 @@ public partial class GameMenuViewModel : ContextViewModel
         {
             new()
             {
-                Id = Guid.NewGuid(), Name = "Back to Dinosaur Island", IconKey = "game-controller.png", Store = eStoreType.Epic,
+                Id = Guid.NewGuid(), Name = "Back to Dinosaur Island", IconKey = "game-controller.png",
+                Store = eStoreType.Epic,
                 InstallPath = @"C:\Users\ff2009\Downloads\GPU-Z.2.66.0.exe", IsInstalled = true, IsFavorite = true
             },
             new() { Id = Guid.NewGuid(), Name = "Crysis", IconKey = "game.png", Store = eStoreType.EaApp },
             new() { Id = Guid.NewGuid(), Name = "Crysis 2", IconKey = "game-controller.png", Store = eStoreType.Other },
             new() { Id = Guid.NewGuid(), Name = "Crysis 2 Remastered", IconKey = "game.png", Store = eStoreType.Steam },
             new() { Id = Guid.NewGuid(), Name = "Crysis 3", IconKey = "game-control.png", Store = eStoreType.Ubisoft },
-            new() { Id = Guid.NewGuid(), Name = "Spacewars", IconKey = "game-controller.png", Store = eStoreType.Steam, IsFavorite = true },
+            new()
+            {
+                Id = Guid.NewGuid(), Name = "Spacewars", IconKey = "game-controller.png", Store = eStoreType.Steam,
+                IsFavorite = true
+            },
             new() { Id = Guid.NewGuid(), Name = "The Witcher 3", IconKey = "game-control.png", Store = eStoreType.GoG },
         };
 
-        var imageCache = new DesignTimeImageCache("Assets/Images/");
-
+        DesignTimeImageCache imageCache = new("Assets/Images/");
         List<GameItemViewModel> vmList = gameListMock.Select(g => new GameItemViewModel(g, imageCache)).ToList();
-        //vmList = gameListMock.Select(g => ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, g)).ToList();
+        Games = new ObservableCollection<GameItemViewModel>(vmList);
+    }
 
+    private void LoadData()
+    {
+        var gameListMock = new List<GameItem>()
+        {
+            new()
+            {
+                Id = Guid.NewGuid(), Name = "Back to Dinosaur Island", IconKey = "game-controller.png",
+                Store = eStoreType.Epic,
+                InstallPath = @"C:\Users\ff2009\Downloads\GPU-Z.2.66.0.exe", IsInstalled = true, IsFavorite = true
+            },
+            new() { Id = Guid.NewGuid(), Name = "Crysis", IconKey = "game.png", Store = eStoreType.EaApp },
+            new() { Id = Guid.NewGuid(), Name = "Crysis 2", IconKey = "game-controller.png", Store = eStoreType.Other },
+            new() { Id = Guid.NewGuid(), Name = "Crysis 2 Remastered", IconKey = "game.png", Store = eStoreType.Steam },
+            new() { Id = Guid.NewGuid(), Name = "Crysis 3", IconKey = "game-control.png", Store = eStoreType.Ubisoft },
+            new()
+            {
+                Id = Guid.NewGuid(), Name = "Spacewars", IconKey = "game-controller.png", Store = eStoreType.Steam,
+                IsFavorite = true
+            },
+            new() { Id = Guid.NewGuid(), Name = "The Witcher 3", IconKey = "game-control.png", Store = eStoreType.GoG },
+        };
+
+        List<GameItemViewModel> vmList = gameListMock
+            .Select(g => ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, g)).ToList();
         Games = new ObservableCollection<GameItemViewModel>(vmList);
     }
 

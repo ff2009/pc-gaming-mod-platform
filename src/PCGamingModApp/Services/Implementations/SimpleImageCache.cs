@@ -6,19 +6,16 @@ using PCGamingModApp.Services.Interfaces;
 
 namespace PCGamingModApp.Services.Implementations;
 
-public sealed class SimpleImageCache : IImageCache
+public sealed class SimpleImageCache(string baseFolder) : IImageCache
 {
     /// <summary>
     /// Base folder where all icons live (e.g. "Assets/StoreIcons/")
     /// </summary>
-    private readonly string _baseFolder;
-
-    private readonly ConcurrentDictionary<string, Lazy<Bitmap?>> _cache =
-        new ConcurrentDictionary<string, Lazy<Bitmap?>>();
-
-    public SimpleImageCache(string baseFolder) => _baseFolder = Path.IsPathRooted(baseFolder) 
+    private readonly string _baseFolder = Path.IsPathRooted(baseFolder) 
         ? baseFolder 
         : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, baseFolder);
+
+    private readonly ConcurrentDictionary<string, Lazy<Bitmap?>> _cache = new();
 
     public Bitmap? GetBitmap(string key)
     {

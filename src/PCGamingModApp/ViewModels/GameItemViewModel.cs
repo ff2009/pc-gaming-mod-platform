@@ -15,7 +15,7 @@ namespace PCGamingModApp.ViewModels;
 public partial class GameItemViewModel : ViewModelBase
 {
     private readonly IImageCache _imageCache;
-    private readonly ILauncherService _launcher;
+    private readonly ILauncherService _launcher = null!;
 
     /// <summary>
     /// Image handling – only the key is stored
@@ -55,7 +55,7 @@ public partial class GameItemViewModel : ViewModelBase
         ) : this(domain, imageCache)
     {
         // services
-        _launcher = launcher;
+        _launcher = launcher ?? throw new ArgumentNullException(nameof(launcher));
         //_repository = repository;
     }
 
