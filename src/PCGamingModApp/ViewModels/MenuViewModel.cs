@@ -17,7 +17,8 @@ public partial class MenuViewModel : ContextViewModel
     /// </summary>
     public MenuViewModel()
     {
-
+        _mainViewModel = null!;
+        _pageFactory = null!;
     }
 
     public MenuViewModel(MainViewModel mainViewModel, PageFactory pageFactory)

@@ -14,12 +14,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Assets\Images\" />
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Remove="Assets\Images\game-control.png" />
+    <AvaloniaResource Remove="Assets\Images\game-controller.png" />
+    <AvaloniaResource Remove="Assets\Images\game.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia"/>
+    <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Controls.DataGrid" />
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
@@ -31,6 +33,24 @@
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Update="Assets\Images\StoreIcons\ea.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Images\StoreIcons\epic.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Images\StoreIcons\gog.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Images\StoreIcons\steam.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Images\StoreIcons\ubisoft.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </AvaloniaResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -58,5 +78,17 @@
     <Compile Update="Views\GameSettingsPageView.axaml.cs">
       <DependentUpon>GameSettingsPageView.axaml</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Assets\Images\game-control.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Images\game-controller.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Images\game.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

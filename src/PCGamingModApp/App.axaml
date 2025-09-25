@@ -19,9 +19,10 @@
     </Application.Styles>
 
     <Application.Resources>
-
-        <valueConverters:StoreToIconConverter x:Key="StoreToIconConverter" />
-
+        <ResourceDictionary>
+            <valueConverters:StoreToIconConverter x:Key="StoreToIconConverter" />
+        </ResourceDictionary>
+        
         <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
         <FontFamily x:Key="PhosphorFill">/Assets/Fonts/Phosphor-Fill.ttf#Phosphor-Fill</FontFamily>
     </Application.Resources>

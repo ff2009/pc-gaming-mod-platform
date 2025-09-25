@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PCGamingModApp.Models;
 using PCGamingModApp.Models.Enums;
 using PCGamingModApp.Services.Interfaces;
+using System;
+using System.Threading.Tasks;
 
 namespace PCGamingModApp.ViewModels;
 
@@ -30,12 +30,11 @@ public partial class GameItemViewModel : ViewModelBase
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private eStoreType _store = eStoreType.Unknown;
 
-    public GameItemViewModel(
-        GameItem domain,
-        ILauncherService launcher,
-        //IGameRepository repository,
-        IImageCache imageCache)
+    public GameItemViewModel(GameItem domain, IImageCache imageCache)
     {
+        // services
+        _imageCache = imageCache;
+
         // immutable fields
         Id = domain.Id;
         IconKey = domain.IconKey;
@@ -46,11 +45,18 @@ public partial class GameItemViewModel : ViewModelBase
         IsInstalled = domain.IsInstalled;
         IsFavorite = domain.IsFavorite;
         InstallPath = domain.InstallPath;
+    }
 
+    public GameItemViewModel(
+        GameItem domain,
+        IImageCache imageCache,
+        ILauncherService launcher
+        //IGameRepository repository
+        ) : this(domain, imageCache)
+    {
         // services
         _launcher = launcher;
         //_repository = repository;
-        _imageCache = imageCache;
     }
 
     /// <summary>

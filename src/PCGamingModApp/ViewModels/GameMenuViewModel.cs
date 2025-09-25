@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using PCGamingModApp.Models;
 using PCGamingModApp.Models.Enums;
+using PCGamingModApp.Services.Implementations;
 using PCGamingModApp.Services.Interfaces;
 
 namespace PCGamingModApp.ViewModels;
@@ -51,25 +52,24 @@ public partial class GameMenuViewModel : ContextViewModel
     {
         var gameListMock = new List<GameItem>()
         {
-            new GameItem
+            new()
             {
-                Id = Guid.NewGuid(), Name = "Back to Dinosaur Island", IconKey = "ea.png", Store = eStoreType.Epic,
+                Id = Guid.NewGuid(), Name = "Back to Dinosaur Island", IconKey = "game-controller.png", Store = eStoreType.Epic,
                 InstallPath = @"C:\Users\ff2009\Downloads\GPU-Z.2.66.0.exe", IsInstalled = true, IsFavorite = true
             },
-            //new GameItem { Id = "-2", Title = "Back to Dinosaur Island Part 2", Icon = "https://images.pcgamingwiki.com/2/2e/Back_to_Dinosaur_Island_Part_2_cover.jpg"},
-            new GameItem { Id = Guid.NewGuid(), Name = "Crysis", IconKey = "epic.png", Store = eStoreType.EaApp },
-            new GameItem { Id = Guid.NewGuid(), Name = "Crysis 2", IconKey = "gog.png", Store = eStoreType.EaApp },
-            new GameItem
-                { Id = Guid.NewGuid(), Name = "Crysis 2 Remastered", IconKey = "steam.png", Store = eStoreType.Epic },
-            new GameItem { Id = Guid.NewGuid(), Name = "Crysis 3", IconKey = "ubisoft.png", Store = eStoreType.EaApp },
-            //new GameItemViewModel { Id = "-5", Name = "Crysis 3 Remastered", Icon = "https://images.pcgamingwiki.com/1/15/Crysis_3_Remastered_cover.jpg"},
-            new GameItem
-                { Id = Guid.NewGuid(), Name = "Crysis 3 Remastered", IconKey = "gog.png", Store = eStoreType.Epic },
-            new GameItem { Id = Guid.NewGuid(), Name = "The Witcher 3", IconKey = "epic.png", Store = eStoreType.GoG },
+            new() { Id = Guid.NewGuid(), Name = "Crysis", IconKey = "game.png", Store = eStoreType.EaApp },
+            new() { Id = Guid.NewGuid(), Name = "Crysis 2", IconKey = "game-controller.png", Store = eStoreType.Other },
+            new() { Id = Guid.NewGuid(), Name = "Crysis 2 Remastered", IconKey = "game.png", Store = eStoreType.Steam },
+            new() { Id = Guid.NewGuid(), Name = "Crysis 3", IconKey = "game-control.png", Store = eStoreType.Ubisoft },
+            new() { Id = Guid.NewGuid(), Name = "Spacewars", IconKey = "game-controller.png", Store = eStoreType.Steam, IsFavorite = true },
+            new() { Id = Guid.NewGuid(), Name = "The Witcher 3", IconKey = "game-control.png", Store = eStoreType.GoG },
         };
 
-        var vmList = gameListMock.Select(g =>
-            ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, g)).ToList();
+        var imageCache = new DesignTimeImageCache("Assets/Images/");
+
+        List<GameItemViewModel> vmList = gameListMock.Select(g => new GameItemViewModel(g, imageCache)).ToList();
+        //vmList = gameListMock.Select(g => ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, g)).ToList();
+
         Games = new ObservableCollection<GameItemViewModel>(vmList);
     }
 
