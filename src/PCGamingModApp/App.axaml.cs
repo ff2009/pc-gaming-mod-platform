@@ -1,16 +1,16 @@
-using System;
-using System.IO;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
-using PCGamingModApp.MainApp;
-using PCGamingModApp.Services.Implementations;
-using PCGamingModApp.Services.Interfaces;
-using PCGamingModApp.ViewModels;
+using PCGamingModApp.Core.MainApp;
+using PCGamingModApp.Core.Services.Implementations;
+using PCGamingModApp.Core.Services.Interfaces;
+using PCGamingModApp.Core.ViewModels;
 using PCGamingModApp.Views;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace PCGamingModApp;
 

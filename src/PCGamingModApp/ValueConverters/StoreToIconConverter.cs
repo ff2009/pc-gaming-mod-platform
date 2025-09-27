@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Globalization;
 using Avalonia.Data.Converters;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using PCGamingModApp.Helpers;
-using PCGamingModApp.Models.Enums;
+using PCGamingModApp.Core.Helpers;
+using PCGamingModApp.Core.Models.Enums;
 
 namespace PCGamingModApp.ValueConverters;
 

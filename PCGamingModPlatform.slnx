@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="src/PCGamingModApp/PCGamingModApp.csproj" />
-  <Project Path="tests/PCGamingModApp.Tests/PCGamingModApp.Tests.csproj"
-             Type="Classic C#"/>
+  <Project Path="src\PCGamingModApp.Core\PCGamingModApp.Core.csproj" Type="Classic C#" />
+  <Project Path="src\PCGamingModApp.Data\PCGamingModApp.Data.csproj" Type="Classic C#" />
+  <Project Path="tests/PCGamingModApp.Tests/PCGamingModApp.Tests.csproj" Type="Classic C#" />
 </Solution>

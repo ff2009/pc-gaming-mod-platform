@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         xmlns:local="clr-namespace:PCGamingModApp.Views"
-        xmlns:vm="clr-namespace:PCGamingModApp.ViewModels"
+        xmlns:vm="clr-namespace:PCGamingModApp.Core.ViewModels;assembly=PCGamingModApp.Core"
         x:Class="PCGamingModApp.Views.MainWindow"
         x:DataType="local:MainWindow"
         Background="Transparent"
