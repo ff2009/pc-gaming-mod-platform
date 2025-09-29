@@ -17,7 +17,7 @@ public class GameRepository(AppDbContext context) : IGameRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task DeleteGame(int id)
+    public async Task DeleteGame(Guid id)
     {
         var game = await context.Games.FindAsync(id);
         if (game != null)
