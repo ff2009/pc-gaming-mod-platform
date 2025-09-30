@@ -26,9 +26,14 @@ public class GameRepository(AppDbContext context) : IGameRepository
             await context.SaveChangesAsync();
         }
     }
-
+    
     public async Task<List<GameDataModel>> GetAllGames()
     {
         return await context.Games.ToListAsync();
+    }
+
+    public async Task<GameDataModel?> GetGameById(Guid id)
+    {
+        return await context.Games.FindAsync(id);
     }
 }

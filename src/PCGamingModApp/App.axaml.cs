@@ -11,6 +11,10 @@ using PCGamingModApp.Views;
 using System;
 using System.IO;
 using System.Linq;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.EntityFrameworkCore;
+using PCGamingModApp.Data;
+using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp;
 
@@ -29,6 +33,7 @@ public partial class App : Application
             new SimpleImageCache(Path.Combine(AppContext.BaseDirectory, "Assets", "Images")));
 
         collection.AddTransient<ILauncherService, LauncherService>();
+        collection.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
 
         collection.AddSingleton<MainViewModel>();
 
@@ -36,6 +41,10 @@ public partial class App : Application
         collection.AddSingleton<MenuViewModel>();
         collection.AddSingleton<GameMenuViewModel>();
         collection.AddTransient<GameItemViewModel>(); // each row gets its own VM
+        
+        collection.AddTransient<IGameRepository, GameRepository>();
+        collection.AddDbContext<AppDbContext>(options =>
+            options.UseSqlite("Data Source=pcgamingmod.db"));
 
         collection.AddSingleton<HomePageViewModel>();
 

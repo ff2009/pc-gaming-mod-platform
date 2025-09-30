@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
+using PCGamingModApp.Core.Messaging.Messages;
+using PCGamingModApp.Core.Services.Implementations;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
-using PCGamingModApp.Core.Services.Implementations;
-using PCGamingModApp.Core.Services.Interfaces;
+using PCGamingModApp.Data.Repositories;
+using System.Collections.ObjectModel;
 
 namespace PCGamingModApp.Core.ViewModels;
 
-public partial class GameMenuViewModel : ContextViewModel
+public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedMessage>, IRecipient<GameUpdatedMessage>,
+    IRecipient<GameDeletedMessage>, IDisposable
 {
-    //private readonly IGameRepository _repo;
-    private readonly IImageCache _imageCache;
+    private readonly IGameRepository _gameRepository;
+    private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
 
     [ObservableProperty] private ObservableCollection<GameItemViewModel> _games = [];
@@ -37,14 +37,15 @@ public partial class GameMenuViewModel : ContextViewModel
     }
 
     public GameMenuViewModel(
-        //IGameRepository repo,
-        IImageCache imageCache,
+        IGameRepository gameRepository,
+        IMessenger messenger,
         IServiceProvider serviceProvider)
     {
-        //_repo        = repo ?? throw new ArgumentNullException(nameof(repo));
-        _imageCache = imageCache ?? throw new ArgumentNullException(nameof(imageCache));
+        _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
+        _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
+        _messenger.RegisterAll(this);
         LoadData();
     }
 
@@ -71,7 +72,7 @@ public partial class GameMenuViewModel : ContextViewModel
         };
 
         DesignTimeImageCache imageCache = new("Assets/Images/");
-        List<GameItemViewModel> vmList = gameListMock.Select(g => new GameItemViewModel(g, imageCache)).ToList();
+        List<GameItemViewModel> vmList = gameListMock.Select(g => new GameItemViewModel(imageCache, g)).ToList();
         Games = new ObservableCollection<GameItemViewModel>(vmList);
     }
 
@@ -96,7 +97,8 @@ public partial class GameMenuViewModel : ContextViewModel
             },
             new() { Id = Guid.NewGuid(), Name = "The Witcher 3", IconKey = "game-control.png", Store = StoreType.GoG },
         };
-
+        
+        var games = _gameRepository.GetAllGames();
         List<GameItemViewModel> vmList = gameListMock
             .Select(g => ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, g)).ToList();
         Games = new ObservableCollection<GameItemViewModel>(vmList);
@@ -140,5 +142,42 @@ public partial class GameMenuViewModel : ContextViewModel
     {
         SortAscending = !SortAscending;
         ApplyFiltersAndSorting();
+    }
+
+    public void Receive(GameAddedMessage message)
+    {
+        var gameToUpdate = Games.FirstOrDefault(g => g.Id == message.Game.Id);
+        if (gameToUpdate != null)
+        {
+            // Update other properties as needed
+            gameToUpdate.IsInstalled = true;
+        }
+    }
+
+    public void Receive(GameUpdatedMessage message)
+    {
+        var gameToUpdate = Games.FirstOrDefault(g => g.Id == message.Game.Id);
+        if (gameToUpdate != null)
+        {
+            // Update other properties as needed
+            gameToUpdate.IsInstalled = !gameToUpdate.IsInstalled;
+        }
+    }
+
+    public void Receive(GameDeletedMessage message)
+    {
+        var gameToRemove  = Games.FirstOrDefault(g => g.Id == message.GameId);
+        if (gameToRemove  != null)
+        {
+            // Update other properties as needed
+            gameToRemove.IsInstalled = false;
+            Games.Remove(gameToRemove);
+        }
+
+    }
+
+    public void Dispose()
+    {
+        _messenger.UnregisterAll(this);
     }
 }

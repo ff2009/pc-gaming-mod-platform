@@ -70,7 +70,7 @@
                                             </MenuItem.Icon>
                                         </MenuItem>
 
-                                        <!-- Add button (visibility driven by IsInstalled)-->
+                                        <!-- Add button (visibility driven by IsInstalled) -->
                                         <MenuItem Header="Add"
                                                   Command="{Binding AddCommand}"
                                                   IsVisible="{Binding !IsInstalled}">
@@ -79,17 +79,19 @@
                                             </MenuItem.Icon>
                                         </MenuItem>
                                         
-                                        <!-- Edit  button -->
+                                        <!-- Edit button (visibility driven by IsInstalled) -->
                                         <MenuItem Header="Edit"
-                                                  Command="{Binding EditCommand}">
+                                                  Command="{Binding EditCommand}"
+                                                  IsVisible="{Binding IsInstalled}">
                                             <MenuItem.Icon>
                                                 <Label Classes="icon-only" Content="&#xe3b4;" />
                                             </MenuItem.Icon>
                                         </MenuItem>
                                         
-                                        <!-- Delete button -->
+                                        <!-- Delete button (visibility driven by IsInstalled) -->
                                         <MenuItem Header="Delete"
-                                                  Command="{Binding DeleteCommand}">
+                                                  Command="{Binding DeleteCommand}"
+                                                  IsVisible="{Binding IsInstalled}">
                                             <MenuItem.Icon>
                                                 <Label Classes="icon-only" Content="&#xe4a8;" />
                                             </MenuItem.Icon>

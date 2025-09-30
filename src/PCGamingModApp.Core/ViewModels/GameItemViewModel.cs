@@ -1,9 +1,12 @@
 ﻿using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using PCGamingModApp.Core.Messaging.Messages;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
 using PCGamingModApp.Core.Services.Interfaces;
+using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp.Core.ViewModels;
 
@@ -12,8 +15,11 @@ namespace PCGamingModApp.Core.ViewModels;
 /// </summary>
 public partial class GameItemViewModel : ViewModelBase
 {
+    private readonly IGameRepository _gameRepository;
     private readonly IImageCache _imageCache;
-    private readonly ILauncherService _launcher = null!;
+    private readonly ILauncherService _launcherService;
+    private readonly IMessenger _messenger;
+    
 
     /// <summary>
     /// Image handling – only the key is stored
@@ -28,7 +34,7 @@ public partial class GameItemViewModel : ViewModelBase
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private StoreType _store = StoreType.Unknown;
 
-    public GameItemViewModel(GameDataModel domain, IImageCache imageCache)
+    public GameItemViewModel(IImageCache imageCache, GameDataModel domain)
     {
         // services
         _imageCache = imageCache;
@@ -46,15 +52,17 @@ public partial class GameItemViewModel : ViewModelBase
     }
 
     public GameItemViewModel(
-        GameDataModel domain,
+        IGameRepository gameRepository,
         IImageCache imageCache,
-        ILauncherService launcher
-        //IGameRepository repository
-        ) : this(domain, imageCache)
+        ILauncherService launcherService,
+        IMessenger messenger,
+        GameDataModel domain
+        ) : this(imageCache, domain)
     {
         // services
-        _launcher = launcher ?? throw new ArgumentNullException(nameof(launcher));
-        //_repository = repository;
+        _gameRepository = gameRepository?? throw new ArgumentNullException(nameof(gameRepository));
+        _launcherService = launcherService ?? throw new ArgumentNullException(nameof(launcherService));
+        _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
     }
 
     /// <summary>
@@ -70,7 +78,7 @@ public partial class GameItemViewModel : ViewModelBase
     {
         if (!string.IsNullOrWhiteSpace(InstallPath))
         {
-            await _launcher.LaunchAsync(InstallPath);
+            await _launcherService.LaunchAsync(InstallPath);
         }
     }
 
@@ -84,7 +92,8 @@ public partial class GameItemViewModel : ViewModelBase
     {
         // Convert the VM back to a domain object and hand it to the repo.
         var newItem = ToDomain();
-        //_repository.Add(newItem);
+        _gameRepository.AddGame(newItem);
+        _messenger.Send(new GameAddedMessage(newItem));
     }
 
     /// <summary>
@@ -93,7 +102,9 @@ public partial class GameItemViewModel : ViewModelBase
     [RelayCommand]
     private void Edit()
     {
-        //_repository.Edit(ToDomain());
+        var updatedItem = ToDomain();
+        _gameRepository.UpdateGame(updatedItem);
+        _messenger.Send(new GameAddedMessage(updatedItem));
     }
 
     /// <summary>
@@ -102,7 +113,8 @@ public partial class GameItemViewModel : ViewModelBase
     [RelayCommand]
     private void Delete()
     {
-        //_repository.Remove(Id);
+        _gameRepository.DeleteGame(Id);
+        _messenger.Send(new GameDeletedMessage(Id));
     }
 
     /// <summary>
