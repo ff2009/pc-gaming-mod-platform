@@ -3,9 +3,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using PCGamingModApp.Core.Messaging.Messages;
+using PCGamingModApp.Core.Services.Implementations;
+using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
-using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp.Core.ViewModels;
@@ -15,11 +16,12 @@ namespace PCGamingModApp.Core.ViewModels;
 /// </summary>
 public partial class GameItemViewModel : ViewModelBase
 {
+    private readonly GameManagerService _gameManagerService;
     private readonly IGameRepository _gameRepository;
     private readonly IImageCache _imageCache;
     private readonly ILauncherService _launcherService;
     private readonly IMessenger _messenger;
-    
+
 
     /// <summary>
     /// Image handling – only the key is stored
@@ -52,15 +54,18 @@ public partial class GameItemViewModel : ViewModelBase
     }
 
     public GameItemViewModel(
+        GameManagerService gameManagerService,
         IGameRepository gameRepository,
         IImageCache imageCache,
         ILauncherService launcherService,
         IMessenger messenger,
         GameDataModel domain
-        ) : this(imageCache, domain)
+    ) : this(imageCache, domain)
     {
         // services
-        _gameRepository = gameRepository?? throw new ArgumentNullException(nameof(gameRepository));
+        _gameManagerService =
+            gameManagerService ?? throw new ArgumentNullException(nameof(gameManagerService));
+        _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
         _launcherService = launcherService ?? throw new ArgumentNullException(nameof(launcherService));
         _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
     }
@@ -88,11 +93,22 @@ public partial class GameItemViewModel : ViewModelBase
     /// Add – used for catalog‑only entries (or manual add)
     /// </summary>
     [RelayCommand]
-    private void Add()
+    private async Task AddAsync()
     {
+        var gameExecutablePath = await _gameManagerService.SelectGameExecutableAsync();
+
+        if (string.IsNullOrWhiteSpace(gameExecutablePath))
+        {
+            // user cancelled or no valid selection
+            return;
+        }
+        
+        InstallPath = gameExecutablePath;
+        IsInstalled = true;
+        
         // Convert the VM back to a domain object and hand it to the repo.
         var newItem = ToDomain();
-        _gameRepository.AddGame(newItem);
+        await  _gameRepository.AddGame(newItem);
         _messenger.Send(new GameAddedMessage(newItem));
     }
 

@@ -25,18 +25,22 @@
                 <DataTemplate DataType="{x:Type vm:GameItemViewModel}">
                     <Border Padding="4">
                         <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                            <ToolTip.Tip>
+                                <Label Grid.ColumnSpan="4" Content="{Binding InstallPath}" IsVisible="{Binding IsInstalled}"/>
+                            </ToolTip.Tip>
+
                             <!-- Game icon (generic) -->
-                            <Image Width="32" Height="32"
+                            <Image Width="32" Height="32" 
                                    Source="{Binding Icon}"
                                    Margin="0,0,8,0" />
 
                             <!-- Store badge -->
                             <Image Grid.Column="0"
-                                Width="14" Height="14"
-                                Source="{Binding Store, Converter={StaticResource StoreToIconConverter}}"
-                                Margin="20,20,0,0" >
+                                   Width="14" Height="14"
+                                   Source="{Binding Store, Converter={StaticResource StoreToIconConverter}}"
+                                   Margin="20,20,0,0">
                                 <Image.Effect>
-                                    <DropShadowEffect BlurRadius="4" OffsetX="0" OffsetY="0"/>
+                                    <DropShadowEffect BlurRadius="4" OffsetX="0" OffsetY="0" />
                                 </Image.Effect>
                             </Image>
 
@@ -78,7 +82,7 @@
                                                 <Label Classes="icon-only" Content="&#xe3d4;" />
                                             </MenuItem.Icon>
                                         </MenuItem>
-                                        
+
                                         <!-- Edit button (visibility driven by IsInstalled) -->
                                         <MenuItem Header="Edit"
                                                   Command="{Binding EditCommand}"
@@ -87,7 +91,7 @@
                                                 <Label Classes="icon-only" Content="&#xe3b4;" />
                                             </MenuItem.Icon>
                                         </MenuItem>
-                                        
+
                                         <!-- Delete button (visibility driven by IsInstalled) -->
                                         <MenuItem Header="Delete"
                                                   Command="{Binding DeleteCommand}"

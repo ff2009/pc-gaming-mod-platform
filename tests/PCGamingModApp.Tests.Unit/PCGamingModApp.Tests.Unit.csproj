@@ -10,6 +10,7 @@
     <ItemGroup>
         <PackageReference Include="coverlet.collector"/>
         <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="JetBrains.Annotations" />
         <PackageReference Include="Microsoft.NET.Test.Sdk"/>
         <PackageReference Include="Moq" />
         <PackageReference Include="xunit"/>
@@ -21,11 +22,22 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\PCGamingModApp.Core\PCGamingModApp.Core.csproj" />
       <ProjectReference Include="..\..\src\PCGamingModApp.Data\PCGamingModApp.Data.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Core\" />
       <Folder Include="Data\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Avalonia.Base">
+        <HintPath>..\..\src\PCGamingModApp\bin\Debug\net9.0\Avalonia.Base.dll</HintPath>
+      </Reference>
+      <Reference Include="Avalonia.Controls">
+        <HintPath>..\..\src\PCGamingModApp\bin\Debug\net9.0\Avalonia.Controls.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

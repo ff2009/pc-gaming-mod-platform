@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PCGamingModApp.Core.MainApp;
-using System;
 
 namespace PCGamingModApp.Core.ViewModels;
 public partial class MenuViewModel : ContextViewModel

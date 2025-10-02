@@ -11,6 +11,7 @@ using PCGamingModApp.Views;
 using System;
 using System.IO;
 using System.Linq;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 using PCGamingModApp.Data;
@@ -27,36 +28,41 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        var collection = new ServiceCollection();
+        var services = new ServiceCollection();
 
-        collection.AddSingleton<IImageCache>(sp =>
+        // Register GameInstallationService
+        services.AddTransient<GameManagerService>();
+
+        services.AddSingleton<IDialogService, DialogService>();
+        
+        services.AddSingleton<IImageCache>(sp =>
             new SimpleImageCache(Path.Combine(AppContext.BaseDirectory, "Assets", "Images")));
 
-        collection.AddTransient<ILauncherService, LauncherService>();
-        collection.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
+        services.AddTransient<ILauncherService, LauncherService>();
+        services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
 
-        collection.AddSingleton<MainViewModel>();
+        services.AddSingleton<MainViewModel>();
 
         // UI ViewModels (transient – new instance per view)
-        collection.AddSingleton<MenuViewModel>();
-        collection.AddSingleton<GameMenuViewModel>();
-        collection.AddTransient<GameItemViewModel>(); // each row gets its own VM
+        services.AddSingleton<MenuViewModel>();
+        services.AddSingleton<GameMenuViewModel>();
+        services.AddTransient<GameItemViewModel>(); // each row gets its own VM
         
-        collection.AddTransient<IGameRepository, GameRepository>();
-        collection.AddDbContext<AppDbContext>(options =>
+        services.AddTransient<IGameRepository, GameRepository>();
+        services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite("Data Source=pcgamingmod.db"));
+        
+        services.AddSingleton<HomePageViewModel>();
 
-        collection.AddSingleton<HomePageViewModel>();
+        services.AddTransient<BasePageViewModel>();
+        services.AddTransient<GameSettingsPageViewModel>();
+        services.AddTransient<AddOnsPageViewModel>();
+        services.AddTransient<SystemPageViewModel>();
+        services.AddTransient<AboutPageViewModel>();
 
-        collection.AddTransient<BasePageViewModel>();
-        collection.AddTransient<GameSettingsPageViewModel>();
-        collection.AddTransient<AddOnsPageViewModel>();
-        collection.AddTransient<SystemPageViewModel>();
-        collection.AddTransient<AboutPageViewModel>();
+        services.AddTransient<DeveloperSettingsPageViewModel>();
 
-        collection.AddTransient<DeveloperSettingsPageViewModel>();
-
-        collection.AddSingleton<Func<Type, PageViewModel>>(x => type => type switch
+        services.AddSingleton<Func<Type, PageViewModel>>(x => type => type switch
         {
             _ when type == typeof(HomePageViewModel) => x.GetRequiredService<HomePageViewModel>(),
             _ when type == typeof(BasePageViewModel) => x.GetRequiredService<BasePageViewModel>(),
@@ -69,9 +75,25 @@ public partial class App : Application
             _ => throw new InvalidOperationException($"Page of type {type?.FullName} has no view model"),
         });
 
-        collection.AddSingleton<PageFactory>();
+        services.AddSingleton<PageFactory>();
+        
+        // TopLevel provider
+        services.AddSingleton<Func<TopLevel?>>(x => () => {
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime topWindow)
+                return TopLevel.GetTopLevel(topWindow.MainWindow);
+            if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
+                return TopLevel.GetTopLevel(singleViewPlatform.MainView);
 
-        var services = collection.BuildServiceProvider();
+            return null;
+        });
+        
+        var serviceProvider = services.BuildServiceProvider();
+        
+        var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
+
+        // Initialize and migrate the database
+        dbContext.Database.EnsureCreated();
+        dbContext.Database.Migrate();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -80,7 +102,7 @@ public partial class App : Application
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = services.GetRequiredService<MainViewModel>()
+                DataContext = serviceProvider.GetRequiredService<MainViewModel>()
             };
         }
 
