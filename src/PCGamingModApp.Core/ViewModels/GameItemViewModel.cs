@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using PCGamingModApp.Core.MainApp;
 using PCGamingModApp.Core.Messaging.Messages;
 using PCGamingModApp.Core.Services.Implementations;
 using PCGamingModApp.Core.Services.Interfaces;
@@ -102,6 +103,8 @@ public partial class GameItemViewModel : ViewModelBase
             // user cancelled or no valid selection
             return;
         }
+        
+        _gameManagerService.SaveGameIcon(gameExecutablePath);
         
         InstallPath = gameExecutablePath;
         IsInstalled = true;

@@ -4,14 +4,14 @@ using System.Collections.Concurrent;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public sealed class SimpleImageCache(string baseFolder) : IImageCache
+public sealed class SimpleImageCache(IAppPaths _appPaths) : IImageCache
 {
     /// <summary>
     /// Base folder where all icons live (e.g. "Assets/StoreIcons/")
     /// </summary>
-    private readonly string _baseFolder = Path.IsPathRooted(baseFolder) 
-        ? baseFolder 
-        : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, baseFolder);
+    private readonly string _baseFolder = Path.IsPathRooted(_appPaths.StoreIcons) 
+        ? _appPaths.StoreIcons 
+        : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _appPaths.StoreIcons);
 
     private readonly ConcurrentDictionary<string, Lazy<Bitmap?>> _cache = new();
 

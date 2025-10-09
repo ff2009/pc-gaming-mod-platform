@@ -28,15 +28,19 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        // Step 1: Create and initialize AppPaths
+        AppPaths appPaths = new AppPaths();
+        appPaths.EnsureCreated();
+        appPaths.Migrate();
+        
         var services = new ServiceCollection();
 
+        services.AddSingleton<IAppPaths>(appPaths);
+        services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<IImageCache, SimpleImageCache>();
+        
         // Register GameInstallationService
         services.AddTransient<GameManagerService>();
-
-        services.AddSingleton<IDialogService, DialogService>();
-        
-        services.AddSingleton<IImageCache>(sp =>
-            new SimpleImageCache(Path.Combine(AppContext.BaseDirectory, "Assets", "Images")));
 
         services.AddTransient<ILauncherService, LauncherService>();
         services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
@@ -50,7 +54,7 @@ public partial class App : Application
         
         services.AddTransient<IGameRepository, GameRepository>();
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite("Data Source=pcgamingmod.db"));
+            options.UseSqlite($"Data Source={appPaths.Database}"));
         
         services.AddSingleton<HomePageViewModel>();
 
@@ -89,6 +93,7 @@ public partial class App : Application
         
         var serviceProvider = services.BuildServiceProvider();
         
+        // Initialize AppPaths
         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
 
         // Initialize and migrate the database
