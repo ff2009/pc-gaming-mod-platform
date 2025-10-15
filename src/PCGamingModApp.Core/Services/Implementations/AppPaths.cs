@@ -7,7 +7,7 @@ public class AppPaths : IAppPaths
     private string LocalAppData => Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
     public string Root  => Path.Combine(LocalAppData, "PCGamingModPlatform");
     public string GameIcons => Path.Combine(Root, "game_icons");
-    public string Database => Path.Combine(Root, "database", "pcgamingmod.db");
+    public string Database => Path.Combine(Root, "database");
     public string Downloads => Path.Combine(Root, "downloads");
     //public string ModsArchive => Path.Combine(Root, "mods_archive");
     public string Temp => Path.Combine(Root, "temp");

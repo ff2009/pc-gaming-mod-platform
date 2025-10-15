@@ -37,7 +37,8 @@ public partial class App : Application
 
         services.AddSingleton<IAppPaths>(appPaths);
         services.AddSingleton<IDialogService, DialogService>();
-        services.AddSingleton<IImageCache, SimpleImageCache>();
+        services.AddSingleton<IImageCache, SimpleImageCache>(x=>
+            new SimpleImageCache(Path.Combine(appPaths.GameIcons)));
         
         // Register GameInstallationService
         services.AddTransient<GameManagerService>();
@@ -54,7 +55,7 @@ public partial class App : Application
         
         services.AddTransient<IGameRepository, GameRepository>();
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite($"Data Source={appPaths.Database}"));
+            options.UseSqlite($"Data Source={Path.Combine(appPaths.Database, "pcgamingmod.db")}"));
         
         services.AddSingleton<HomePageViewModel>();
 
