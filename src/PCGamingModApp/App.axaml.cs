@@ -53,7 +53,7 @@ public partial class App : Application
         services.AddSingleton<GameMenuViewModel>();
         services.AddTransient<GameItemViewModel>(); // each row gets its own VM
         
-        services.AddTransient<IGameRepository, GameRepository>();
+        services.AddScoped<IGameRepository, GameRepository>();
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite($"Data Source={Path.Combine(appPaths.Database, "pcgamingmod.db")}"));
         
