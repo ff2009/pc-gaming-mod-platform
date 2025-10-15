@@ -7,7 +7,7 @@ namespace PCGamingModApp.Core.Services.Implementations;
 
 public class GameManagerService(IAppPaths _appPaths, IDialogService _dialogService)
 {
-    public (Icon, string) ExtractGameInfo(string exePath)
+    public (Icon, string) ExtractWindowsGameInfo(string exePath)
     {
         // Extract icon
         Icon gameIcon = Icon.ExtractAssociatedIcon(exePath);
@@ -59,13 +59,15 @@ public class GameManagerService(IAppPaths _appPaths, IDialogService _dialogServi
         return (iconPath, gameTitle);
     }
     
-    public void SaveGameIcon(string sourcePath)
+    public string? SaveGameIcon(string sourcePath)
     {
+        string output = null;
         if (OperatingSystem.IsWindows() && OperatingSystem.IsWindowsVersionAtLeast(6, 1))
         {
-            var (icon, gameTitle) = ExtractGameInfo(sourcePath);
+            var (icon, gameTitle) = ExtractWindowsGameInfo(sourcePath);
             string iconPath = Path.Combine(_appPaths.GameIcons, $"{gameTitle}.png");
             icon.ToBitmap().Save(iconPath, System.Drawing.Imaging.ImageFormat.Png);
+            output = gameTitle;
         }
         else if (OperatingSystem.IsLinux())
         {
@@ -75,7 +77,10 @@ public class GameManagerService(IAppPaths _appPaths, IDialogService _dialogServi
                 string destPath = Path.Combine(_appPaths.GameIcons, $"{gameTitle}.png");
                 File.Copy(iconPath, destPath, overwrite: true);
             }
+            output = gameTitle;
         }
+
+        return output;
     }
     
     public async Task<string?> SelectGameExecutableAsync()

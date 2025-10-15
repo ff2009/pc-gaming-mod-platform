@@ -27,6 +27,7 @@ public partial class GameItemViewModel : ViewModelBase
     /// <summary>
     /// Image handling – only the key is stored
     /// </summary>
+    [NotifyPropertyChangedFor(nameof(Icon))]
     [ObservableProperty] private string _iconKey;
 
     [ObservableProperty] private Guid _id;
@@ -96,19 +97,26 @@ public partial class GameItemViewModel : ViewModelBase
     [RelayCommand]
     private async Task AddAsync()
     {
-        var gameExecutablePath = await _gameManagerService.SelectGameExecutableAsync();
-
+        string? gameExecutablePath = await _gameManagerService.SelectGameExecutableAsync();
         if (string.IsNullOrWhiteSpace(gameExecutablePath))
         {
             // user cancelled or no valid selection
             return;
         }
-        
-        _gameManagerService.SaveGameIcon(gameExecutablePath);
-        
+
+        string? gameTitle = _gameManagerService.SaveGameIcon(gameExecutablePath);
+        if (string.IsNullOrWhiteSpace(gameTitle))
+        {
+            // user cancelled or no valid selection
+            return;
+        }
+
+        Name = gameTitle;
+        IconKey = $"{gameTitle}.png";
+
         InstallPath = gameExecutablePath;
         IsInstalled = true;
-        
+
         // Convert the VM back to a domain object and hand it to the repo.
         var newItem = ToDomain();
         await  _gameRepository.AddGame(newItem);
@@ -143,6 +151,8 @@ public partial class GameItemViewModel : ViewModelBase
     private void ToggleFavorite()
     {
         IsFavorite = !IsFavorite;
+        var updatedItem = ToDomain();
+        _gameRepository.UpdateGame(updatedItem);
     }
 
     /// <summary>
