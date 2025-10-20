@@ -118,7 +118,7 @@ public partial class GameItemViewModel : ViewModelBase
         IsInstalled = true;
 
         // Convert the VM back to a domain object and hand it to the repo.
-        var newItem = ToDomain();
+        var newItem = this.ToDataModel();
         await  _gameRepository.AddGame(newItem);
         _messenger.Send(new GameAddedMessage(newItem));
     }
@@ -129,7 +129,7 @@ public partial class GameItemViewModel : ViewModelBase
     [RelayCommand]
     private void Edit()
     {
-        var updatedItem = ToDomain();
+        var updatedItem = this.ToDataModel();
         _gameRepository.UpdateGame(updatedItem);
         _messenger.Send(new GameAddedMessage(updatedItem));
     }
@@ -151,22 +151,26 @@ public partial class GameItemViewModel : ViewModelBase
     private void ToggleFavorite()
     {
         IsFavorite = !IsFavorite;
-        var updatedItem = ToDomain();
+        var updatedItem = this.ToDataModel();
         _gameRepository.UpdateGame(updatedItem);
     }
 
+}
+
+
+public static class GameViewModelExtenstions
+{
     /// <summary>
-    /// Helper – map back to the domain model (useful for persistence)
+    /// Map the Game View Model to the Data Model (useful for persistence)
     /// </summary>
     /// <returns></returns>
-    private GameDataModel ToDomain() => new()
-    {
-        Id = Id,
-        Name = Name,
-        Store = Store,
-        IsInstalled = IsInstalled,
-        IsFavorite = IsFavorite,
-        InstallPath = InstallPath,
-        IconKey = IconKey
+    public static GameDataModel ToDataModel(this GameItemViewModel gameItem) => new() {
+        Id = gameItem.Id,
+        Name = gameItem.Name,
+        Store = gameItem.Store,
+        IsInstalled = gameItem.IsInstalled,
+        IsFavorite = gameItem.IsFavorite,
+        InstallPath = gameItem.InstallPath,
+        IconKey = gameItem.IconKey
     };
 }

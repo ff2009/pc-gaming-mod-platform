@@ -16,11 +16,12 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
     IRecipient<GameDeletedMessage>, IDisposable
 {
     private readonly IGameRepository _gameRepository;
+    private readonly GameManagerService _gameManagerService;
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
-
+    
     [ObservableProperty] private ObservableCollection<GameItemViewModel> _gamesList = [];
-    [ObservableProperty] private ObservableCollection<GameItemViewModel> _filteredGameList;
+    [ObservableProperty] private ObservableCollection<GameItemViewModel> _filteredGameList = [];
 
 
     // UI state
@@ -42,10 +43,12 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
     public GameMenuViewModel(
         IGameRepository gameRepository,
+        GameManagerService gameManagerService,
         IMessenger messenger,
         IServiceProvider serviceProvider)
     {
         _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
+        _gameManagerService = gameManagerService ?? throw new ArgumentNullException(nameof(gameManagerService));
         _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
@@ -78,7 +81,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
         DesignTimeImageCache imageCache = new("Assets/Images/");
         List<GameItemViewModel> vmList = gameListMock.Select(g => new GameItemViewModel(imageCache, g)).ToList();
-        GamesList = new ObservableCollection<GameItemViewModel>();
+        GamesList = new ObservableCollection<GameItemViewModel>(vmList);
     }
 
     private async Task LoadData()
@@ -147,10 +150,37 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
     // Top‑bar commands
     // -----------------------------------------------------------------
     [RelayCommand]
-    private void AddNewGame()
+    private async Task AddNewGameAsync()
     {
         // Open a modal dialog (implementation left to UI layer)
         // After the dialog returns a GameItem, call _repo.AddAsync and refresh.
+        
+        string? gameExecutablePath = await _gameManagerService.SelectGameExecutableAsync();
+        if (string.IsNullOrWhiteSpace(gameExecutablePath))
+        {
+            // user cancelled or no valid selection
+            return;
+        }
+
+        string? gameTitle = _gameManagerService.SaveGameIcon(gameExecutablePath);
+        if (string.IsNullOrWhiteSpace(gameTitle))
+        {
+            // user cancelled or no valid selection
+            return;
+        }
+
+        // Convert the VM back to a domain object and hand it to the repo.
+        GameDataModel newGame = new()
+        {
+            Name = gameTitle,
+            IconKey = $"{gameTitle}.png",
+            InstallPath = gameExecutablePath,
+            IsInstalled = true
+        };
+
+        await _gameRepository.AddGame(newGame);
+        GamesList.Add(ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, newGame));
+        ApplyFiltersAndSorting();
     }
 
     [RelayCommand]
