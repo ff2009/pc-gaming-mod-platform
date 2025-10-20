@@ -19,10 +19,12 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
 
-    [ObservableProperty] private ObservableCollection<GameItemViewModel> _games = [];
+    [ObservableProperty] private ObservableCollection<GameItemViewModel> _gamesList = [];
+    [ObservableProperty] private ObservableCollection<GameItemViewModel> _filteredGameList;
+
 
     // UI state
-    [ObservableProperty] private string _searchText = string.Empty;
+    [ObservableProperty] private string _filterText = string.Empty;
     [ObservableProperty] private bool _showFavoritesOnly;
     [ObservableProperty] private bool _showInstalledOnly;
     [ObservableProperty] private bool _sortAscending = true;
@@ -34,6 +36,8 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
         {
             OnDesignTimeConstructor();
         }
+
+        ApplyFiltersAndSorting();
     }
 
     public GameMenuViewModel(
@@ -47,6 +51,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
         _messenger.RegisterAll(this);
         LoadData();
+        ApplyFiltersAndSorting();
     }
 
     private void OnDesignTimeConstructor()
@@ -73,7 +78,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
         DesignTimeImageCache imageCache = new("Assets/Images/");
         List<GameItemViewModel> vmList = gameListMock.Select(g => new GameItemViewModel(imageCache, g)).ToList();
-        Games = new ObservableCollection<GameItemViewModel>(vmList);
+        GamesList = new ObservableCollection<GameItemViewModel>();
     }
 
     private async Task LoadData()
@@ -118,7 +123,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
         List<GameItemViewModel> vmList = games
             .Select(g => ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, g)).ToList();
-        Games = new ObservableCollection<GameItemViewModel>(vmList);
+        GamesList = new ObservableCollection<GameItemViewModel>(vmList);
     }
 
     /// <summary>
@@ -127,21 +132,15 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
     [RelayCommand]
     private void ApplyFiltersAndSorting()
     {
-        // var view = CollectionViewSource.GetDefaultView(Games);
-        // view.Filter = o =>
-        // {
-        //     if (o is not GameItemViewModel g) return false;
-        //     if (ShowFavoritesOnly && !g.IsFavorite) return false;
-        //     if (ShowInstalledOnly && !g.IsInstalled) return false;
-        //     if (!string.IsNullOrWhiteSpace(SearchText) &&
-        //         !g.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
-        //         return false;
-        //     return true;
-        // };
-        //
-        // view.SortDescriptions.Clear();
-        // view.SortDescriptions.Add(new SortDescription(nameof(GameItemViewModel.Name),
-        //     SortAscending ? ListSortDirection.Ascending : ListSortDirection.Descending));
+        var query = GamesList.AsEnumerable();
+
+        if (!string.IsNullOrEmpty(FilterText))
+            query = query.Where(game => game.Name.Contains(FilterText, StringComparison.OrdinalIgnoreCase));
+
+        if (ShowFavoritesOnly)
+            query = query.Where(game => game.IsFavorite);
+
+        FilteredGameList = new ObservableCollection<GameItemViewModel>(SortAscending? query.OrderBy(game => game.Name) : query.OrderByDescending(game => game.Name));
     }
 
     // -----------------------------------------------------------------
@@ -155,6 +154,13 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
     }
 
     [RelayCommand]
+    private void ToggleFavorites()
+    {
+        ShowFavoritesOnly = !ShowFavoritesOnly;
+        ApplyFiltersAndSorting();
+    }
+    
+    [RelayCommand]
     private void ToggleSortOrder()
     {
         SortAscending = !SortAscending;
@@ -163,7 +169,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
     public void Receive(GameAddedMessage message)
     {
-        var gameToUpdate = Games.FirstOrDefault(g => g.Id == message.Game.Id);
+        var gameToUpdate = GamesList.FirstOrDefault(g => g.Id == message.Game.Id);
         if (gameToUpdate != null)
         {
             // Update other properties as needed
@@ -173,7 +179,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
     public void Receive(GameUpdatedMessage message)
     {
-        var gameToUpdate = Games.FirstOrDefault(g => g.Id == message.Game.Id);
+        var gameToUpdate = GamesList.FirstOrDefault(g => g.Id == message.Game.Id);
         if (gameToUpdate != null)
         {
             // Update other properties as needed
@@ -183,12 +189,12 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
     public void Receive(GameDeletedMessage message)
     {
-        var gameToRemove = Games.FirstOrDefault(g => g.Id == message.GameId);
+        var gameToRemove = GamesList.FirstOrDefault(g => g.Id == message.GameId);
         if (gameToRemove != null)
         {
             // Update other properties as needed
             gameToRemove.IsInstalled = false;
-            Games.Remove(gameToRemove);
+            GamesList.Remove(gameToRemove);
         }
     }
 

@@ -10,11 +10,45 @@
         <vm:GameMenuViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="*, Auto">
-        <ListBox Grid.Row="0"
-                 Background="Transparent"
-                 ItemsSource="{Binding Games}">
+    <Grid RowDefinitions="Auto, *" >
+        <Border Padding="4">
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="4 0">
 
+                
+                <!-- Toggle favorites -->
+                <Button Grid.Column="2"
+                        Background="Transparent"
+                        Command="{Binding ToggleFavoritesCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Classes="icon-fill-only" Content="&#xe2aa;" IsVisible="{Binding ShowFavoritesOnly}" />
+                        <Label Classes="icon-only" Content="&#xe2aa;" IsVisible="{Binding !ShowFavoritesOnly}" />
+                    </StackPanel>
+                </Button>
+                
+                <!-- Sort A-Z -->
+                <Button Grid.Column="2"
+                        Background="Transparent"
+                        Command="{Binding ToggleSortOrderCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Classes="icon-only" Content="&#xe444;" IsVisible="{Binding SortAscending}" />
+                        <Label Classes="icon-only" Content="&#xe446;" IsVisible="{Binding !SortAscending}" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Add Game -->
+                <Button
+                    Background="Transparent"
+                    Command="{Binding AddNewGameCommand}">
+                    <Label Classes="icon-only" Content="&#xe3d4;" />
+                </Button>
+            </StackPanel>
+        </Border>
+
+        
+        <ListBox Grid.Row="1"
+                 Background="Transparent"
+                 ItemsSource="{Binding FilteredGameList}">
+            
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel />
@@ -26,11 +60,12 @@
                     <Border Padding="4">
                         <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                             <ToolTip.Tip>
-                                <Label Grid.ColumnSpan="4" Content="{Binding InstallPath}" IsVisible="{Binding IsInstalled}"/>
+                                <Label Grid.ColumnSpan="4" Content="{Binding InstallPath}"
+                                       IsVisible="{Binding IsInstalled}" />
                             </ToolTip.Tip>
 
                             <!-- Game icon (generic) -->
-                            <Image Width="32" Height="32" 
+                            <Image Width="32" Height="32"
                                    Source="{Binding Icon}"
                                    Margin="0,0,8,0" />
 
