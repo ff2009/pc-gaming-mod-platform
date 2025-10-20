@@ -13,7 +13,7 @@ using System.Collections.ObjectModel;
 namespace PCGamingModApp.Core.ViewModels;
 
 public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedMessage>, IRecipient<GameUpdatedMessage>,
-    IRecipient<GameDeletedMessage>, IDisposable
+    IRecipient<GameDeletedMessage>, IRecipient<FilterTextMessage> , IDisposable
 {
     private readonly IGameRepository _gameRepository;
     private readonly GameManagerService _gameManagerService;
@@ -225,11 +225,19 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
             // Update other properties as needed
             gameToRemove.IsInstalled = false;
             GamesList.Remove(gameToRemove);
+            ApplyFiltersAndSorting();
         }
     }
 
+    public void Receive(FilterTextMessage message)
+    {
+        FilterText = message.FilterText;
+        ApplyFiltersAndSorting();
+    }
+    
     public void Dispose()
     {
         _messenger.UnregisterAll(this);
     }
+
 }

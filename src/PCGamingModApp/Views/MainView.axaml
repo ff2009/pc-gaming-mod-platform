@@ -41,9 +41,15 @@
                 Orientation="Horizontal" 
                 IsHitTestVisible="True">
 
-      <TextBox HorizontalAlignment="Stretch" Watermark="Search..." MinWidth="240">
+      <TextBox HorizontalAlignment="Stretch" 
+               Watermark="Search..." 
+               MinWidth="240"
+               Text="{Binding FilterText}">
         <TextBox.InnerLeftContent>
-          <Button Background="Transparent" Margin="8 0 0 0" Padding="0">
+          <Button Background="Transparent" 
+                  Command="{Binding SearchCommand}"
+                  Margin="8 0 0 0" 
+                  Padding="0">
             <Label Classes="icon-only" Content="&#xe30c;"/>
           </Button>
         </TextBox.InnerLeftContent>
