@@ -76,30 +76,47 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
         Games = new ObservableCollection<GameItemViewModel>(vmList);
     }
 
-    private void LoadData()
+    private async Task LoadData()
     {
-        var gameListMock = new List<GameDataModel>()
+        var games = await _gameRepository.GetAllGames();
+        if (games == null || !games.Any())
         {
-            new()
+            var gameListMock = new List<GameDataModel>()
             {
-                Id = Guid.NewGuid(), Name = "Back to Dinosaur Island", IconKey = "game-controller.png",
-                Store = StoreType.Epic,
-                InstallPath = @"C:\Users\ff2009\Downloads\GPU-Z.2.66.0.exe", IsInstalled = true, IsFavorite = true
-            },
-            new() { Id = Guid.NewGuid(), Name = "Crysis", IconKey = "game.png", Store = StoreType.EaApp },
-            new() { Id = Guid.NewGuid(), Name = "Crysis 2", IconKey = "game-controller.png", Store = StoreType.Other },
-            new() { Id = Guid.NewGuid(), Name = "Crysis 2 Remastered", IconKey = "game.png", Store = StoreType.Steam },
-            new() { Id = Guid.NewGuid(), Name = "Crysis 3", IconKey = "game-control.png", Store = StoreType.Ubisoft },
-            new()
-            {
-                Id = Guid.NewGuid(), Name = "Spacewars", IconKey = "game-controller.png", Store = StoreType.Steam,
-                IsFavorite = true
-            },
-            new() { Id = Guid.NewGuid(), Name = "The Witcher 3", IconKey = "game-control.png", Store = StoreType.GoG },
-        };
-        
-        var games = _gameRepository.GetAllGames();
-        List<GameItemViewModel> vmList = gameListMock
+                new()
+                {
+                    Id = Guid.NewGuid(), Name = "Back to Dinosaur Island", IconKey = "game-controller.png",
+                    Store = StoreType.Epic,
+                    InstallPath = @"C:\Users\ff2009\Downloads\GPU-Z.2.66.0.exe", IsInstalled = true, IsFavorite = true
+                },
+                new() { Id = Guid.NewGuid(), Name = "Crysis", IconKey = "game.png", Store = StoreType.EaApp },
+                new()
+                {
+                    Id = Guid.NewGuid(), Name = "Crysis 2", IconKey = "game-controller.png", Store = StoreType.Other
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(), Name = "Crysis 2 Remastered", IconKey = "game.png", Store = StoreType.Steam
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(), Name = "Crysis 3", IconKey = "game-control.png", Store = StoreType.Ubisoft
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(), Name = "Spacewars", IconKey = "game-controller.png", Store = StoreType.Steam,
+                    IsFavorite = true
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(), Name = "The Witcher 3", IconKey = "game-control.png", Store = StoreType.GoG
+                },
+            };
+            games.AddRange(gameListMock);
+        }
+
+
+        List<GameItemViewModel> vmList = games
             .Select(g => ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, g)).ToList();
         Games = new ObservableCollection<GameItemViewModel>(vmList);
     }
@@ -166,14 +183,13 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
     public void Receive(GameDeletedMessage message)
     {
-        var gameToRemove  = Games.FirstOrDefault(g => g.Id == message.GameId);
-        if (gameToRemove  != null)
+        var gameToRemove = Games.FirstOrDefault(g => g.Id == message.GameId);
+        if (gameToRemove != null)
         {
             // Update other properties as needed
             gameToRemove.IsInstalled = false;
             Games.Remove(gameToRemove);
         }
-
     }
 
     public void Dispose()

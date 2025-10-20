@@ -13,8 +13,13 @@ public class GameRepository(AppDbContext context) : IGameRepository
 
     public async Task UpdateGame(GameDataModel game)
     {
-        context.Games.Update(game);
-        await context.SaveChangesAsync();
+        var existingGame = await context.Games.FindAsync(game.Id);
+        if (existingGame != null)
+        {
+            // Updates only the required fields
+            context.Entry(existingGame).CurrentValues.SetValues(game);
+            await context.SaveChangesAsync();
+        }
     }
 
     public async Task DeleteGame(Guid id)
