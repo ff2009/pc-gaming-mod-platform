@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              xmlns:vm="clr-namespace:PCGamingModApp.Core.ViewModels;assembly=PCGamingModApp.Core"
-             xmlns:view="clr-namespace:PCGamingModApp.Views"
              x:DataType="vm:MainViewModel"
              x:Class="PCGamingModApp.Views.MainView"
              Background="Transparent">
@@ -13,7 +12,7 @@
     <vm:MainViewModel />
   </Design.DataContext>
 
-  <Grid ColumnDefinitions="Auto, *" 
+  <Grid ColumnDefinitions="300, *" 
         RowDefinitions="Auto, Auto, *, Auto">
   
     <!-- Logo and app name -->
@@ -24,9 +23,7 @@
                 Margin="8"
                 IsHitTestVisible="False">
       <Image Source="avares://PCGamingModApp/Assets/avalonia-logo.ico" MaxWidth="32" />
-      <TextBlock Grid.Column="0"
-                 Grid.Row="0"
-                 Text="PC Gaming App"
+      <TextBlock Text="PC Gaming App"
                  Margin="8 0"
                  FontFamily="SegoeUI"
                  HorizontalAlignment="Left"
@@ -42,8 +39,8 @@
                 IsHitTestVisible="True">
 
       <TextBox HorizontalAlignment="Stretch" 
-               Watermark="Search..." 
-               MinWidth="240"
+               Watermark="Search..."
+               Width="260"
                Text="{Binding FilterText}">
         <TextBox.InnerLeftContent>
           <Button Background="Transparent" 
@@ -57,14 +54,18 @@
     </StackPanel>
 
     <!-- Context section -->
-    <ContentControl Grid.Column="0" Grid.Row="2" Margin="8" Content="{Binding CurrentContext}"></ContentControl>
+    <ContentControl Grid.Column="0" Grid.Row="2" 
+                    Margin="8 0" 
+                    Content="{Binding CurrentContext}" />
 
-    <Button Grid.Row="3" Margin="8" Command="{Binding GoToSettingsCommand}">
+    <Button Grid.Row="3" Grid.Column="0" Margin="8" Command="{Binding GoToSettingsCommand}">
       <Label Classes="icon-only" Content="&#xe272;"/>
     </Button>
 
     <!-- Main Content section -->
-    <ContentControl Grid.Column="2" Grid.RowSpan="4" Content="{Binding CurrentPage}"></ContentControl>
+    <ContentControl Grid.Row="0" Grid.Column="1" 
+                    Grid.RowSpan="4" 
+                    Content="{Binding CurrentPage}" />
 
 
   </Grid>
