@@ -104,22 +104,13 @@ public partial class GameItemViewModel : ViewModelBase
             return;
         }
 
-        string? gameTitle = _gameManagerService.SaveGameIcon(gameExecutablePath);
-        if (string.IsNullOrWhiteSpace(gameTitle))
+        var newItem = await _gameManagerService.AddGame(gameExecutablePath);
+        if (newItem is null)
         {
             // user cancelled or no valid selection
             return;
         }
 
-        Name = gameTitle;
-        IconKey = $"{gameTitle}.png";
-
-        InstallPath = gameExecutablePath;
-        IsInstalled = true;
-
-        // Convert the VM back to a domain object and hand it to the repo.
-        var newItem = this.ToDataModel();
-        await  _gameRepository.AddGame(newItem);
         _messenger.Send(new GameAddedMessage(newItem));
     }
 
@@ -154,9 +145,7 @@ public partial class GameItemViewModel : ViewModelBase
         var updatedItem = this.ToDataModel();
         _gameRepository.UpdateGame(updatedItem);
     }
-
 }
-
 
 public static class GameViewModelExtenstions
 {

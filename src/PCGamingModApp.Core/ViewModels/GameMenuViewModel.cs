@@ -13,13 +13,13 @@ using System.Collections.ObjectModel;
 namespace PCGamingModApp.Core.ViewModels;
 
 public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedMessage>, IRecipient<GameUpdatedMessage>,
-    IRecipient<GameDeletedMessage>, IRecipient<FilterTextMessage> , IDisposable
+    IRecipient<GameDeletedMessage>, IRecipient<FilterTextMessage>, IDisposable
 {
     private readonly IGameRepository _gameRepository;
     private readonly GameManagerService _gameManagerService;
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
-    
+
     [ObservableProperty] private ObservableCollection<GameItemViewModel> _gamesList = [];
     [ObservableProperty] private ObservableCollection<GameItemViewModel> _filteredGameList = [];
 
@@ -143,7 +143,9 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
         if (ShowFavoritesOnly)
             query = query.Where(game => game.IsFavorite);
 
-        FilteredGameList = new ObservableCollection<GameItemViewModel>(SortAscending? query.OrderBy(game => game.Name) : query.OrderByDescending(game => game.Name));
+        FilteredGameList = new ObservableCollection<GameItemViewModel>(SortAscending
+            ? query.OrderBy(game => game.Name)
+            : query.OrderByDescending(game => game.Name));
     }
 
     // -----------------------------------------------------------------
@@ -154,7 +156,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
     {
         // Open a modal dialog (implementation left to UI layer)
         // After the dialog returns a GameItem, call _repo.AddAsync and refresh.
-        
+
         string? gameExecutablePath = await _gameManagerService.SelectGameExecutableAsync();
         if (string.IsNullOrWhiteSpace(gameExecutablePath))
         {
@@ -162,23 +164,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
             return;
         }
 
-        string? gameTitle = _gameManagerService.SaveGameIcon(gameExecutablePath);
-        if (string.IsNullOrWhiteSpace(gameTitle))
-        {
-            // user cancelled or no valid selection
-            return;
-        }
-
-        // Convert the VM back to a domain object and hand it to the repo.
-        GameDataModel newGame = new()
-        {
-            Name = gameTitle,
-            IconKey = $"{gameTitle}.png",
-            InstallPath = gameExecutablePath,
-            IsInstalled = true
-        };
-
-        await _gameRepository.AddGame(newGame);
+        var newGame = await _gameManagerService.AddGame(gameExecutablePath);
         GamesList.Add(ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, newGame));
         ApplyFiltersAndSorting();
     }
@@ -189,7 +175,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
         ShowFavoritesOnly = !ShowFavoritesOnly;
         ApplyFiltersAndSorting();
     }
-    
+
     [RelayCommand]
     private void ToggleSortOrder()
     {
@@ -234,10 +220,9 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
         FilterText = message.FilterText;
         ApplyFiltersAndSorting();
     }
-    
+
     public void Dispose()
     {
         _messenger.UnregisterAll(this);
     }
-
 }

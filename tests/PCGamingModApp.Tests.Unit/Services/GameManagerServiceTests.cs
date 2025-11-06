@@ -2,6 +2,7 @@
 using Moq;
 using PCGamingModApp.Core.Services.Implementations;
 using PCGamingModApp.Core.Services.Interfaces;
+using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp.Tests.Unit.Services;
 
@@ -13,12 +14,13 @@ public class GameManagerServiceTests
         // Arrange
         var appPaths = new Mock<IAppPaths>();
         var dialogService = new Mock<IDialogService>();
+        var gameRepository = new Mock<IGameRepository>();
         // Mock the file picker to return a predefined path
         dialogService
             .Setup(x => x.FilePicker(It.IsAny<FilePickerOpenOptions>()))
             .ReturnsAsync("/path/to/game.exe");
 
-        var service = new GameManagerService(appPaths.Object, dialogService.Object);
+        var service = new GameManagerService(appPaths.Object, dialogService.Object, gameRepository.Object);
 
         // Act
         var result = await service.SelectGameExecutableAsync();
@@ -33,12 +35,13 @@ public class GameManagerServiceTests
         // Arrange
         var appPaths = new Mock<IAppPaths>();
         var dialogService = new Mock<IDialogService>();
+        var gameRepository = new Mock<IGameRepository>();
         // Mock the file picker to return null (user canceled)
         dialogService
             .Setup(x => x.FilePicker(It.IsAny<FilePickerOpenOptions>()))
             .ReturnsAsync((string?)null);
 
-        var service = new GameManagerService(appPaths.Object, dialogService.Object);
+        var service = new GameManagerService(appPaths.Object, dialogService.Object, gameRepository.Object);
 
         // Act
         var result = await service.SelectGameExecutableAsync();

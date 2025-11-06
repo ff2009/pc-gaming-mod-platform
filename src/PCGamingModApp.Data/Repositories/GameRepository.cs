@@ -41,4 +41,14 @@ public class GameRepository(AppDbContext context) : IGameRepository
     {
         return await context.Games.FindAsync(id);
     }
+    
+    public async Task<GameDataModel?> GetGameByName(string name)
+    {
+        return await context.Games.FirstOrDefaultAsync(g => g.Name == name);
+    }
+    
+    public async Task<GameDataModel?> GetGameByInstallPath(string installPath)
+    {
+        return await context.Games.FirstOrDefaultAsync(g => g.InstallPath == installPath);
+    }
 }

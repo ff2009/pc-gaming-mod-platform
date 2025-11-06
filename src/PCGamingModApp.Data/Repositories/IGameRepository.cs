@@ -9,4 +9,6 @@ public interface IGameRepository
     Task DeleteGame(Guid id);
     Task<List<GameDataModel>> GetAllGames();
     Task<GameDataModel?> GetGameById(Guid id);
+    Task<GameDataModel?> GetGameByName(string name);
+    Task<GameDataModel?> GetGameByInstallPath(string installPath);
 }
