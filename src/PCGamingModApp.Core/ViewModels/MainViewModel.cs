@@ -12,7 +12,7 @@ namespace PCGamingModApp.Core.ViewModels;
 public partial class MainViewModel : ViewModelBase
 {
     private readonly IMessenger _messenger;
-    private readonly IServiceProvider? _serviceProvider = null;
+    private readonly IServiceProvider _serviceProvider;
     private readonly PageFactory _pageFactory;
 
     [ObservableProperty] private ContextViewModel? _currentContext;
@@ -23,13 +23,20 @@ public partial class MainViewModel : ViewModelBase
 
     public string FilterText
     {
-        get { return _filterText; }
+        get => _filterText;
         set
         {
+            if (_filterText == value) return;
             _filterText = value;
             _messenger.Send(new FilterTextMessage(_filterText));
         }
     }
+    
+    [ObservableProperty]
+    private bool _sideMenuExpanded = true;
+    
+    [ObservableProperty]
+    private bool _sideMenuGameMenuVisible = true;
 
     /// <summary>
     /// Design-time only constructor
@@ -54,11 +61,23 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void GoToSettings()
     {
-        CurrentContext = new MenuViewModel(this, _pageFactory);
+        CurrentContext = _serviceProvider.GetRequiredService<MenuViewModel>();
 
         CurrentPage = _pageFactory.GetPageViewModel<BasePageViewModel>();
+        
+        SideMenuGameMenuVisible = false;
     }
 
+    [RelayCommand]
+    private void GoBack()
+    {
+        CurrentContext = _serviceProvider.GetRequiredService<GameMenuViewModel>();
+
+        CurrentPage = _pageFactory.GetPageViewModel<BasePageViewModel>();
+        
+        SideMenuGameMenuVisible = true;
+    }
+    
     [RelayCommand]
     private void Search()
     {

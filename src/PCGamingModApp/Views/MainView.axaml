@@ -8,66 +8,77 @@
              x:Class="PCGamingModApp.Views.MainView"
              Background="Transparent">
 
-  <Design.DataContext>
-    <vm:MainViewModel />
-  </Design.DataContext>
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
 
-  <Grid ColumnDefinitions="300, *" 
-        RowDefinitions="Auto, Auto, *, Auto">
-  
-    <!-- Logo and app name -->
-    <StackPanel Grid.Column="0"
-                Grid.Row="0"
-                Orientation="Horizontal" 
-                VerticalAlignment="Center" 
-                Margin="8"
-                IsHitTestVisible="False">
-      <Image Source="avares://PCGamingModApp/Assets/avalonia-logo.ico" MaxWidth="32" />
-      <TextBlock Text="PC Gaming App"
-                 Margin="8 0"
-                 FontFamily="SegoeUI"
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Center"/>
-    </StackPanel>
+    <Grid ColumnDefinitions="300, *"
+          RowDefinitions="Auto, Auto, *, Auto">
 
-
-    <!-- Search bar -->
-    <StackPanel Grid.Column="0"
-                Grid.Row="1"
-                Margin="8"
-                Orientation="Horizontal" 
-                IsHitTestVisible="True">
-
-      <TextBox HorizontalAlignment="Stretch" 
-               Watermark="Search..."
-               Width="260"
-               Text="{Binding FilterText}">
-        <TextBox.InnerLeftContent>
-          <Button Background="Transparent" 
-                  Command="{Binding SearchCommand}"
-                  Margin="8 0 0 0" 
-                  Padding="0">
-            <Label Classes="icon-only" Content="&#xe30c;"/>
-          </Button>
-        </TextBox.InnerLeftContent>
-      </TextBox>
-    </StackPanel>
-
-    <!-- Context section -->
-    <ContentControl Grid.Column="0" Grid.Row="2" 
-                    Margin="8 0" 
-                    Content="{Binding CurrentContext}" />
-
-    <Button Grid.Row="3" Grid.Column="0" Margin="8" Command="{Binding GoToSettingsCommand}">
-      <Label Classes="icon-only" Content="&#xe272;"/>
-    </Button>
-
-    <!-- Main Content section -->
-    <ContentControl Grid.Row="0" Grid.Column="1" 
-                    Grid.RowSpan="4" 
-                    Content="{Binding CurrentPage}" />
+        <!-- Logo and app name -->
+        <StackPanel Grid.Column="0"
+                    Grid.Row="0"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    Margin="8"
+                    IsHitTestVisible="False">
+            <Image Source="avares://PCGamingModApp/Assets/avalonia-logo.ico" MaxWidth="32" />
+            <TextBlock Text="PC Gaming App"
+                       Margin="8 0"
+                       FontFamily="SegoeUI"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center" />
+        </StackPanel>
 
 
-  </Grid>
+        <!-- Search bar -->
+        <StackPanel Grid.Column="0"
+                    Grid.Row="1"
+                    Margin="8"
+                    Orientation="Horizontal"
+                    IsHitTestVisible="True">
+
+            <TextBox HorizontalAlignment="Stretch"
+                     Watermark="Search..."
+                     Width="260"
+                     Text="{Binding FilterText}">
+                <TextBox.InnerLeftContent>
+                    <Button Background="Transparent"
+                            Command="{Binding SearchCommand}"
+                            Margin="8 0 0 0"
+                            Padding="0">
+                        <Label Classes="icon-only" Content="&#xe30c;" />
+                    </Button>
+                </TextBox.InnerLeftContent>
+            </TextBox>
+        </StackPanel>
+
+        <!-- Context section -->
+        <ContentControl Grid.Column="0" Grid.Row="2"
+                        Margin="8 0"
+                        Content="{Binding CurrentContext}" />
+
+        
+        
+        <Button Grid.Row="3" Grid.Column="0"
+                Margin="12"
+                Command="{Binding GoToSettingsCommand}"
+                IsVisible="{Binding SideMenuGameMenuVisible}">
+            <Label Classes="icon-fill-only" Content="&#xe272;" />
+        </Button>
+        
+        <Button Grid.Row="3" Grid.Column="0"
+                Margin="12"
+                Command="{Binding GoBackCommand}"
+                IsVisible="{Binding !SideMenuGameMenuVisible}">
+            <Label Classes="icon-fill-only" Content="&#xe07e;" />
+        </Button>
+        
+        <!-- Main Content section -->
+        <ContentControl Grid.Row="0" Grid.Column="1"
+                        Grid.RowSpan="4"
+                        Content="{Binding CurrentPage}" />
+
+
+    </Grid>
 </UserControl>
-
