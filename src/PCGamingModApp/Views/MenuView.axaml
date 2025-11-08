@@ -2,65 +2,88 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="400"             
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="450"
              xmlns:vm="clr-namespace:PCGamingModApp.Core.ViewModels;assembly=PCGamingModApp.Core"
              x:DataType="vm:MenuViewModel"
              x:Class="PCGamingModApp.Views.MenuView">
 
-  <Design.DataContext>
-    <vm:MenuViewModel />
-  </Design.DataContext>
-  
-  <Grid RowDefinitions="*, Auto">
-    <StackPanel Spacing="12">
-      <Button HorizontalAlignment="Stretch" Command="{Binding GoToBaseCommand}" >
-        <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe2c2;" />
-          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Base" />
+    <Design.DataContext>
+        <vm:MenuViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Header -->
+        <Border Grid.Row="0" Padding="8 4">
+            <Label Classes="normal"
+                   Content="Settings"
+                   Padding="4"
+                   VerticalAlignment="Center" />
+        </Border>
+
+        <!-- Menu buttons -->
+        <StackPanel Grid.Row="1" Spacing="4" Margin="0 2">
+            <Button HorizontalAlignment="Stretch" Padding="8 4"
+                    Background="Transparent"
+                    Command="{Binding GoToBaseCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xe2c2;" />
+                    <Label VerticalAlignment="Center" Padding="8 0" Content="Base" />
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Padding="8 4"
+                    Background="Transparent"
+                    Command="{Binding GoToGameSettingsCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xe26e;" />
+                    <Label VerticalAlignment="Center" Padding="8 0" Content="Games" />
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Padding="8 4"
+                    Background="Transparent">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xead4;" />
+                    <Label VerticalAlignment="Center" Padding="8 0" Content="Launchers" />
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Padding="8 4"
+                    Background="Transparent"
+                    Command="{Binding GoToAddOnsCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xe596;" />
+                    <Label VerticalAlignment="Center" Padding="8 0" Content="Add-ons" />
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Padding="8 4"
+                    Background="Transparent">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xe1aa;" />
+                    <Label VerticalAlignment="Center" Padding="8 0" Content="Sync" />
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Padding="8 4"
+                    Background="Transparent">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xe5da;" />
+                    <Label VerticalAlignment="Center" Padding="8 0" Content="System" />
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Padding="8 4"
+                    Background="Transparent"
+                    Command="{Binding GoToAboutCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xe2ce;" />
+                    <Label VerticalAlignment="Center" Padding="8 0" Content="About" />
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Padding="8 4"
+                    Background="Transparent"
+                    Command="{Binding GoToDeveloperSettingsCommand}"
+                    IsVisible="{Binding IsDeveloperSettingsVisible, FallbackValue=0}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xed0e;" />
+                    <Label VerticalAlignment="Center" Padding="8 0" Content="Developer Settings" />
+                </StackPanel>
+            </Button>
         </StackPanel>
-      </Button>
-      <Button HorizontalAlignment="Stretch" Command="{Binding GoToGameSettingsCommand}">
-        <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe26e;" />
-          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Games" />
-        </StackPanel>
-      </Button>
-      <Button HorizontalAlignment="Stretch">
-        <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Classes="icon" Content="&#xead4;" />
-          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Launchers" />
-        </StackPanel>
-      </Button>
-      <Button HorizontalAlignment="Stretch" Command="{Binding GoToAddOnsCommand}">
-        <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe596;" />
-          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Add-ons" />
-        </StackPanel>
-      </Button>
-      <Button HorizontalAlignment="Stretch">
-        <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe1aa;" />
-          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Sync"/>
-        </StackPanel>
-      </Button>
-      <Button HorizontalAlignment="Stretch">
-        <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe5da;" />
-          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="System" />
-        </StackPanel>
-      </Button>
-      <Button HorizontalAlignment="Stretch" Command="{Binding GoToAboutCommand}">
-        <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Classes="icon" Content="&#xe2ce;" />
-          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="About" />
-        </StackPanel>
-      </Button>
-      <Button HorizontalAlignment="Stretch" Command="{Binding GoToDeveloperSettingsCommand}" IsVisible="{Binding IsDeveloperSettingsVisible, FallbackValue=0}">
-        <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Classes="icon" Content="&#xed0e;" />
-          <Label HorizontalAlignment="Left" VerticalAlignment="Center" Content="Developer Settings" />
-        </StackPanel>
-      </Button>
-    </StackPanel>
-  </Grid>
+    </Grid>
 </UserControl>

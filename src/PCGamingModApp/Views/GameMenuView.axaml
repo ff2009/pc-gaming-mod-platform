@@ -6,15 +6,23 @@
              xmlns:vm="clr-namespace:PCGamingModApp.Core.ViewModels;assembly=PCGamingModApp.Core"
              x:DataType="vm:GameMenuViewModel"
              x:Class="PCGamingModApp.Views.GameMenuView">
+
     <Design.DataContext>
         <vm:GameMenuViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto, *" >
-        <Border Padding="4">
-            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="4 0">
-
-                
+    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *">
+        <!-- Header -->
+        <Border Grid.Column="0" Grid.Row="0" Padding="4">
+            <Label Classes="normal"
+                   Content="Games"
+                   Padding="8 4"
+                   VerticalAlignment="Center" />
+        </Border>
+        
+        <!-- Action buttons -->
+        <Border Grid.Column="1" Grid.Row="0" Padding="4">
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4 0">
                 <!-- Toggle favorites -->
                 <Button Grid.Column="2"
                         Background="Transparent"
@@ -24,11 +32,12 @@
                         <Label Classes="icon-only" Content="&#xe2aa;" IsVisible="{Binding !ShowFavoritesOnly}" />
                     </StackPanel>
                 </Button>
-                
+
                 <!-- Sort A-Z -->
                 <Button Grid.Column="2"
                         Background="Transparent"
-                        Command="{Binding ToggleSortOrderCommand}">
+                        Command="{Binding ToggleSortOrderCommand}"
+                        HorizontalAlignment="Left">
                     <StackPanel Orientation="Horizontal">
                         <Label Classes="icon-only" Content="&#xe444;" IsVisible="{Binding SortAscending}" />
                         <Label Classes="icon-only" Content="&#xe446;" IsVisible="{Binding !SortAscending}" />
@@ -38,17 +47,19 @@
                 <!-- Add Game -->
                 <Button
                     Background="Transparent"
-                    Command="{Binding AddNewGameCommand}">
+                    Command="{Binding AddNewGameCommand}"
+                    HorizontalContentAlignment="Left">
                     <Label Classes="icon-only" Content="&#xe3d4;" />
                 </Button>
             </StackPanel>
         </Border>
-
         
-        <ListBox Grid.Row="1"
+        <!-- Game list -->
+        <ListBox Grid.Column="0" Grid.ColumnSpan="2"
+                 Grid.Row="1"
                  Background="Transparent"
                  ItemsSource="{Binding FilteredGameList}">
-            
+
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel />
@@ -57,30 +68,30 @@
 
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:GameItemViewModel}">
-                    <Border Padding="4">
+                    <Border Padding="4 0">
                         <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                             <ToolTip.Tip>
-                                <Label Grid.ColumnSpan="4" Content="{Binding InstallPath}"
+                                <Label Grid.ColumnSpan="4" 
+                                       Content="{Binding InstallPath}"
                                        IsVisible="{Binding IsInstalled}" />
                             </ToolTip.Tip>
 
                             <!-- Game icon (generic) -->
                             <Image Width="32" Height="32"
-                                   Source="{Binding Icon}"
-                                   Margin="0,0,8,0" />
+                                   Source="{Binding Icon}" />
 
                             <!-- Store badge -->
                             <Image Grid.Column="0"
                                    Width="14" Height="14"
                                    Source="{Binding Store, Converter={StaticResource StoreToIconConverter}}"
-                                   Margin="20,20,0,0">
+                                   Margin="24,24,0,0">
                                 <Image.Effect>
                                     <DropShadowEffect BlurRadius="4" OffsetX="0" OffsetY="0" />
                                 </Image.Effect>
                             </Image>
 
                             <!-- Game name -->
-                            <TextBlock Grid.Column="1"
+                            <TextBlock Grid.Column="1" Padding="8 0"
                                        Text="{Binding Name}"
                                        VerticalAlignment="Center" />
 
