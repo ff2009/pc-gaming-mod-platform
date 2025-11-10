@@ -4,7 +4,7 @@ namespace PCGamingModApp.Core.Services.Interfaces;
 
 public interface IDialogService
 {
-    Task<string?> FilePicker(FilePickerOpenOptions? options = null);
+    Task<string?> FilePickerAsync(FilePickerOpenOptions? options = null);
     
-    Task<string?> FolderPicker(FolderPickerOpenOptions? options = null);
+    Task<string?> FolderPickerAsync(FolderPickerOpenOptions? options = null);
 }

@@ -6,7 +6,7 @@ namespace PCGamingModApp.Core.Services.Implementations;
 
 public class DialogService(Func<TopLevel?> topLevel) : IDialogService
 {
-    public async Task<string?> FilePicker(FilePickerOpenOptions? options = null)
+    public async Task<string?> FilePickerAsync(FilePickerOpenOptions? options = null)
     {
         TopLevel? topLevelVisual = topLevel();
         if (topLevelVisual == null) return null;
@@ -24,7 +24,7 @@ public class DialogService(Func<TopLevel?> topLevel) : IDialogService
         return path.IsAbsoluteUri ? path.LocalPath : path.OriginalString;
     }
 
-    public async Task<string?> FolderPicker(FolderPickerOpenOptions? options = null)
+    public async Task<string?> FolderPickerAsync(FolderPickerOpenOptions? options = null)
     {
         TopLevel? topLevelVisual = topLevel();
         if (topLevelVisual == null) return null;

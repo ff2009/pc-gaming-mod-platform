@@ -17,7 +17,7 @@ public class GameManagerServiceTests
         var gameRepository = new Mock<IGameRepository>();
         // Mock the file picker to return a predefined path
         dialogService
-            .Setup(x => x.FilePicker(It.IsAny<FilePickerOpenOptions>()))
+            .Setup(x => x.FilePickerAsync(It.IsAny<FilePickerOpenOptions>()))
             .ReturnsAsync("/path/to/game.exe");
 
         var service = new GameManagerService(appPaths.Object, dialogService.Object, gameRepository.Object);
@@ -38,7 +38,7 @@ public class GameManagerServiceTests
         var gameRepository = new Mock<IGameRepository>();
         // Mock the file picker to return null (user canceled)
         dialogService
-            .Setup(x => x.FilePicker(It.IsAny<FilePickerOpenOptions>()))
+            .Setup(x => x.FilePickerAsync(It.IsAny<FilePickerOpenOptions>()))
             .ReturnsAsync((string?)null);
 
         var service = new GameManagerService(appPaths.Object, dialogService.Object, gameRepository.Object);
