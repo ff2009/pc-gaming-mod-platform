@@ -1,6 +1,4 @@
-﻿using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
+﻿using Microsoft.EntityFrameworkCore;
 using PCGamingModApp.Data;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
@@ -35,11 +33,11 @@ public class GameRepositoryIntegrationTests : IDisposable
 
         // Assert
         var games = await _repository.GetAllGames();
-        games.Should().ContainSingle();
-        
+        Assert.NotNull(games);
+
         var loadedGame = games.Single();
-        loadedGame.Name.Should().BeEquivalentTo("Test Game");
-        loadedGame.Store.Should().Be(StoreType.EaApp);
+        Assert.Equivalent(loadedGame.Name, "Test Game");
+        Assert.Equivalent(loadedGame.Store, StoreType.EaApp);
     }
 
     [Fact]
