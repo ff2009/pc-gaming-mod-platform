@@ -43,6 +43,8 @@ public partial class App : Application
         // Register GameInstallationService
         services.AddTransient<GameManagerService>();
 
+        services.AddSingleton<IIconExtractor, IconExtractorService>();
+        services.AddSingleton<IGameIconService, GameIconService>();
         services.AddTransient<ILauncherService, LauncherService>();
         services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
 

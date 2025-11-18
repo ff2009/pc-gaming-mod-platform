@@ -15,11 +15,21 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Exceptions\" />
       <Folder Include="Models\" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\PCGamingModApp.Data\PCGamingModApp.Data.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Avalonia.Base">
+        <HintPath>..\PCGamingModApp\bin\Debug\net9.0\Avalonia.Base.dll</HintPath>
+      </Reference>
+      <Reference Include="Avalonia.Controls">
+        <HintPath>..\PCGamingModApp\bin\Debug\net9.0\Avalonia.Controls.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
