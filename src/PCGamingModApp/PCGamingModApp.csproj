@@ -11,6 +11,7 @@
     <RepositoryUrl>https://github.com/ff2009/pc-gaming-mod-platform</RepositoryUrl>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>
+    <LangVersion>14</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,7 +1,7 @@
-using PCGamingModApp.Core.Services.Interfaces;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using PCGamingModApp.Core.Services.Interfaces;
 using SkiaSharp;
 
 namespace PCGamingModApp.Core.Services.Implementations;
@@ -20,7 +20,7 @@ public class IconExtractorService(IAppPaths appPaths) : IIconExtractor
             case ".desktop":
                 // TODO: implement the parsing of the .desktop file
                 throw new Exception($"Unsupported file type: {Path.GetExtension(sourcePath)}");
-            
+
             case ".exe":
                 if (OperatingSystem.IsWindows() && OperatingSystem.IsWindowsVersionAtLeast(6, 1))
                 {
