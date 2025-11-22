@@ -22,15 +22,9 @@ public partial class DownloadItemViewModel : ViewModelBase
     [ObservableProperty] private string _unit = string.Empty; // in bytes per second
     private TimeSpan _eta = TimeSpan.MaxValue;
 
-    public long FileSize
-    {
-        get => _fileSizeInBytes / 1024 / 1024;
-    }
+    public long FileSize => _fileSizeInBytes / 1024 / 1024;
 
-    public long DownloadedSize
-    {
-        get => _downloadedBytes / 1024 / 1024;
-    }
+    public long DownloadedSize => _downloadedBytes / 1024 / 1024;
 
     public double DownloadSpeed
     {
