@@ -33,6 +33,9 @@ public partial class MenuViewModel : ContextViewModel
     private void GoToGameSettings() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<GameSettingsPageViewModel>();
 
     [RelayCommand]
+    private void GoToDownloads() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<DownloadsPageViewModel>();
+
+    [RelayCommand]
     private void GoToAddOns() => _mainViewModel.CurrentPage = _pageFactory.GetPageViewModel<AddOnsPageViewModel>();
 
     [RelayCommand]

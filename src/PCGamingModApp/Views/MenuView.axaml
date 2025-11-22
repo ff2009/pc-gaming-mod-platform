@@ -39,6 +39,14 @@
                 </StackPanel>
             </Button>
             <Button HorizontalAlignment="Stretch" Padding="8 4"
+                    Background="Transparent"
+                    Command="{Binding GoToDownloadsCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xe20c;" />
+                    <Label VerticalAlignment="Center" Padding="8 0" Content="Downloads" />
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Padding="8 4"
                     Background="Transparent">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" Classes="menu-icon" Content="&#xead4;" />

@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="clr-namespace:PCGamingModApp.Core.ViewModels;assembly=PCGamingModApp.Core"
+             xmlns:views="clr-namespace:PCGamingModApp.Views"
+             x:DataType="vm:DownloadsPageViewModel"
+             x:Class="PCGamingModApp.Views.DownloadsPageView">
+    <Design.DataContext>
+        <vm:DownloadsPageViewModel />
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, *">
+        <Label Grid.Row="0" Classes="h1" Content="{Binding PageTitle}" />
+        <ListBox Grid.Column="0" Grid.ColumnSpan="2"
+                 Grid.Row="1"
+                 Background="Transparent"
+                 ItemsSource="{Binding FilteredDownloadList}">
+
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border Padding="4 0">
+                        <views:DownloadItemView DataContext="{Binding}" />
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

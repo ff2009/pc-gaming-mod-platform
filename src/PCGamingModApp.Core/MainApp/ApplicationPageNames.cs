@@ -12,7 +12,9 @@ public enum ApplicationPageNames
     AddOns = 1004,
     Sync = 1005,
     System = 1006,
-    About = 1007,
+    Downloads = 1007,
+    
+    About = 9999,
 
     DeveloperSettings = 5001,
 }

@@ -63,6 +63,8 @@ public partial class App : Application
 
         services.AddTransient<BasePageViewModel>();
         services.AddTransient<GameSettingsPageViewModel>();
+        services.AddTransient<DownloadsPageViewModel>();
+        services.AddTransient<DownloadItemViewModel>(); // each row gets its own VM
         services.AddTransient<AddOnsPageViewModel>();
         services.AddTransient<SystemPageViewModel>();
         services.AddTransient<AboutPageViewModel>();
@@ -74,6 +76,7 @@ public partial class App : Application
             _ when type == typeof(HomePageViewModel) => x.GetRequiredService<HomePageViewModel>(),
             _ when type == typeof(BasePageViewModel) => x.GetRequiredService<BasePageViewModel>(),
             _ when type == typeof(GameSettingsPageViewModel) => x.GetRequiredService<GameSettingsPageViewModel>(),
+            _ when type == typeof(DownloadsPageViewModel) => x.GetRequiredService<DownloadsPageViewModel>(),
             _ when type == typeof(AddOnsPageViewModel) => x.GetRequiredService<AddOnsPageViewModel>(),
             _ when type == typeof(SystemPageViewModel) => x.GetRequiredService<SystemPageViewModel>(),
             _ when type == typeof(AboutPageViewModel) => x.GetRequiredService<AboutPageViewModel>(),

@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="60"
+             xmlns:vm="clr-namespace:PCGamingModApp.Core.ViewModels;assembly=PCGamingModApp.Core"
+             x:DataType="vm:DownloadItemViewModel"
+             x:Class="PCGamingModApp.Views.DownloadItemView">
+    <Design.DataContext>
+        <vm:DownloadItemViewModel />
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto, *, Auto" ShowGridLines="False">
+        <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"
+                    Margin="4 0">
+            <Label Content="{Binding FileName, Mode=OneWay}" />
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal"
+                    VerticalAlignment="Center" HorizontalAlignment="Right"
+                    Margin="4 0">
+            <Label Content="{Binding Progress, Mode=OneWay, StringFormat=0.00}" />
+            <Label Content="%" />
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="4 0">
+            <Button Height="24" Width="24" Background="Transparent" Padding="2">
+                <StackPanel Orientation="Horizontal">
+                    <Label Classes="icon-only-small" Content="&#xe39e;" IsVisible="{Binding IsPaused}" />
+                    <Label Classes="icon-only-small" Content="&#xe3d0;" IsVisible="{Binding !IsPaused}" />
+                </StackPanel>
+            </Button>
+            <Button Height="24" Width="24" Background="Transparent" Padding="2">
+                <StackPanel Orientation="Horizontal">
+                    <Label Classes="icon-only-small" Content="&#xe4f6;" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+        
+        <ProgressBar Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1"
+                     Margin="8 0" Height="8"
+                     Padding="0"
+                     Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}" />
+
+        <StackPanel Grid.Column="0" Grid.Row="2"
+                    Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left"
+                    Margin="4 0">
+            <Label Content="{Binding DownloadedSize, Mode=OneWay}" />
+            <Label Content="/" />
+            <Label Content="{Binding FileSize, Mode=OneWay}" />
+            <Label Content="{Binding Unit, Mode=OneWay}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal"
+                    VerticalAlignment="Center" HorizontalAlignment="Right"
+                    Margin="4 0">
+            <Label Content="{Binding DownloadSpeed, Mode=OneWay}" />
+            <Label Content="{Binding Unit, Mode=OneWay}" />
+            <Label Content="/s" Margin="-7 0"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal"
+                    VerticalAlignment="Center" HorizontalAlignment="Right"
+                    Margin="4 0">
+            <Label Content="{Binding ETA, Mode=OneWay}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

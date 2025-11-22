@@ -27,8 +27,8 @@ public partial class GameItemViewModel : ViewModelBase
     /// <summary>
     /// Image handling – only the key is stored
     /// </summary>
-    [NotifyPropertyChangedFor(nameof(Icon))]
-    [ObservableProperty] private string _iconKey;
+    [NotifyPropertyChangedFor(nameof(Icon))] [ObservableProperty]
+    private string _iconKey;
 
     [ObservableProperty] private Guid _id;
     [ObservableProperty] private string? _installPath; // null when not installed
@@ -147,19 +147,24 @@ public partial class GameItemViewModel : ViewModelBase
     }
 }
 
-public static class GameViewModelExtenstions
+public static class GameItemViewModelExtensions
 {
     /// <summary>
-    /// Map the Game View Model to the Data Model (useful for persistence)
+    /// Map the Game Item View Model to the Data Model (useful for persistence)
     /// </summary>
     /// <returns></returns>
-    public static GameDataModel ToDataModel(this GameItemViewModel gameItem) => new() {
-        Id = gameItem.Id,
-        Name = gameItem.Name,
-        Store = gameItem.Store,
-        IsInstalled = gameItem.IsInstalled,
-        IsFavorite = gameItem.IsFavorite,
-        InstallPath = gameItem.InstallPath,
-        IconKey = gameItem.IconKey
-    };
+    ///
+    extension(GameItemViewModel viewModel)
+    {
+        public GameDataModel ToDataModel() => new()
+        {
+            Id = viewModel.Id,
+            Name = viewModel.Name,
+            Store = viewModel.Store,
+            IsInstalled = viewModel.IsInstalled,
+            IsFavorite = viewModel.IsFavorite,
+            InstallPath = viewModel.InstallPath,
+            IconKey = viewModel.IconKey
+        };
+    }
 }

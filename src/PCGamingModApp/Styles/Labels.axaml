@@ -8,6 +8,7 @@
         <Label Classes="icon">&#xe2c2;</Label>
         <Label Classes="icon-fill">&#xe2c2;</Label>
         <Label Classes="icon-only">&#xe2c2;</Label>
+        <Label Classes="icon-only-small">&#xe2c2;</Label>
         <Label Classes="menu-icon">&#xe2c2;</Label>
         <Label Classes="h1">Header 1</Label>
         <Label Classes="h2">Header 2</Label>
@@ -56,8 +57,18 @@
     <Setter Property="Margin" Value="0" />
   </Style>
   
+  <Style Selector="Label.icon-only-small">
+    <Setter Property="FontFamily" Value="{DynamicResource Phosphor}" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+  
   <Style Selector="Label.icon-fill-only">
     <Setter Property="Margin" Value="0" />
+  </Style>
+  
+  <Style Selector="Label.icon-fill-only-small">
+    <Setter Property="FontFamily" Value="{DynamicResource PhosphorFill}" />
+    <Setter Property="FontSize" Value="12" />
   </Style>
 
   <Style Selector="Label.menu-icon, Label.menu-icon-only">
