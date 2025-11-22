@@ -10,9 +10,10 @@ namespace PCGamingModApp.Core.ViewModels;
 public partial class DownloadItemViewModel : ViewModelBase
 {
     private readonly IDownloadService _downloadService;
-    
+
     [ObservableProperty] private Guid _id;
     [ObservableProperty] private string _fileName = string.Empty;
+    [ObservableProperty] private string _url = string.Empty;
 
     private long _fileSizeInBytes;
     private long _downloadedBytes;
@@ -46,6 +47,7 @@ public partial class DownloadItemViewModel : ViewModelBase
                     speed = _downloadSpeed;
                     break;
             }
+
             return speed;
         }
     }
@@ -74,21 +76,28 @@ public partial class DownloadItemViewModel : ViewModelBase
             OnDesignTimeConstructor();
         }
     }
-    
-    public DownloadItemViewModel (IDownloadService downloadService, DownloadDataModel domain)
+
+    public DownloadItemViewModel(IDownloadService downloadService, DownloadDataModel domain)
     {
         _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
         ArgumentNullException.ThrowIfNull(domain);
 
         Id = domain.Id;
         FileName = domain.FileName;
+        Url = domain.Url;
         // Map other properties as needed
         _fileSizeInBytes = domain.FileSizeInBytes;
         _downloadedBytes = domain.DownloadedBytes;
         _status = domain.Status;
         _createdAt = domain.CreatedAt;
+
+        _downloadService.DownloadProgressUpdated += (download) =>
+        {
+            _downloadedBytes = download.DownloadedBytes;
+            _status = download.Status;
+        };
     }
-    
+
     private void OnDesignTimeConstructor()
     {
         FileName = "FidelityFX-SDK-v1.1.4.zip";
@@ -101,21 +110,21 @@ public partial class DownloadItemViewModel : ViewModelBase
         _eta = TimeSpan.FromMinutes(3666);
         IsPaused = false;
     }
-    
+
     [RelayCommand]
     private async Task ResumeDownloadAsync(DownloadItemViewModel item)
     {
         await _downloadService.ResumeDownloadAsync(item.Id);
         IsPaused = false;
     }
-    
+
     [RelayCommand]
     private async Task PauseDownloadAsync(DownloadItemViewModel item)
     {
         await _downloadService.ResumeDownloadAsync(item.Id);
         IsPaused = true;
     }
-    
+
     [RelayCommand]
     private async Task CancelDownloadAsync(DownloadItemViewModel item)
     {
@@ -137,6 +146,7 @@ public static class DownloadItemViewModelExtensions
         {
             Id = viewModel.Id,
             FileName = viewModel.FileName,
+            Url = viewModel.Url,
             Status = viewModel.Status,
         };
     }
