@@ -1,5 +1,7 @@
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
 
@@ -7,6 +9,8 @@ namespace PCGamingModApp.Core.ViewModels;
 
 public partial class DownloadItemViewModel : ViewModelBase
 {
+    private readonly IDownloadService _downloadService;
+    
     [ObservableProperty] private Guid _id;
     [ObservableProperty] private string _fileName = string.Empty;
 
@@ -67,7 +71,7 @@ public partial class DownloadItemViewModel : ViewModelBase
         }
     }
 
-    [ObservableProperty] private bool _isPaused;
+    [ObservableProperty] private bool _isPaused = true;
 
     public DownloadItemViewModel()
     {
@@ -77,17 +81,18 @@ public partial class DownloadItemViewModel : ViewModelBase
         }
     }
     
-    public DownloadItemViewModel (DownloadDataModel dataModel)
+    public DownloadItemViewModel (IDownloadService downloadService, DownloadDataModel domain)
     {
-        if (dataModel == null) throw new ArgumentNullException(nameof(dataModel));
-        
-        Id = dataModel.Id;
-        FileName = dataModel.FileName;
+        _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
+        ArgumentNullException.ThrowIfNull(domain);
+
+        Id = domain.Id;
+        FileName = domain.FileName;
         // Map other properties as needed
-        _fileSizeInBytes = dataModel.FileSizeInBytes;
-        _downloadedBytes = dataModel.DownloadedBytes;
-        _status = dataModel.Status;
-        _createdAt = dataModel.CreatedAt;
+        _fileSizeInBytes = domain.FileSizeInBytes;
+        _downloadedBytes = domain.DownloadedBytes;
+        _status = domain.Status;
+        _createdAt = domain.CreatedAt;
     }
     
     private void OnDesignTimeConstructor()
@@ -101,6 +106,27 @@ public partial class DownloadItemViewModel : ViewModelBase
         Unit = "MB";
         _eta = TimeSpan.FromMinutes(3666);
         IsPaused = false;
+    }
+    
+    [RelayCommand]
+    private async Task ResumeDownloadAsync(DownloadItemViewModel item)
+    {
+        await _downloadService.ResumeDownloadAsync(item.Id);
+        IsPaused = false;
+    }
+    
+    [RelayCommand]
+    private async Task PauseDownloadAsync(DownloadItemViewModel item)
+    {
+        await _downloadService.ResumeDownloadAsync(item.Id);
+        IsPaused = true;
+    }
+    
+    [RelayCommand]
+    private async Task CancelDownloadAsync(DownloadItemViewModel item)
+    {
+        await _downloadService.CancelDownloadAsync(item.Id);
+        IsPaused = true;
     }
 }
 

@@ -5,11 +5,16 @@ namespace PCGamingModApp.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<DownloadDataModel> Downloads { get; set; }
     public DbSet<GameDataModel> Games { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        // Downloads
+        modelBuilder.Entity<DownloadDataModel>()
+            .HasKey(f => f.Id);
         
         // Games
         modelBuilder.Entity<GameDataModel>()

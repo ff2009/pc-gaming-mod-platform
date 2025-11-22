@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PCGamingModApp.Core.MainApp;
+using PCGamingModApp.Core.Services.Implementations;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
 
@@ -48,18 +49,18 @@ public partial class DownloadsPageViewModel : PageViewModel
             },
             new()
             {
-                FileName = "Optiscaler_0.9.0-pre5 (20251031).7z", 
+                FileName = "Optiscaler_0.9.0-pre5 (20251031).7z",
                 FileSizeInBytes = 324535560,
-                DownloadedBytes = 250525435, 
+                DownloadedBytes = 250525435,
                 Status = DownloadStatus.InProgress,
                 CreatedAt = DateTime.Now.AddDays(-5)
             },
             new()
             {
-                FileName = "dlssg-to-fsr3-0.130-738-0-130-1742150748.zip", 
+                FileName = "dlssg-to-fsr3-0.130-738-0-130-1742150748.zip",
                 FileSizeInBytes = 23452352,
-                DownloadedBytes = 5205677, 
-                Status = DownloadStatus.InProgress, 
+                DownloadedBytes = 5205677,
+                Status = DownloadStatus.InProgress,
                 CreatedAt = DateTime.Now.AddDays(-7)
             },
             new()
@@ -73,7 +74,7 @@ public partial class DownloadsPageViewModel : PageViewModel
         };
 
         List<DownloadItemViewModel> vmList = downloadListMock
-            .Select(dm => new DownloadItemViewModel(dm))
+            .Select(dm => new DownloadItemViewModel(new DownloadService(null, null), dm))
             .ToList();
         DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
     }
