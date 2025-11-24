@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PCGamingModApp.Core.MainApp;
 using PCGamingModApp.Core.Services.Implementations;
+using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
 
@@ -13,6 +14,9 @@ public partial class DownloadsPageViewModel : PageViewModel
 {
     public override string PageTitle => "Downloads";
 
+    private readonly IDownloadService _downloadService;
+    private readonly IServiceProvider? _serviceProvider;
+
     [ObservableProperty] private ObservableCollection<DownloadItemViewModel> _downloadsList = [];
     [ObservableProperty] private ObservableCollection<DownloadItemViewModel> _filteredDownloadList = [];
 
@@ -20,17 +24,33 @@ public partial class DownloadsPageViewModel : PageViewModel
     [ObservableProperty] private string _filterText = string.Empty;
     [ObservableProperty] private bool _sortAscending = true;
 
+    [ObservableProperty] private bool _isShowingAllDownloads = true;
+    [ObservableProperty] private bool _isShowingActiveDownloads = false;
+    [ObservableProperty] private bool _isShowingCompletedDownloads = false;
+    [ObservableProperty] private bool _isShowingNewDownload = false;
+
+    [ObservableProperty] private string _newDownloadUrl = string.Empty;
+
+    [ObservableProperty] private string _newDownloadDestinationPath = string.Empty;
+    [ObservableProperty] private double _newDownloadFileSizeBytes = 0;
+    [ObservableProperty] private bool _isDownloadReady = false;
+
+    // Design-time constructor
     public DownloadsPageViewModel() : base(ApplicationPageNames.Downloads)
     {
-        // Detect design time
         if (Design.IsDesignMode)
-        {
             OnDesignTimeConstructor();
-        }
-        else
-        {
-            OnDesignTimeConstructor();
-        }
+
+        ApplyFiltersAndSorting();
+    }
+
+    public DownloadsPageViewModel(IDownloadService downloadService, IServiceProvider serviceProvider) : base(
+        ApplicationPageNames.Downloads)
+    {
+        _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
+        OnDesignTimeConstructor();
 
         ApplyFiltersAndSorting();
     }
@@ -79,6 +99,22 @@ public partial class DownloadsPageViewModel : PageViewModel
         DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
     }
 
+    public async Task GetMetadata()
+    {
+        // Simulate fetching metadata for the new download URL
+        if (Uri.IsWellFormedUriString(NewDownloadUrl, UriKind.Absolute))
+        {
+            var datamodel = await _downloadService.GetDownloadMetadataAsync(NewDownloadUrl);
+            // For design time, we just set a mock file size
+            NewDownloadFileSizeBytes = datamodel.FileSizeInBytes; // 150 MB
+            IsDownloadReady = true;
+            return;
+        }
+
+        NewDownloadFileSizeBytes = 0;
+        IsDownloadReady = false;
+    }
+
     /// <summary>
     /// Filtering / Sorting logic (called whenever a related property changes)
     /// </summary>
@@ -93,5 +129,50 @@ public partial class DownloadsPageViewModel : PageViewModel
         FilteredDownloadList = new ObservableCollection<DownloadItemViewModel>(SortAscending
             ? query.OrderBy(game => game.FileName)
             : query.OrderByDescending(game => game.FileName));
+    }
+
+    [RelayCommand]
+    private void ShowAllDownloads()
+    {
+        IsShowingAllDownloads = true;
+    }
+
+    [RelayCommand]
+    private void ShowActiveDownloads()
+    {
+    }
+
+    [RelayCommand]
+    private void ShowCompletedDownloads()
+    {
+    }
+
+    [RelayCommand]
+    private void NewDownload()
+    {
+        IsShowingNewDownload = true;
+    }
+
+    [RelayCommand]
+    private void SelectDownloadDestinationPath()
+    {
+    }
+
+    [RelayCommand]
+    private void StartDownloadLater()
+    {
+        IsShowingNewDownload = false;
+    }
+
+    [RelayCommand]
+    private void StartNewDownload()
+    {
+        IsShowingNewDownload = false;
+    }
+
+    [RelayCommand]
+    private void CancelNewDownload()
+    {
+        IsShowingNewDownload = false;
     }
 }

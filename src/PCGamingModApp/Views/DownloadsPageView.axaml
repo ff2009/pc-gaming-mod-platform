@@ -11,10 +11,93 @@
         <vm:DownloadsPageViewModel />
     </Design.DataContext>
 
-    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, *">
-        <Label Grid.Row="0" Classes="h1" Content="{Binding PageTitle}" />
+    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto, *">
+        <!-- Header -->
+        <Label Grid.Column="0" Grid.Row="0" Classes="h1" Content="{Binding PageTitle}" />
+
+        <!-- Filter Buttons -->
+        <StackPanel Grid.Column="1" Grid.Row="0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,0,8,0">
+            <Button Content="All Downloads"
+                    Command="{Binding ShowAllDownloadsCommand}"
+                    IsEnabled="{Binding IsShowingAllDownloads}"
+                    Margin="0,0,0,4"
+                    VerticalAlignment="Bottom" />
+            <Button Content="Active Downloads"
+                    Command="{Binding ShowActiveDownloadsCommand}"
+                    IsEnabled="{Binding IsShowingActiveDownloads}"
+                    Margin="0,0,0,4"
+                    VerticalAlignment="Bottom" />
+            <Button Content="Completed Downloads"
+                    Command="{Binding ShowCompletedDownloadsCommand}"
+                    Margin="0,0,0,4"
+                    IsEnabled="{Binding IsShowingCompletedDownloads}"
+                    VerticalAlignment="Bottom" />
+            <Button Content="New"
+                    Command="{Binding NewDownloadCommand}"
+                    Margin="0,0,0,4"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+
+        <!-- New Download -->
+        <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" ShowGridLines="True"
+              ColumnDefinitions="*, Auto"
+              RowDefinitions="Auto, Auto, Auto"
+              IsVisible="{Binding IsShowingNewDownload}"
+              Margin="12 0">
+            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"  Orientation="Vertical">
+                <Label Content="URL" />
+                <TextBox Text="{Binding NewDownloadUrl}" LostFocus="InputElement_OnLostFocus"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
+                <Label Content="Destination" />
+                <TextBox Text="{Binding NewDownloadDestinationPath}">
+                    <TextBox.InnerRightContent>
+                        <Button Background="Transparent"
+                                Command="{Binding SelectDownloadDestinationPathCommand}"
+                                Margin="0 0 8 0"
+                                Padding="0">
+                            <Label Classes="icon-only" Content="&#xe248;" />
+                        </Button>
+                    </TextBox.InnerRightContent>
+                </TextBox>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                <Label Content="{Binding NewDownloadFileSizeBytes}"
+                       VerticalAlignment="Center" />
+                <Label Content="MB"
+                       VerticalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Start Later"
+                        Command="{Binding StartDownloadLaterCommand}"
+                        IsEnabled="{Binding IsDownloadReady}"
+                        Margin="0,4,0,4"
+                        HorizontalAlignment="Right">
+                </Button>
+                <Button 
+                        Command="{Binding StartNewDownloadCommand}"
+                        IsEnabled="{Binding IsDownloadReady}"
+                        Margin="0,4,0,4"
+                        HorizontalAlignment="Right" >
+                    <StackPanel Orientation="Horizontal">
+                        <Label Classes="icon-only" Content="&#xe20a;" />
+                        <Label Content="Start Download" />
+                    </StackPanel>
+                </Button>
+                <Button Content="Cancel"
+                        Command="{Binding CancelNewDownloadCommand}"
+                        Margin="0,4,0,4" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Download List -->
         <ListBox Grid.Column="0" Grid.ColumnSpan="2"
-                 Grid.Row="1"
+                 Grid.Row="2"
                  Background="Transparent"
                  ItemsSource="{Binding FilteredDownloadList}">
 

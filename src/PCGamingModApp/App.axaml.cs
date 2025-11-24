@@ -34,13 +34,13 @@ public partial class App : Application
         appPaths.Migrate();
         
         var services = new ServiceCollection();
-
+        services.AddHttpClient();
         services.AddSingleton<IAppPaths>(appPaths);
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<IImageCache, SimpleImageCache>(x=>
             new SimpleImageCache(Path.Combine(appPaths.GameIcons)));
         
-        services.AddTransient<DownloadService>();
+        services.AddTransient<IDownloadService, DownloadService>();
         // Register GameInstallationService
         services.AddTransient<GameManagerService>();
 

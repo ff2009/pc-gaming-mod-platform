@@ -14,6 +14,23 @@ public class DownloadService(
 {
     private readonly SemaphoreSlim _downloadSemaphore = new(maxParallelDownloads);
 
+    public async Task<DownloadDataModel> GetDownloadMetadataAsync(string url)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Head, url);
+        var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var contentLength = response.Content.Headers.ContentLength ?? 0;
+        var fileName = Path.GetFileName(new Uri(url).LocalPath);
+
+        return new DownloadDataModel
+        {
+            Url = url,
+            FileName = fileName,
+            FileSizeInBytes = contentLength
+        };
+    }
+    
     public async Task<Guid> StartDownloadAsync(string url, string savePath, int parts = 1, long speedLimit = 0)
     {
         var download = new DownloadDataModel
@@ -71,7 +88,7 @@ public class DownloadService(
 
     public event Action<DownloadDataModel>? DownloadProgressUpdated;
     public event Action<DownloadDataModel>? DownloadCompleted;
-
+    
     private async Task DownloadFileAsync(DownloadDataModel download)
     {
         await _downloadSemaphore.WaitAsync();
