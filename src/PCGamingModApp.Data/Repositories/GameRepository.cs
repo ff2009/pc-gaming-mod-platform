@@ -3,7 +3,7 @@ using PCGamingModApp.Data.Entities;
 
 namespace PCGamingModApp.Data.Repositories;
 
-public class GameRepository(AppDbContext context) : IGameRepository
+internal class GameRepository(AppDbContext context) : IGameRepository
 {
     public async Task AddGame(GameDataModel game)
     {

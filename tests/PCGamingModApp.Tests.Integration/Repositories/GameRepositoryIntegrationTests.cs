@@ -9,7 +9,7 @@ namespace PCGamingModApp.Tests.Integration.Repositories;
 public class GameRepositoryIntegrationTests : IDisposable
 {
     private readonly AppDbContext _context;
-    private readonly GameRepository _repository;
+    private readonly IGameRepository _repository;
 
     public GameRepositoryIntegrationTests()
     {

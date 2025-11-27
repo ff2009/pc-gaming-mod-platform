@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using CommunityToolkit.Mvvm.Messaging;
+using PCGamingModApp.Data.Dependencies;
 using Microsoft.Extensions.DependencyInjection;
 using PCGamingModApp.Core.MainApp;
 using PCGamingModApp.Core.Services.Implementations;
@@ -12,10 +14,6 @@ using System;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
-using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.EntityFrameworkCore;
-using PCGamingModApp.Data;
-using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp;
 
@@ -56,11 +54,8 @@ public partial class App : Application
         services.AddSingleton<GameMenuViewModel>();
         services.AddTransient<GameItemViewModel>(); // each row gets its own VM
         
-        services.AddScoped<IDownloadRepository, DownloadRepository>();
-        services.AddScoped<IGameRepository, GameRepository>();
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite($"Data Source={Path.Combine(appPaths.Database, "pcgamingmod.db")}"));
-        
+        services.AddDataRepository(connectionString: $"DataSource={Path.Combine(appPaths.Database, "pcgamingmod.db")}");
+            
         services.AddSingleton<HomePageViewModel>();
 
         services.AddTransient<BasePageViewModel>();
@@ -100,13 +95,7 @@ public partial class App : Application
         });
         
         var serviceProvider = services.BuildServiceProvider();
-        
-        // Initialize AppPaths
-        var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
-
-        // Initialize and migrate the database
-        dbContext.Database.EnsureCreated();
-        dbContext.Database.Migrate();
+        serviceProvider.InitializeDatabase();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

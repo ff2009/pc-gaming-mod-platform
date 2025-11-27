@@ -3,7 +3,7 @@ using PCGamingModApp.Data.Entities;
 
 namespace PCGamingModApp.Data.Repositories;
 
-public class DownloadRepository(AppDbContext context) : IDownloadRepository
+internal class DownloadRepository(AppDbContext context) : IDownloadRepository
 {
     public async Task AddDownload(DownloadDataModel download)
     {
@@ -13,7 +13,7 @@ public class DownloadRepository(AppDbContext context) : IDownloadRepository
 
     public async Task UpdateDownload(DownloadDataModel download)
     {
-        var existingDownload = await context.Games.FindAsync(download.Id);
+        var existingDownload = await context.Downloads.FindAsync(download.Id);
         if (existingDownload != null)
         {
             // Updates only the required fields
