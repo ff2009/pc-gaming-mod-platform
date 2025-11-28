@@ -7,7 +7,8 @@ using PCGamingModApp.Data.Repositories;
 namespace PCGamingModApp.Core.Services.Implementations;
 
 public class DownloadService(
-    HttpClient httpClient,
+    IAppPaths appPaths,
+    IHttpClientFactory httpClientFactory,
     IDownloadRepository downloadRepository,
     int maxParallelDownloads = 3)
     : IDownloadService
@@ -16,37 +17,48 @@ public class DownloadService(
 
     public async Task<DownloadDataModel> GetDownloadMetadataAsync(string url)
     {
+        using var httpClient = httpClientFactory.CreateClient();
         var request = new HttpRequestMessage(HttpMethod.Head, url);
         var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
         var contentLength = response.Content.Headers.ContentLength ?? 0;
         var fileName = Path.GetFileName(new Uri(url).LocalPath);
+        var savePath = Path.Combine(appPaths.Downloads, fileName);
 
         return new DownloadDataModel
         {
             Url = url,
             FileName = fileName,
-            FileSizeInBytes = contentLength
-        };
-    }
-    
-    public async Task<Guid> StartDownloadAsync(string url, string savePath, int parts = 1, long speedLimit = 0)
-    {
-        var download = new DownloadDataModel
-        {
-            Id = Guid.NewGuid(),
-            Url = url,
             SavePath = savePath,
-            FileName = Path.GetFileName(savePath),
-            Parts = parts,
-            SpeedLimitBytesPerSecond = speedLimit,
+            FileSizeInBytes = contentLength,
             Status = DownloadStatus.Pending,
             CreatedAt = DateTime.Now
         };
+    }
+
+    public async Task<DownloadDataModel> CreateDownloadAsync(string url, string savePath, int parts = 1,
+        long speedLimit = 0)
+    {
+        var download = await GetDownloadMetadataAsync(url);
+        download.SavePath = savePath;
+        download.Parts = parts;
+        download.CreatedAt = DateTime.Now;
 
         await downloadRepository.AddDownload(download);
-        return download.Id;
+        return download;
+    }
+
+    public async Task StartDownloadAsync(Guid id)
+    {
+        var download = await downloadRepository.GetDownloadById(id);
+        if (download != null &&
+            download.Status is DownloadStatus.Pending or DownloadStatus.Paused or DownloadStatus.Failed)
+        {
+            _ = DownloadFileAsync(download); // Start download in background
+        }
+
+        throw new InvalidOperationException("Download cannot be started.");
     }
 
     public async Task PauseDownloadAsync(Guid id)
@@ -81,6 +93,15 @@ public class DownloadService(
         }
     }
 
+    public async Task DeleteDownloadAsync(Guid id)
+    {
+        var download = await downloadRepository.GetDownloadById(id);
+        if (download != null)
+        {
+            await downloadRepository.DeleteDownload(id);
+        }
+    }
+
     public async Task<IEnumerable<DownloadDataModel>> GetDownloadsAsync()
     {
         return await downloadRepository.GetAllDownloads();
@@ -88,12 +109,14 @@ public class DownloadService(
 
     public event Action<DownloadDataModel>? DownloadProgressUpdated;
     public event Action<DownloadDataModel>? DownloadCompleted;
-    
+
     private async Task DownloadFileAsync(DownloadDataModel download)
     {
         await _downloadSemaphore.WaitAsync();
         try
         {
+            using var httpClient = httpClientFactory.CreateClient();
+
             // Create directory if it doesn't exist
             Directory.CreateDirectory(Path.GetDirectoryName(download.SavePath)!);
 
@@ -120,7 +143,8 @@ public class DownloadService(
             response.EnsureSuccessStatusCode();
 
             await using var contentStream = await response.Content.ReadAsStreamAsync();
-            var buffer = new byte[8192]; // 8KB buffer
+            int bufferSize = 32 * 1024;
+            var buffer = new byte[bufferSize]; // 8KB buffer
             int bytesRead;
             var stopwatch = Stopwatch.StartNew();
             long bytesDownloadedThisSecond = 0;
@@ -151,11 +175,13 @@ public class DownloadService(
                 {
                     stopwatch.Restart();
                     bytesDownloadedThisSecond = 0;
+                    DownloadProgressUpdated?.Invoke(download);
                 }
 
                 // Update DB and notify UI
                 download.Status = DownloadStatus.InProgress;
-                await downloadRepository.UpdateDownload(download);
+                // Slows down the download significantly
+                //await downloadRepository.UpdateDownload(download);
                 DownloadProgressUpdated?.Invoke(download);
             }
 

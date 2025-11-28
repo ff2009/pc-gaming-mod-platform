@@ -2,7 +2,10 @@ using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.DependencyInjection;
 using PCGamingModApp.Core.MainApp;
+using PCGamingModApp.Core.Messaging.Messages;
 using PCGamingModApp.Core.Services.Implementations;
 using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
@@ -15,7 +18,8 @@ public partial class DownloadsPageViewModel : PageViewModel
     public override string PageTitle => "Downloads";
 
     private readonly IDownloadService _downloadService;
-    private readonly IServiceProvider? _serviceProvider;
+    private readonly IMessenger _messenger;
+    private readonly IServiceProvider _serviceProvider;
 
     [ObservableProperty] private ObservableCollection<DownloadItemViewModel> _downloadsList = [];
     [ObservableProperty] private ObservableCollection<DownloadItemViewModel> _filteredDownloadList = [];
@@ -44,13 +48,17 @@ public partial class DownloadsPageViewModel : PageViewModel
         ApplyFiltersAndSorting();
     }
 
-    public DownloadsPageViewModel(IDownloadService downloadService, IServiceProvider serviceProvider) : base(
-        ApplicationPageNames.Downloads)
+    public DownloadsPageViewModel(
+        IDownloadService downloadService, 
+        IMessenger messenger,
+        IServiceProvider serviceProvider) : base(ApplicationPageNames.Downloads)
     {
         _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
+        _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-        OnDesignTimeConstructor();
+        _messenger.RegisterAll(this);
+        LoadData();
 
         ApplyFiltersAndSorting();
     }
@@ -94,8 +102,19 @@ public partial class DownloadsPageViewModel : PageViewModel
         };
 
         List<DownloadItemViewModel> vmList = downloadListMock
-            .Select(dm => new DownloadItemViewModel(new DownloadService(null, null), dm))
+            .Select(dm => new DownloadItemViewModel(new DownloadService(null, null, null), null, dm))
             .ToList();
+        DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
+    }
+
+    private async Task LoadData()
+    {
+        var downloads = await _downloadService.GetDownloadsAsync();
+        if (downloads is null && !downloads.Any())
+            return;
+
+        List<DownloadItemViewModel> vmList = downloads
+            .Select(g => ActivatorUtilities.CreateInstance<DownloadItemViewModel>(_serviceProvider, g)).ToList();
         DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
     }
 
@@ -107,6 +126,7 @@ public partial class DownloadsPageViewModel : PageViewModel
             var datamodel = await _downloadService.GetDownloadMetadataAsync(NewDownloadUrl);
             // For design time, we just set a mock file size
             NewDownloadFileSizeBytes = datamodel.FileSizeInBytes; // 150 MB
+            NewDownloadDestinationPath = datamodel.SavePath;
             IsDownloadReady = true;
             return;
         }
@@ -159,20 +179,40 @@ public partial class DownloadsPageViewModel : PageViewModel
     }
 
     [RelayCommand]
-    private void StartDownloadLater()
+    private async Task StartDownloadLaterAsync()
     {
+        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, NewDownloadDestinationPath, 1);
+        var download = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(_serviceProvider, newDownload);
+        DownloadsList.Add(download);
         IsShowingNewDownload = false;
+        ApplyFiltersAndSorting();
     }
 
     [RelayCommand]
-    private void StartNewDownload()
+    private async Task StartNewDownload()
     {
+        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, NewDownloadDestinationPath, 1);
+        var download = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(_serviceProvider, newDownload);
+        DownloadsList.Add(download);
         IsShowingNewDownload = false;
+        ApplyFiltersAndSorting();
     }
 
     [RelayCommand]
     private void CancelNewDownload()
     {
         IsShowingNewDownload = false;
+    }
+    
+    public void Receive(DownloadDeletedMessage message)
+    {
+        var downloadToRemove = DownloadsList.FirstOrDefault(g => g.Id == message.DownloadId);
+        if (downloadToRemove != null)
+        {
+            // Update other properties as needed
+            //downloadToRemove.IsInstalled = false;
+            DownloadsList.Remove(downloadToRemove);
+            ApplyFiltersAndSorting();
+        }
     }
 }
