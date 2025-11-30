@@ -25,11 +25,21 @@ public partial class DownloadItemViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(DownloadedSize))]
     [ObservableProperty]
     private long _downloadedBytes;
-    [ObservableProperty] private DownloadStatus _status;
+    
+    [ObservableProperty] 
+    private DownloadStatus _status;
+    
     private DateTime _createdAt;
-    private double _downloadSpeed; // in bytes per second
-    [ObservableProperty] private string _unit = string.Empty; // in bytes per second
+    
+    [NotifyPropertyChangedFor(nameof(DownloadSpeed))] 
+    [ObservableProperty]
+    private double _downloadSpeedInBytes; // in bytes per second
+    
+    [ObservableProperty] private string _unit = "MB"; // in bytes per second
     [ObservableProperty] private TimeSpan _timeElapsed = TimeSpan.Zero;
+    
+    [NotifyPropertyChangedFor(nameof(ETA))] 
+    [ObservableProperty] 
     private TimeSpan _eta = TimeSpan.MaxValue;
 
     public long FileSize => FileSizeInBytes / 1024 / 1024;
@@ -44,16 +54,16 @@ public partial class DownloadItemViewModel : ViewModelBase
             switch (Unit)
             {
                 case "KB":
-                    speed = _downloadSpeed / 1024d;
+                    speed = DownloadSpeedInBytes / 1024d;
                     break;
                 case "MB":
-                    speed = _downloadSpeed / (1024d * 1024d);
+                    speed = DownloadSpeedInBytes / (1024d * 1024d);
                     break;
                 case "GB":
-                    speed = _downloadSpeed / (1024d * 1024d * 1024d);
+                    speed = DownloadSpeedInBytes / (1024d * 1024d * 1024d);
                     break;
                 default:
-                    speed = _downloadSpeed;
+                    speed = DownloadSpeedInBytes;
                     break;
             }
 
@@ -68,10 +78,10 @@ public partial class DownloadItemViewModel : ViewModelBase
     {
         get
         {
-            if (_eta.TotalDays >= 1) return $"{(int)_eta.TotalDays}d {_eta.Hours}h {_eta.Minutes}m";
-            if (_eta.TotalHours >= 1) return $"{(int)_eta.TotalHours}h {_eta.Minutes}m {_eta.Seconds}s";
-            if (_eta.TotalMinutes >= 1) return $"{(int)_eta.TotalMinutes}m {_eta.Seconds}s";
-            if (_eta.TotalSeconds >= 0) return $"{(int)_eta.TotalSeconds}s";
+            if (Eta.TotalDays >= 1) return $"{(int)Eta.TotalDays}d {Eta.Hours}h {Eta.Minutes}m";
+            if (Eta.TotalHours >= 1) return $"{(int)Eta.TotalHours}h {Eta.Minutes}m {Eta.Seconds}s";
+            if (Eta.TotalMinutes >= 1) return $"{(int)Eta.TotalMinutes}m {Eta.Seconds}s";
+            if (Eta.TotalSeconds >= 0) return $"{(int)Eta.TotalSeconds}s";
             return "∞";
         }
     }
@@ -105,7 +115,8 @@ public partial class DownloadItemViewModel : ViewModelBase
         _downloadService.DownloadProgressUpdated += (download) =>
         {
             DownloadedBytes = download.DownloadedBytes;
-            _downloadSpeed = download.SpeedLimitBytesPerSecond;
+            DownloadSpeedInBytes = download.DownloadSpeedInBytes;
+            Eta = _downloadService.GetRemainingTime(download.Id);
             Status = download.Status;
         };
     }
@@ -117,9 +128,9 @@ public partial class DownloadItemViewModel : ViewModelBase
         DownloadedBytes = 34078720; // ~32.5 MB
         Status = DownloadStatus.InProgress;
         _createdAt = DateTime.Now.AddMinutes(-5);
-        _downloadSpeed = 1048576; // 1 MB/s
+        DownloadSpeedInBytes = 1048576; // 1 MB/s
         Unit = "MB";
-        _eta = TimeSpan.FromMinutes(3666);
+        Eta = TimeSpan.FromMinutes(3666);
         IsPaused = false;
     }
 
@@ -133,8 +144,24 @@ public partial class DownloadItemViewModel : ViewModelBase
     [RelayCommand]
     private async Task PauseDownloadAsync()
     {
-        await _downloadService.ResumeDownloadAsync(Id);
+        await _downloadService.PauseDownloadAsync(Id);
         IsPaused = true;
+    }
+
+    [RelayCommand]
+    private void OpenFileLocation()
+    {
+        // TODO : Move to a platform-specific service
+        var folderPath = Path.GetDirectoryName(SavePath);
+        if (folderPath != null && Directory.Exists(folderPath))
+        {
+            _ = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+            {
+                FileName = folderPath,
+                UseShellExecute = true,
+                Verb = "open"
+            });
+        }
     }
 
     [RelayCommand]

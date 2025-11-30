@@ -42,7 +42,7 @@
         </StackPanel>
 
         <!-- New Download -->
-        <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" ShowGridLines="True"
+        <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" ShowGridLines="False"
               ColumnDefinitions="*, Auto"
               RowDefinitions="Auto, Auto, Auto"
               IsVisible="{Binding IsShowingNewDownload}"

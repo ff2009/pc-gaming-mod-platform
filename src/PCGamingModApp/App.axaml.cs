@@ -38,6 +38,7 @@ public partial class App : Application
         services.AddSingleton<IImageCache, SimpleImageCache>(x=>
             new SimpleImageCache(Path.Combine(appPaths.GameIcons)));
         
+        services.AddSingleton<DownloadManager>();
         services.AddTransient<IDownloadService, DownloadService>();
         // Register GameInstallationService
         services.AddTransient<GameManagerService>();

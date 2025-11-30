@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -17,6 +18,7 @@ public partial class DownloadsPageViewModel : PageViewModel
 {
     public override string PageTitle => "Downloads";
 
+    private readonly IDialogService _dialogService;
     private readonly IDownloadService _downloadService;
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
@@ -35,6 +37,7 @@ public partial class DownloadsPageViewModel : PageViewModel
 
     [ObservableProperty] private string _newDownloadUrl = string.Empty;
 
+    [ObservableProperty] private string _newDownloadFilename = string.Empty;
     [ObservableProperty] private string _newDownloadDestinationPath = string.Empty;
     [ObservableProperty] private double _newDownloadFileSizeBytes = 0;
     [ObservableProperty] private bool _isDownloadReady = false;
@@ -49,10 +52,12 @@ public partial class DownloadsPageViewModel : PageViewModel
     }
 
     public DownloadsPageViewModel(
-        IDownloadService downloadService, 
+        IDialogService dialogService,
+        IDownloadService downloadService,
         IMessenger messenger,
         IServiceProvider serviceProvider) : base(ApplicationPageNames.Downloads)
     {
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
         _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
@@ -102,7 +107,7 @@ public partial class DownloadsPageViewModel : PageViewModel
         };
 
         List<DownloadItemViewModel> vmList = downloadListMock
-            .Select(dm => new DownloadItemViewModel(new DownloadService(null, null, null), null, dm))
+            .Select(dm => new DownloadItemViewModel(new DownloadService(null, null, null, null), null, dm))
             .ToList();
         DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
     }
@@ -127,6 +132,7 @@ public partial class DownloadsPageViewModel : PageViewModel
             // For design time, we just set a mock file size
             NewDownloadFileSizeBytes = datamodel.FileSizeInBytes; // 150 MB
             NewDownloadDestinationPath = datamodel.SavePath;
+            NewDownloadFilename = datamodel.FileName;
             IsDownloadReady = true;
             return;
         }
@@ -174,8 +180,22 @@ public partial class DownloadsPageViewModel : PageViewModel
     }
 
     [RelayCommand]
-    private void SelectDownloadDestinationPath()
+    private async Task SelectDownloadDestinationPathAsync()
     {
+        if (string.IsNullOrWhiteSpace(NewDownloadDestinationPath) || !Path.Exists(Path.GetDirectoryName(NewDownloadDestinationPath)))
+            return;
+
+        string? destinationPath = Path.GetDirectoryName(NewDownloadDestinationPath);
+        FolderPickerOpenOptions options = new()
+        {
+            Title = "Select download path",
+            AllowMultiple = false,
+            SuggestedFileName = Path.GetFileName(NewDownloadDestinationPath)
+        };
+
+        destinationPath = await _dialogService.FolderPickerAsync(options);
+        if (!string.IsNullOrWhiteSpace(destinationPath))
+            NewDownloadDestinationPath = Path.Combine(destinationPath, NewDownloadFilename);
     }
 
     [RelayCommand]
@@ -203,7 +223,7 @@ public partial class DownloadsPageViewModel : PageViewModel
     {
         IsShowingNewDownload = false;
     }
-    
+
     public void Receive(DownloadDeletedMessage message)
     {
         var downloadToRemove = DownloadsList.FirstOrDefault(g => g.Id == message.DownloadId);

@@ -15,44 +15,62 @@
                     Margin="4 0">
             <Label Content="{Binding FileName, Mode=OneWay}" />
         </StackPanel>
-        
+
         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal"
                     VerticalAlignment="Center" HorizontalAlignment="Right"
                     Margin="4 0">
             <Label Content="{Binding Progress, Mode=OneWay, StringFormat=0.00}" />
             <Label Content="%" />
         </StackPanel>
-        
+
         <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="4 0">
             <!-- Resume Button -->
-            <Button Height="24" Width="24" Background="Transparent" 
+            <Button Height="24" Width="24" Background="Transparent"
                     Command="{Binding ResumeDownloadCommand}"
-                    Padding="2" IsVisible="{Binding IsPaused}">
+                    Padding="2 2 0 2"
+                    IsVisible="{Binding IsPaused}">
                 <StackPanel Orientation="Horizontal">
                     <Label Classes="icon-only-small" Content="&#xe3d0;" />
                 </StackPanel>
             </Button>
-            
+
             <!-- Pause Button -->
-            <Button Height="24" Width="24" Background="Transparent" 
+            <Button Height="24" Width="24" Background="Transparent"
                     Command="{Binding PauseDownloadCommand}"
-                    Padding="2" IsVisible="{Binding !IsPaused}">
+                    Padding="2 2 0 2"
+                    IsVisible="{Binding !IsPaused}">
                 <StackPanel Orientation="Horizontal">
                     <Label Classes="icon-only-small" Content="&#xe39e;" />
                 </StackPanel>
             </Button>
-            
+
+            <!-- More Options Button -->
+            <Button Height="24" Width="24" Background="Transparent"
+                    Padding="2 2 0 2">
+                <Label Classes="icon-only-small" Content="&#xe208;" />
+                <Button.Flyout>
+                    <MenuFlyout>
+                        <MenuItem Header="Open File Location"
+                                  Command="{Binding OpenFileLocationCommand}">
+                            <MenuItem.Icon>
+                                <Label Classes="icon-only" Content="&#xe256;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+
             <!-- Cancel Button -->
-            <Button Height="24" Width="24" Background="Transparent" 
+            <Button Height="24" Width="24" Background="Transparent"
                     Command="{Binding CancelDownloadCommand}"
-                    Padding="2">
+                    Padding="2 2 0 2">
                 <StackPanel Orientation="Horizontal">
                     <Label Classes="icon-only-small" Content="&#xe4f6;" />
                 </StackPanel>
             </Button>
         </StackPanel>
-        
+
         <ProgressBar Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1"
                      Margin="8 0" Height="8"
                      Padding="0"
@@ -70,14 +88,15 @@
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal"
                     VerticalAlignment="Center" HorizontalAlignment="Right"
                     Margin="4 0">
-            <Label Content="{Binding DownloadSpeed, Mode=OneWay}" />
+            <Label Content="{Binding DownloadSpeed, Mode=OneWay, StringFormat=0.00}" />
             <Label Content="{Binding Unit, Mode=OneWay}" />
-            <Label Content="/s" Margin="-7 0"/>
+            <Label Content="/s" Margin="-7 0" />
         </StackPanel>
-        
+
         <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal"
                     VerticalAlignment="Center" HorizontalAlignment="Right"
-                    Margin="4 0">
+                    Margin="4 0"
+                    MinWidth="80">
             <Label Content="{Binding ETA, Mode=OneWay}" />
         </StackPanel>
     </Grid>

@@ -10,6 +10,7 @@ public class DownloadDataModel
     public string SavePath { get; set; } = string.Empty;
     public long FileSizeInBytes { get; set; }
     public long DownloadedBytes { get; set; }
+    public long DownloadSpeedInBytes { get; set; }
     public DownloadStatus Status { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime? CompletedAt { get; set; }

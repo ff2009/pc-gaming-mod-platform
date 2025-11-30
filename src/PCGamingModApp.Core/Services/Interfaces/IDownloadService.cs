@@ -4,6 +4,7 @@ namespace PCGamingModApp.Core.Services.Interfaces;
 
 public interface IDownloadService
 {
+    Task<IEnumerable<DownloadDataModel>> GetDownloadsAsync();
     Task<DownloadDataModel> GetDownloadMetadataAsync(string url);
     Task<DownloadDataModel> CreateDownloadAsync(string url, string savePath, int parts = 1, long speedLimit = 0);
     Task StartDownloadAsync(Guid id);
@@ -11,7 +12,7 @@ public interface IDownloadService
     Task ResumeDownloadAsync(Guid id);
     Task CancelDownloadAsync(Guid id);
     Task DeleteDownloadAsync(Guid id);
-    Task<IEnumerable<DownloadDataModel>> GetDownloadsAsync();
+    TimeSpan GetRemainingTime(Guid id);
     event Action<DownloadDataModel> DownloadProgressUpdated;
     event Action<DownloadDataModel> DownloadCompleted;
 }

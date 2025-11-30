@@ -10,6 +10,7 @@ public class DownloadService(
     IAppPaths appPaths,
     IHttpClientFactory httpClientFactory,
     IDownloadRepository downloadRepository,
+    DownloadManager downloadManager,
     int maxParallelDownloads = 3)
     : IDownloadService
 {
@@ -55,6 +56,7 @@ public class DownloadService(
         if (download != null &&
             download.Status is DownloadStatus.Pending or DownloadStatus.Paused or DownloadStatus.Failed)
         {
+            downloadManager.StartTracking(download);
             _ = DownloadFileAsync(download); // Start download in background
         }
 
@@ -67,6 +69,7 @@ public class DownloadService(
         if (download is { Status: DownloadStatus.InProgress })
         {
             download.IsPaused = true;
+            downloadManager.StopTracking(id);
             await downloadRepository.UpdateDownload(download);
         }
     }
@@ -74,9 +77,11 @@ public class DownloadService(
     public async Task ResumeDownloadAsync(Guid id)
     {
         var download = await downloadRepository.GetDownloadById(id);
-        if (download is { IsPaused: true })
+        // if (download is { IsPaused: true })
+        if (download is not null)
         {
             download.IsPaused = false;
+            downloadManager.StartTracking(download);
             await downloadRepository.UpdateDownload(download);
             _ = DownloadFileAsync(download); // Restart download
         }
@@ -87,6 +92,7 @@ public class DownloadService(
         var download = await downloadRepository.GetDownloadById(id);
         if (download != null)
         {
+            downloadManager.StopTracking(id);
             download.Status = DownloadStatus.Canceled;
             await downloadRepository.UpdateDownload(download);
             DownloadProgressUpdated?.Invoke(download);
@@ -97,9 +103,15 @@ public class DownloadService(
     {
         var download = await downloadRepository.GetDownloadById(id);
         if (download != null)
-        {
+        { 
+            downloadManager.StopTracking(id);
             await downloadRepository.DeleteDownload(id);
         }
+    }
+    
+    public TimeSpan GetRemainingTime(Guid id)
+    {
+        return downloadManager.GetRemainingTime(id);
     }
 
     public async Task<IEnumerable<DownloadDataModel>> GetDownloadsAsync()
@@ -173,6 +185,8 @@ public class DownloadService(
                 // Reset stopwatch every second for speed calculation
                 if (stopwatch.ElapsedMilliseconds >= 1000)
                 {
+                    download.DownloadSpeedInBytes = bytesDownloadedThisSecond;
+                    downloadManager.UpdateProgress(download.Id, download.DownloadedBytes, bytesDownloadedThisSecond);
                     stopwatch.Restart();
                     bytesDownloadedThisSecond = 0;
                     DownloadProgressUpdated?.Invoke(download);
