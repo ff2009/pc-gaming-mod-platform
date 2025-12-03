@@ -16,6 +16,6 @@ public class DownloadDataModel
     public DateTime? CompletedAt { get; set; }
     public int Parts { get; set; } = 1; // For multi-part downloads
     public long SpeedLimitBytesPerSecond { get; set; } = 0; // 0 = unlimited
-    
-    public bool IsPaused { get; set; }
+
+    public bool IsPaused { get; set; } = true;
 }

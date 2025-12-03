@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using System.Net.Http.Headers;
+using CommunityToolkit.Mvvm.Messaging;
+using PCGamingModApp.Core.Messaging.Messages;
 using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
@@ -11,10 +14,79 @@ public class DownloadService(
     IHttpClientFactory httpClientFactory,
     IDownloadRepository downloadRepository,
     DownloadManager downloadManager,
+    IMessenger messenger,
     int maxParallelDownloads = 3)
     : IDownloadService
 {
     private readonly SemaphoreSlim _downloadSemaphore = new(maxParallelDownloads);
+
+    public async Task StartDownloadAsync(Guid id)
+    {
+        var download = await downloadRepository.GetDownloadById(id);
+        if (download is
+            {
+                Status: DownloadStatus.NotStarted or DownloadStatus.Pending or DownloadStatus.Paused
+                or DownloadStatus.Failed
+            })
+        {
+            downloadManager.StartTracking(download);
+            _ = DownloadFileAsync(download); // Start download in background
+        }
+    }
+
+    public async Task PauseDownloadAsync(Guid id)
+    {
+        var download = await downloadRepository.GetDownloadById(id);
+        if (download is { Status: DownloadStatus.InProgress })
+        {
+            download.IsPaused = true;
+            downloadManager.StopTracking(id);
+            await downloadRepository.UpdateDownload(download);
+        }
+    }
+
+    public async Task ResumeDownloadAsync(Guid id)
+    {
+        var download = await downloadRepository.GetDownloadById(id);
+        if (download is
+            {
+                Status: DownloadStatus.NotStarted or DownloadStatus.Pending or DownloadStatus.Paused
+                or DownloadStatus.Failed
+            })
+        {
+            download.IsPaused = false;
+            downloadManager.StartTracking(download);
+            await downloadRepository.UpdateDownload(download);
+            _ = DownloadFileAsync(download); // Restart download
+        }
+    }
+
+    public async Task CancelDownloadAsync(Guid id)
+    {
+        var download = await downloadRepository.GetDownloadById(id);
+        if (download != null)
+        {
+            downloadManager.StopTracking(id);
+            download.Status = DownloadStatus.Canceled;
+            await downloadRepository.UpdateDownload(download);
+            messenger.Send(new DownloadUpdatedMessage(download)); // Async UI update
+        }
+    }
+
+    public async Task DeleteDownloadAsync(Guid id)
+    {
+        var download = await downloadRepository.GetDownloadById(id);
+        if (download != null)
+        {
+            downloadManager.StopTracking(id);
+            await downloadRepository.DeleteDownload(id);
+        }
+    }
+
+    public TimeSpan GetRemainingTime(Guid id)
+    {
+        return downloadManager.GetRemainingTime(id);
+    }
 
     public async Task<DownloadDataModel> GetDownloadMetadataAsync(string url)
     {
@@ -38,93 +110,33 @@ public class DownloadService(
         };
     }
 
-    public async Task<DownloadDataModel> CreateDownloadAsync(string url, string savePath, int parts = 1,
-        long speedLimit = 0)
+    public async Task<DownloadDataModel> CreateDownloadAsync(string url, string savePath)
     {
         var download = await GetDownloadMetadataAsync(url);
         download.SavePath = savePath;
-        download.Parts = parts;
         download.CreatedAt = DateTime.Now;
 
         await downloadRepository.AddDownload(download);
         return download;
     }
 
-    public async Task StartDownloadAsync(Guid id)
+    public Task<List<DownloadDataModel>> GetDownloadsAsync()
     {
-        var download = await downloadRepository.GetDownloadById(id);
-        if (download != null &&
-            download.Status is DownloadStatus.Pending or DownloadStatus.Paused or DownloadStatus.Failed)
-        {
-            downloadManager.StartTracking(download);
-            _ = DownloadFileAsync(download); // Start download in background
-        }
-
-        throw new InvalidOperationException("Download cannot be started.");
+        return downloadRepository.GetAllDownloads();
     }
 
-    public async Task PauseDownloadAsync(Guid id)
+    // Other methods (e.g., GetDownloadByIdAsync, GetDownloadsAsync) remain unchanged.
+    private Task<DownloadDataModel?> GetDownloadByIdAsync(Guid id)
     {
-        var download = await downloadRepository.GetDownloadById(id);
-        if (download is { Status: DownloadStatus.InProgress })
-        {
-            download.IsPaused = true;
-            downloadManager.StopTracking(id);
-            await downloadRepository.UpdateDownload(download);
-        }
+        // Fetch download from database or cache.
+        return downloadRepository.GetDownloadById(id);
     }
-
-    public async Task ResumeDownloadAsync(Guid id)
-    {
-        var download = await downloadRepository.GetDownloadById(id);
-        // if (download is { IsPaused: true })
-        if (download is not null)
-        {
-            download.IsPaused = false;
-            downloadManager.StartTracking(download);
-            await downloadRepository.UpdateDownload(download);
-            _ = DownloadFileAsync(download); // Restart download
-        }
-    }
-
-    public async Task CancelDownloadAsync(Guid id)
-    {
-        var download = await downloadRepository.GetDownloadById(id);
-        if (download != null)
-        {
-            downloadManager.StopTracking(id);
-            download.Status = DownloadStatus.Canceled;
-            await downloadRepository.UpdateDownload(download);
-            DownloadProgressUpdated?.Invoke(download);
-        }
-    }
-
-    public async Task DeleteDownloadAsync(Guid id)
-    {
-        var download = await downloadRepository.GetDownloadById(id);
-        if (download != null)
-        { 
-            downloadManager.StopTracking(id);
-            await downloadRepository.DeleteDownload(id);
-        }
-    }
-    
-    public TimeSpan GetRemainingTime(Guid id)
-    {
-        return downloadManager.GetRemainingTime(id);
-    }
-
-    public async Task<IEnumerable<DownloadDataModel>> GetDownloadsAsync()
-    {
-        return await downloadRepository.GetAllDownloads();
-    }
-
-    public event Action<DownloadDataModel>? DownloadProgressUpdated;
-    public event Action<DownloadDataModel>? DownloadCompleted;
 
     private async Task DownloadFileAsync(DownloadDataModel download)
     {
         await _downloadSemaphore.WaitAsync();
+        const int bufferSize = 64 * 1024; // 64KB buffer
+
         try
         {
             using var httpClient = httpClientFactory.CreateClient();
@@ -133,7 +145,7 @@ public class DownloadService(
             Directory.CreateDirectory(Path.GetDirectoryName(download.SavePath)!);
 
             // Open a stream to the file (append if resuming)
-            using var fileStream = new FileStream(
+            await using var fileStream = new FileStream(
                 download.SavePath,
                 download.DownloadedBytes > 0 ? FileMode.Append : FileMode.Create,
                 FileAccess.Write);
@@ -149,14 +161,13 @@ public class DownloadService(
             // Create a GET request with Range header for resuming
             var request = new HttpRequestMessage(HttpMethod.Get, download.Url);
             if (download.DownloadedBytes > 0)
-                request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(download.DownloadedBytes, null);
+                request.Headers.Range = new RangeHeaderValue(download.DownloadedBytes, null);
 
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
             await using var contentStream = await response.Content.ReadAsStreamAsync();
-            int bufferSize = 32 * 1024;
-            var buffer = new byte[bufferSize]; // 8KB buffer
+            var buffer = new byte[bufferSize];
             int bytesRead;
             var stopwatch = Stopwatch.StartNew();
             long bytesDownloadedThisSecond = 0;
@@ -189,27 +200,27 @@ public class DownloadService(
                     downloadManager.UpdateProgress(download.Id, download.DownloadedBytes, bytesDownloadedThisSecond);
                     stopwatch.Restart();
                     bytesDownloadedThisSecond = 0;
-                    DownloadProgressUpdated?.Invoke(download);
+                    messenger.Send(new DownloadUpdatedMessage(download)); // Async UI update
                 }
 
                 // Update DB and notify UI
                 download.Status = DownloadStatus.InProgress;
                 // Slows down the download significantly
                 //await downloadRepository.UpdateDownload(download);
-                DownloadProgressUpdated?.Invoke(download);
+                messenger.Send(new DownloadUpdatedMessage(download)); // Async UI update
             }
 
             // Download complete
             download.Status = DownloadStatus.Completed;
             download.CompletedAt = DateTime.Now;
             await downloadRepository.UpdateDownload(download);
-            DownloadCompleted?.Invoke(download);
+            messenger.Send(new DownloadUpdatedMessage(download)); // Async UI update
         }
         catch (Exception ex)
         {
             download.Status = DownloadStatus.Failed;
             await downloadRepository.UpdateDownload(download);
-            DownloadProgressUpdated?.Invoke(download);
+            messenger.Send(new DownloadUpdatedMessage(download)); // Async UI update
         }
         finally
         {

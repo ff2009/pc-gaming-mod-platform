@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,38 +10,64 @@ using PCGamingModApp.Data.Enums;
 
 namespace PCGamingModApp.Core.ViewModels;
 
-public partial class DownloadItemViewModel : ViewModelBase
+public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadUpdatedMessage>
 {
     private readonly IDownloadService _downloadService;
     private readonly IMessenger _messenger;
 
-    [ObservableProperty] private Guid _id;
+    private DateTime _createdAt;
+
+    [NotifyPropertyChangedFor(nameof(Progress))] [NotifyPropertyChangedFor(nameof(DownloadedSize))] [ObservableProperty]
+    private long _downloadedBytes;
+
+    [NotifyPropertyChangedFor(nameof(DownloadSpeed))] [ObservableProperty]
+    private double _downloadSpeedInBytes; // in bytes per second
+
+    [NotifyPropertyChangedFor(nameof(ETA))] [ObservableProperty]
+    private TimeSpan _eta = TimeSpan.MaxValue;
+
     [ObservableProperty] private string _fileName = string.Empty;
-    [ObservableProperty] private string _url = string.Empty;
-    [ObservableProperty] private string _savePath = string.Empty;
 
     [ObservableProperty] private long _fileSizeInBytes;
-    
-    [NotifyPropertyChangedFor(nameof(Progress))] 
-    [NotifyPropertyChangedFor(nameof(DownloadedSize))]
-    [ObservableProperty]
-    private long _downloadedBytes;
-    
-    [ObservableProperty] 
-    private DownloadStatus _status;
-    
-    private DateTime _createdAt;
-    
-    [NotifyPropertyChangedFor(nameof(DownloadSpeed))] 
-    [ObservableProperty]
-    private double _downloadSpeedInBytes; // in bytes per second
-    
-    [ObservableProperty] private string _unit = "MB"; // in bytes per second
+
+    [ObservableProperty] private Guid _id;
+
+    [ObservableProperty] private bool _isPaused = true;
+    [ObservableProperty] private string _savePath = string.Empty;
+
+    [ObservableProperty] private DownloadStatus _status;
+
     [ObservableProperty] private TimeSpan _timeElapsed = TimeSpan.Zero;
-    
-    [NotifyPropertyChangedFor(nameof(ETA))] 
-    [ObservableProperty] 
-    private TimeSpan _eta = TimeSpan.MaxValue;
+
+    [ObservableProperty] private string _unit = "MB"; // in bytes per second
+    [ObservableProperty] private string _url = string.Empty;
+
+    public DownloadItemViewModel()
+    {
+        if (Design.IsDesignMode)
+        {
+            OnDesignTimeConstructor();
+        }
+    }
+
+    public DownloadItemViewModel(IDownloadService downloadService, IMessenger messenger, DownloadDataModel domain)
+    {
+        _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
+        _messenger = messenger; // ?? throw new ArgumentNullException(nameof(messenger));
+        ArgumentNullException.ThrowIfNull(domain);
+
+        _id = domain.Id;
+        _fileName = domain.FileName;
+        _url = domain.Url;
+        _savePath = domain.SavePath;
+        // Map other properties as needed
+        _fileSizeInBytes = domain.FileSizeInBytes;
+        _downloadedBytes = domain.DownloadedBytes;
+        _status = domain.Status;
+        _createdAt = domain.CreatedAt;
+
+        _messenger.Register<DownloadUpdatedMessage>(this);
+    }
 
     public long FileSize => FileSizeInBytes / 1024 / 1024;
 
@@ -78,6 +105,7 @@ public partial class DownloadItemViewModel : ViewModelBase
     {
         get
         {
+            if (Eta.TotalDays > 99) return "∞";
             if (Eta.TotalDays >= 1) return $"{(int)Eta.TotalDays}d {Eta.Hours}h {Eta.Minutes}m";
             if (Eta.TotalHours >= 1) return $"{(int)Eta.TotalHours}h {Eta.Minutes}m {Eta.Seconds}s";
             if (Eta.TotalMinutes >= 1) return $"{(int)Eta.TotalMinutes}m {Eta.Seconds}s";
@@ -86,39 +114,15 @@ public partial class DownloadItemViewModel : ViewModelBase
         }
     }
 
-    [ObservableProperty] private bool _isPaused = true;
-
-    public DownloadItemViewModel()
+    public void Receive(DownloadUpdatedMessage message)
     {
-        if (Design.IsDesignMode)
+        if (message.Download.Id == Id)
         {
-            OnDesignTimeConstructor();
+            DownloadedBytes = message.Download.DownloadedBytes;
+            DownloadSpeedInBytes = message.Download.DownloadSpeedInBytes;
+            Status = message.Download.Status;
+            Eta = _downloadService.GetRemainingTime(Id);
         }
-    }
-
-    public DownloadItemViewModel(IDownloadService downloadService, IMessenger messenger, DownloadDataModel domain)
-    {
-        _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
-        _messenger = messenger; // ?? throw new ArgumentNullException(nameof(messenger));
-        ArgumentNullException.ThrowIfNull(domain);
-
-        _id = domain.Id;
-        _fileName = domain.FileName;
-        _url = domain.Url;
-        _savePath = domain.SavePath;
-        // Map other properties as needed
-        _fileSizeInBytes = domain.FileSizeInBytes;
-        _downloadedBytes = domain.DownloadedBytes;
-        _status = domain.Status;
-        _createdAt = domain.CreatedAt;
-
-        _downloadService.DownloadProgressUpdated += (download) =>
-        {
-            DownloadedBytes = download.DownloadedBytes;
-            DownloadSpeedInBytes = download.DownloadSpeedInBytes;
-            Eta = _downloadService.GetRemainingTime(download.Id);
-            Status = download.Status;
-        };
     }
 
     private void OnDesignTimeConstructor()
@@ -155,7 +159,7 @@ public partial class DownloadItemViewModel : ViewModelBase
         var folderPath = Path.GetDirectoryName(SavePath);
         if (folderPath != null && Directory.Exists(folderPath))
         {
-            _ = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+            _ = Process.Start(new ProcessStartInfo()
             {
                 FileName = folderPath,
                 UseShellExecute = true,

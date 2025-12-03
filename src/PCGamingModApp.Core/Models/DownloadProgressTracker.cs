@@ -4,26 +4,27 @@ namespace PCGamingModApp.Core.Models;
 
 public class DownloadProgressTracker(DownloadDataModel download)
 {
+    private const double SmoothingFactor = 0.2; // Adjust as needed
+
     /// <summary>
     /// Exponential Moving Average (EMA)
     /// </summary>
     private long _emaSpeed = 0;
-    private const double SmoothingFactor = 0.2; // Adjust as needed
 
     /// <summary>
     /// Updates the progress and recalculates EMA speed.
     /// </summary>
     /// <param name="downloadedBytes">Current downloaded bytes.</param>
     /// <param name="currentSpeed">Current download speed in bytes/second.</param>
-    public void UpdateProgress(long downloadedBytes, long currentSpeed)
+    public void UpdateProgress(long downloadedBytes, double currentSpeed)
     {
         download.DownloadedBytes = downloadedBytes;
         if (_emaSpeed == 0)
-            _emaSpeed = currentSpeed; // Initialize EMA
+            _emaSpeed = (long)currentSpeed; // Initialize EMA
         else
             _emaSpeed = (long)(currentSpeed * SmoothingFactor + _emaSpeed * (1 - SmoothingFactor));
     }
-    
+
     /// <summary>
     /// Estimates the remaining time for the download.
     /// </summary>
@@ -36,4 +37,6 @@ public class DownloadProgressTracker(DownloadDataModel download)
         long remainingBytes = download.FileSizeInBytes - download.DownloadedBytes;
         return TimeSpan.FromSeconds(remainingBytes / _emaSpeed);
     }
+
+    public DownloadDataModel GetDownload() => download;
 }

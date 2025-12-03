@@ -5,10 +5,10 @@ namespace PCGamingModApp.Data.Repositories;
 
 internal class DownloadRepository(AppDbContext context) : IDownloadRepository
 {
-    public async Task AddDownload(DownloadDataModel download)
+    public Task AddDownload(DownloadDataModel download)
     {
         context.Downloads.Add(download);
-        await context.SaveChangesAsync();
+        return context.SaveChangesAsync();
     }
 
     public async Task UpdateDownload(DownloadDataModel download)
@@ -32,9 +32,9 @@ internal class DownloadRepository(AppDbContext context) : IDownloadRepository
         }
     }
 
-    public async Task<List<DownloadDataModel>> GetAllDownloads()
+    public Task<List<DownloadDataModel>> GetAllDownloads()
     {
-        return await context.Downloads.ToListAsync();
+        return context.Downloads.ToListAsync();
     }
 
     public async Task<DownloadDataModel?> GetDownloadById(Guid id)

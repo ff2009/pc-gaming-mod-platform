@@ -14,10 +14,9 @@ using PCGamingModApp.Data.Enums;
 
 namespace PCGamingModApp.Core.ViewModels;
 
-public partial class DownloadsPageViewModel : PageViewModel
+public partial class DownloadsPageViewModel : PageViewModel, IRecipient<DownloadAddedMessage>,
+    IRecipient<DownloadDeletedMessage>
 {
-    public override string PageTitle => "Downloads";
-
     private readonly IDialogService _dialogService;
     private readonly IDownloadService _downloadService;
     private readonly IMessenger _messenger;
@@ -28,19 +27,19 @@ public partial class DownloadsPageViewModel : PageViewModel
 
     // UI state
     [ObservableProperty] private string _filterText = string.Empty;
-    [ObservableProperty] private bool _sortAscending = true;
+    [ObservableProperty] private bool _isDownloadReady = false;
+    [ObservableProperty] private bool _isShowingActiveDownloads = false;
 
     [ObservableProperty] private bool _isShowingAllDownloads = true;
-    [ObservableProperty] private bool _isShowingActiveDownloads = false;
     [ObservableProperty] private bool _isShowingCompletedDownloads = false;
     [ObservableProperty] private bool _isShowingNewDownload = false;
-
-    [ObservableProperty] private string _newDownloadUrl = string.Empty;
+    [ObservableProperty] private string _newDownloadDestinationPath = string.Empty;
 
     [ObservableProperty] private string _newDownloadFilename = string.Empty;
-    [ObservableProperty] private string _newDownloadDestinationPath = string.Empty;
     [ObservableProperty] private double _newDownloadFileSizeBytes = 0;
-    [ObservableProperty] private bool _isDownloadReady = false;
+
+    [ObservableProperty] private string _newDownloadUrl = string.Empty;
+    [ObservableProperty] private bool _sortAscending = true;
 
     // Design-time constructor
     public DownloadsPageViewModel() : base(ApplicationPageNames.Downloads)
@@ -63,9 +62,29 @@ public partial class DownloadsPageViewModel : PageViewModel
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         _messenger.RegisterAll(this);
-        LoadData();
+        _ = LoadData();
 
         ApplyFiltersAndSorting();
+    }
+
+    public override string PageTitle => "Downloads";
+
+    public void Receive(DownloadAddedMessage message)
+    {
+        var download = message.Download;
+        var downloadItem = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(_serviceProvider, download);
+        DownloadsList.Add(downloadItem);
+        ApplyFiltersAndSorting();
+    }
+
+    public void Receive(DownloadDeletedMessage message)
+    {
+        var downloadToRemove = DownloadsList.FirstOrDefault(g => g.Id == message.DownloadId);
+        if (downloadToRemove != null)
+        {
+            DownloadsList.Remove(downloadToRemove);
+            ApplyFiltersAndSorting();
+        }
     }
 
     private void OnDesignTimeConstructor()
@@ -107,7 +126,7 @@ public partial class DownloadsPageViewModel : PageViewModel
         };
 
         List<DownloadItemViewModel> vmList = downloadListMock
-            .Select(dm => new DownloadItemViewModel(new DownloadService(null, null, null, null), null, dm))
+            .Select(dm => new DownloadItemViewModel(new DownloadService(null, null, null, null, null), null, dm))
             .ToList();
         DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
     }
@@ -115,7 +134,7 @@ public partial class DownloadsPageViewModel : PageViewModel
     private async Task LoadData()
     {
         var downloads = await _downloadService.GetDownloadsAsync();
-        if (downloads is null && !downloads.Any())
+        if (!downloads.Any())
             return;
 
         List<DownloadItemViewModel> vmList = downloads
@@ -129,8 +148,7 @@ public partial class DownloadsPageViewModel : PageViewModel
         if (Uri.IsWellFormedUriString(NewDownloadUrl, UriKind.Absolute))
         {
             var datamodel = await _downloadService.GetDownloadMetadataAsync(NewDownloadUrl);
-            // For design time, we just set a mock file size
-            NewDownloadFileSizeBytes = datamodel.FileSizeInBytes; // 150 MB
+            NewDownloadFileSizeBytes = datamodel.FileSizeInBytes;
             NewDownloadDestinationPath = datamodel.SavePath;
             NewDownloadFilename = datamodel.FileName;
             IsDownloadReady = true;
@@ -182,7 +200,8 @@ public partial class DownloadsPageViewModel : PageViewModel
     [RelayCommand]
     private async Task SelectDownloadDestinationPathAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewDownloadDestinationPath) || !Path.Exists(Path.GetDirectoryName(NewDownloadDestinationPath)))
+        if (string.IsNullOrWhiteSpace(NewDownloadDestinationPath) ||
+            !Path.Exists(Path.GetDirectoryName(NewDownloadDestinationPath)))
             return;
 
         string? destinationPath = Path.GetDirectoryName(NewDownloadDestinationPath);
@@ -201,7 +220,7 @@ public partial class DownloadsPageViewModel : PageViewModel
     [RelayCommand]
     private async Task StartDownloadLaterAsync()
     {
-        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, NewDownloadDestinationPath, 1);
+        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, NewDownloadDestinationPath);
         var download = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(_serviceProvider, newDownload);
         DownloadsList.Add(download);
         IsShowingNewDownload = false;
@@ -211,7 +230,7 @@ public partial class DownloadsPageViewModel : PageViewModel
     [RelayCommand]
     private async Task StartNewDownload()
     {
-        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, NewDownloadDestinationPath, 1);
+        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, NewDownloadDestinationPath);
         var download = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(_serviceProvider, newDownload);
         DownloadsList.Add(download);
         IsShowingNewDownload = false;
@@ -222,17 +241,5 @@ public partial class DownloadsPageViewModel : PageViewModel
     private void CancelNewDownload()
     {
         IsShowingNewDownload = false;
-    }
-
-    public void Receive(DownloadDeletedMessage message)
-    {
-        var downloadToRemove = DownloadsList.FirstOrDefault(g => g.Id == message.DownloadId);
-        if (downloadToRemove != null)
-        {
-            // Update other properties as needed
-            //downloadToRemove.IsInstalled = false;
-            DownloadsList.Remove(downloadToRemove);
-            ApplyFiltersAndSorting();
-        }
     }
 }
