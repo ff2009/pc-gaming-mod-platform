@@ -16,6 +16,11 @@ public class DownloadManager
         _messenger = messenger;
     }
 
+    public ICollection<Guid> GetActiveDownloads()
+    {
+        return _activeDownloads.Keys;
+    }
+
     /// <summary>
     /// Starts tracking a new download.
     /// </summary>

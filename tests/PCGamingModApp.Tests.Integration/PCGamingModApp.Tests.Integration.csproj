@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Castle.Core"/>
         <PackageReference Include="coverlet.collector" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
@@ -24,7 +25,22 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\PCGamingModApp.Core\PCGamingModApp.Core.csproj"/>
       <ProjectReference Include="..\..\src\PCGamingModApp.Data\PCGamingModApp.Data.csproj" />
+        <ProjectReference Include="..\PCGamingModApp.Tests.Utilities\PCGamingModApp.Tests.Utilities.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="CommunityToolkit.Mvvm">
+            <HintPath>..\..\..\..\.nuget\packages\communitytoolkit.mvvm\8.4.0\lib\net8.0\CommunityToolkit.Mvvm.dll</HintPath>
+        </Reference>
+        <Reference Include="Moq">
+            <HintPath>..\..\..\..\.nuget\packages\moq\4.20.72\lib\net6.0\Moq.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Helpers\"/>
     </ItemGroup>
 
 </Project>

@@ -1,7 +1,8 @@
 <Solution>
   <Project Path="src/PCGamingModApp/PCGamingModApp.csproj" />
-  <Project Path="src\PCGamingModApp.Core\PCGamingModApp.Core.csproj" Type="Classic C#" />
-  <Project Path="src\PCGamingModApp.Data\PCGamingModApp.Data.csproj" Type="Classic C#" />
-  <Project Path="tests\PCGamingModApp.Tests.Integration\PCGamingModApp.Tests.Integration.csproj" Type="Classic C#" />
-  <Project Path="tests\PCGamingModApp.Tests.Unit\PCGamingModApp.Tests.Unit.csproj" Type="Classic C#" />
+    <Project Path="src\PCGamingModApp.Core\PCGamingModApp.Core.csproj" Type="C#"/>
+    <Project Path="src\PCGamingModApp.Data\PCGamingModApp.Data.csproj" Type="C#"/>
+    <Project Path="tests/PCGamingModApp.Tests.Utilities/PCGamingModApp.Tests.Utilities.csproj"/>
+    <Project Path="tests\PCGamingModApp.Tests.Integration\PCGamingModApp.Tests.Integration.csproj" Type="C#"/>
+    <Project Path="tests\PCGamingModApp.Tests.Unit\PCGamingModApp.Tests.Unit.csproj" Type="C#"/>
 </Solution>

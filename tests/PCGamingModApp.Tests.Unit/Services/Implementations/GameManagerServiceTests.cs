@@ -6,7 +6,7 @@ using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Repositories;
 
-namespace PCGamingModApp.Tests.Unit.Services;
+namespace PCGamingModApp.Tests.Unit.Services.Implementations;
 
 public class GameManagerServiceTests
 {
@@ -51,13 +51,13 @@ public class GameManagerServiceTests
         // Assert
         Assert.Null(result);
     }
-    
+
     [Fact(Skip = "File system dependent test")]
     public void AddGameIcon_SavesToCorrectPath()
     {
         var mockAppPaths = new Mock<IAppPaths>();
         mockAppPaths.SetupGet(x => x.GameIcons).Returns("/tmp/test_icons");
-        
+
         var mockGameRepository = new Mock<IGameRepository>();
         var mockGameManagerService = new Mock<GameManagerService>();
         var mockMessenger = new Mock<IMessenger>();
@@ -67,7 +67,7 @@ public class GameManagerServiceTests
 
         Assert.True(File.Exists("/tmp/test_icons/TestGame.png"));
     }
-    
+
     [Fact]
     public async Task AddGame_ShouldThrow_IfGameExists()
     {
@@ -86,7 +86,7 @@ public class GameManagerServiceTests
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() => service.AddGame("fake/path"));
     }
-    
+
     [Fact]
     public async Task SaveIconAsync_ShouldReturnFilename_IfExtractionSucceeds()
     {
