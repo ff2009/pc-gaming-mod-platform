@@ -40,6 +40,15 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
 
     [ObservableProperty] private string _newDownloadUrl = string.Empty;
     [ObservableProperty] private bool _sortAscending = true;
+    
+    [ObservableProperty] private double _currentDownloadSpeed = 0;
+    [ObservableProperty] private double _peakDownloadSpeed = 25;
+    
+    [ObservableProperty] private double _sessionTraffic = 0;
+    [ObservableProperty] private double _totalTraffic = 0;
+    
+    [ObservableProperty] private string _unit = "MB"; // in bytes per second
+    [ObservableProperty] private string _trafficUnit = "GB"; // in bytes per second
 
     // Design-time constructor
     public DownloadsPageViewModel() : base(ApplicationPageNames.Downloads)
@@ -61,7 +70,7 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
         _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-        _messenger.RegisterAll(this);
+        _messenger?.RegisterAll(this);
         _ = LoadData();
 
         ApplyFiltersAndSorting();
@@ -241,5 +250,11 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     private void CancelNewDownload()
     {
         IsShowingNewDownload = false;
+    }
+
+    [RelayCommand]
+    private void GoToDownloadSettings()
+    {
+        // TODO
     }
 }

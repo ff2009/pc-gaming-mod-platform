@@ -11,34 +11,90 @@
         <vm:DownloadsPageViewModel />
     </Design.DataContext>
 
-    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto, *">
+    <Grid ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, Auto, *">
         <!-- Header -->
-        <Label Grid.Column="0" Grid.Row="0" Classes="h1" Content="{Binding PageTitle}" />
-
+        <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
+               Classes="h1" Content="{Binding PageTitle}" />
+        
+        <!-- Statistics -->
+        <Grid Grid.Row="0" Grid.Column="2"
+              ColumnDefinitions="Auto, Auto, 8, Auto, Auto"
+              RowDefinitions="Auto, Auto, Auto">
+            <Label Grid.Row="0" Grid.Column="0" Content="Speed" FontWeight="Bold" />
+            <Label Grid.Row="1" Grid.Column="0" Content="Current:" />
+            <Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">
+                <Label.Content>
+                    <MultiBinding StringFormat=" {0} {1}/s">
+                        <Binding Path="CurrentDownloadSpeed" StringFormat="0.00" />
+                        <Binding Path="Unit" />
+                    </MultiBinding>
+                </Label.Content>
+            </Label>
+            <Label Grid.Row="2" Grid.Column="0" Content="Peak:" />
+            <Label Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right">
+                <Label.Content>
+                    <MultiBinding StringFormat=" {0} {1}/s">
+                        <Binding Path="PeakDownloadSpeed" StringFormat="0.00" />
+                        <Binding Path="Unit" />
+                    </MultiBinding>
+                </Label.Content>
+            </Label>
+            <Label Grid.Row="0" Grid.Column="3" Content="Traffic" FontWeight="Bold" />
+            <Label Grid.Row="1" Grid.Column="3" Content="Session:" />
+            <Label Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right">
+                <Label.Content>
+                    <MultiBinding StringFormat=" {0} {1}">
+                        <Binding Path="SessionTraffic" StringFormat="0.00" />
+                        <Binding Path="TrafficUnit" />
+                    </MultiBinding>
+                </Label.Content>
+            </Label>
+            <Label Grid.Row="2" Grid.Column="3" Content="Total:" />
+            <Label Grid.Row="2" Grid.Column="4" HorizontalAlignment="Right">
+                <Label.Content>
+                    <MultiBinding StringFormat=" {0} {1}">
+                        <Binding Path="TotalTraffic" StringFormat="0.00" />
+                        <Binding Path="TrafficUnit" />
+                    </MultiBinding>
+                </Label.Content>
+            </Label>
+        </Grid>
+        
         <!-- Filter Buttons -->
-        <StackPanel Grid.Column="1" Grid.Row="0"
+        <StackPanel Grid.Column="2" Grid.Row="1"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,0,8,0">
-            <Button Content="All Downloads"
-                    Command="{Binding ShowAllDownloadsCommand}"
-                    IsEnabled="{Binding IsShowingAllDownloads}"
-                    Margin="0,0,0,4"
-                    VerticalAlignment="Bottom" />
-            <Button Content="Active Downloads"
-                    Command="{Binding ShowActiveDownloadsCommand}"
-                    IsEnabled="{Binding IsShowingActiveDownloads}"
-                    Margin="0,0,0,4"
-                    VerticalAlignment="Bottom" />
-            <Button Content="Completed Downloads"
-                    Command="{Binding ShowCompletedDownloadsCommand}"
-                    Margin="0,0,0,4"
-                    IsEnabled="{Binding IsShowingCompletedDownloads}"
-                    VerticalAlignment="Bottom" />
-            <Button Content="New"
-                    Command="{Binding NewDownloadCommand}"
-                    Margin="0,0,0,4"
-                    VerticalAlignment="Bottom" />
+
+            <Button Background="Transparent"
+                    Command="{Binding NewDownloadCommand}">
+                <Label Classes="icon-only" Content="&#xe3d4;" />
+            </Button>
+
+            <Button Background="Transparent">
+                <Label Classes="icon-only" Content="&#xe266;" />
+                <Button.Flyout>
+                    <MenuFlyout>
+                        <MenuItem Header="Show all"
+                                  Command="{Binding ShowAllDownloadsCommand}"
+                                  IsChecked="True">
+                        </MenuItem>
+                        <MenuItem Header="Active only"
+                                  Command="{Binding ShowActiveDownloadsCommand}"
+                                  IsChecked="False">
+                        </MenuItem>
+                        <MenuItem Header="Completed only"
+                                  Command="{Binding ShowCompletedDownloadsCommand}">
+                        </MenuItem>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+
+            <Button Background="Transparent"
+                    Command="{Binding GoToDownloadSettingsCommand}">
+                <Label Classes="icon-only" Content="&#xe272;" />
+            </Button>
+
         </StackPanel>
 
         <!-- New Download -->
@@ -47,9 +103,9 @@
               RowDefinitions="Auto, Auto, Auto"
               IsVisible="{Binding IsShowingNewDownload}"
               Margin="12 0">
-            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"  Orientation="Vertical">
+            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
                 <Label Content="URL" />
-                <TextBox Text="{Binding NewDownloadUrl}" LostFocus="InputElement_OnLostFocus"/>
+                <TextBox Text="{Binding NewDownloadUrl}" LostFocus="InputElement_OnLostFocus" />
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
                 <Label Content="Destination" />
@@ -79,11 +135,11 @@
                         Margin="0,4,0,4"
                         HorizontalAlignment="Right">
                 </Button>
-                <Button 
-                        Command="{Binding StartNewDownloadCommand}"
-                        IsEnabled="{Binding IsDownloadReady}"
-                        Margin="0,4,0,4"
-                        HorizontalAlignment="Right" >
+                <Button
+                    Command="{Binding StartNewDownloadCommand}"
+                    IsEnabled="{Binding IsDownloadReady}"
+                    Margin="0,4,0,4"
+                    HorizontalAlignment="Right">
                     <StackPanel Orientation="Horizontal">
                         <Label Classes="icon-only" Content="&#xe20a;" />
                         <Label Content="Start Download" />
@@ -96,7 +152,7 @@
         </Grid>
 
         <!-- Download List -->
-        <ListBox Grid.Column="0" Grid.ColumnSpan="2"
+        <ListBox Grid.Column="0" Grid.ColumnSpan="3"
                  Grid.Row="2"
                  Background="Transparent"
                  ItemsSource="{Binding FilteredDownloadList}">

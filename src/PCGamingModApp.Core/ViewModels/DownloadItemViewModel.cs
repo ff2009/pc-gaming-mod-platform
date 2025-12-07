@@ -53,7 +53,11 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
     public DownloadItemViewModel(IDownloadService downloadService, IMessenger messenger, DownloadDataModel domain)
     {
         _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
-        _messenger = messenger; // ?? throw new ArgumentNullException(nameof(messenger));
+        if (!Design.IsDesignMode)
+        {
+            _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
+            _messenger?.Register<DownloadUpdatedMessage>(this);
+        }
         ArgumentNullException.ThrowIfNull(domain);
 
         _id = domain.Id;
@@ -66,7 +70,6 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
         _status = domain.Status;
         _createdAt = domain.CreatedAt;
 
-        _messenger.Register<DownloadUpdatedMessage>(this);
     }
 
     public long FileSize => FileSizeInBytes / 1024 / 1024;
