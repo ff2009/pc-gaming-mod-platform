@@ -9,6 +9,7 @@ using PCGamingModApp.Data.Enums;
 using PCGamingModApp.Data.Repositories;
 using PCGamingModApp.Tests.Utilities.Helpers;
 using PCGamingModApp.Tests.Utilities.Repositories;
+using Xunit;
 
 namespace PCGamingModApp.Tests.Integration.Services;
 

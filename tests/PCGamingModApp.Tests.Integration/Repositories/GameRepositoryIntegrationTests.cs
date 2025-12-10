@@ -3,6 +3,7 @@ using PCGamingModApp.Data;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
 using PCGamingModApp.Data.Repositories;
+using Xunit;
 
 namespace PCGamingModApp.Tests.Integration.Repositories;
 
