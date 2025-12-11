@@ -3,7 +3,7 @@ using PCGamingModApp.Core.Services.Interfaces;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public class DesignTimeImageCache(string baseFolder) : IImageCache
+internal sealed class DesignTimeImageCache(string baseFolder) : IImageCache
 {
     /// <summary>
     /// Base folder where all icons live (e.g. "Assets/Images/")

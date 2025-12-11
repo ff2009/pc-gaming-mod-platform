@@ -4,7 +4,7 @@ using PCGamingModApp.Core.Services.Interfaces;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public class DialogService(Func<TopLevel?> topLevel) : IDialogService
+internal sealed class DialogService(Func<TopLevel?> topLevel) : IDialogService
 {
     public async Task<string?> FilePickerAsync(FilePickerOpenOptions? options = null)
     {

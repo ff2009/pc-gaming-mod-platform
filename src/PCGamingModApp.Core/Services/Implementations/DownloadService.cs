@@ -9,11 +9,11 @@ using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public class DownloadService(
+internal sealed class DownloadService(
     IAppPaths appPaths,
     IHttpClientFactory httpClientFactory,
     IDownloadRepository downloadRepository,
-    DownloadManager downloadManager,
+    IDownloadManager downloadManager,
     IMessenger messenger,
     int maxParallelDownloads = 3)
     : IDownloadService

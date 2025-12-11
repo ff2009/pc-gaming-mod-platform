@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public sealed class SimpleImageCache(string baseFolder) : IImageCache
+internal sealed class SimpleImageCache(string baseFolder) : IImageCache
 {
     /// <summary>
     /// Base folder where all icons live   

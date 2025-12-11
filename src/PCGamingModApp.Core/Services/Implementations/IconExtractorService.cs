@@ -6,7 +6,7 @@ using SkiaSharp;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public class IconExtractorService(IAppPaths appPaths) : IIconExtractor
+internal sealed class IconExtractorService(IAppPaths appPaths) : IIconExtractor
 {
     public async Task ExtractAndSaveAsync(string sourcePath, string outputPath)
     {

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using PCGamingModApp.Core.Messaging.Messages;
 using PCGamingModApp.Core.Services.Implementations;
+using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
 using PCGamingModApp.Data.Repositories;
@@ -16,7 +17,7 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
     IRecipient<GameDeletedMessage>, IRecipient<FilterTextMessage>, IDisposable
 {
     private readonly IGameRepository _gameRepository;
-    private readonly GameManagerService _gameManagerService;
+    private readonly IGameManager _gameManager;
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
 
@@ -43,12 +44,12 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
 
     public GameMenuViewModel(
         IGameRepository gameRepository,
-        GameManagerService gameManagerService,
+        IGameManager gameManager,
         IMessenger messenger,
         IServiceProvider serviceProvider)
     {
         _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
-        _gameManagerService = gameManagerService ?? throw new ArgumentNullException(nameof(gameManagerService));
+        _gameManager = gameManager ?? throw new ArgumentNullException(nameof(gameManager));
         _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
@@ -157,14 +158,14 @@ public partial class GameMenuViewModel : ContextViewModel, IRecipient<GameAddedM
         // Open a modal dialog (implementation left to UI layer)
         // After the dialog returns a GameItem, call _repo.AddAsync and refresh.
 
-        string? gameExecutablePath = await _gameManagerService.SelectGameExecutableAsync();
+        string? gameExecutablePath = await _gameManager.SelectGameExecutableAsync();
         if (string.IsNullOrWhiteSpace(gameExecutablePath))
         {
             // user cancelled or no valid selection
             return;
         }
 
-        var newGame = await _gameManagerService.AddGame(gameExecutablePath);
+        var newGame = await _gameManager.AddGame(gameExecutablePath);
         GamesList.Add(ActivatorUtilities.CreateInstance<GameItemViewModel>(_serviceProvider, newGame));
         ApplyFiltersAndSorting();
     }

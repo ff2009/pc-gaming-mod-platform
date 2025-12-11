@@ -3,11 +3,10 @@ using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Repositories;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public class GameManagerService(IDialogService dialogService, IGameRepository gameRepository, IGameIconService iconService)
+internal sealed class GameManager(IDialogService dialogService, IGameRepository gameRepository, IGameIconService iconService) : IGameManager
 {
     /// <summary>
     /// Adds games to the library

@@ -17,7 +17,7 @@ namespace PCGamingModApp.Core.ViewModels;
 /// </summary>
 public partial class GameItemViewModel : ViewModelBase
 {
-    private readonly GameManagerService _gameManagerService;
+    private readonly IGameManager _gameManager;
     private readonly IGameRepository _gameRepository;
     private readonly IImageCache _imageCache;
     private readonly ILauncherService _launcherService;
@@ -56,7 +56,7 @@ public partial class GameItemViewModel : ViewModelBase
     }
 
     public GameItemViewModel(
-        GameManagerService gameManagerService,
+        IGameManager gameManager,
         IGameRepository gameRepository,
         IImageCache imageCache,
         ILauncherService launcherService,
@@ -65,8 +65,8 @@ public partial class GameItemViewModel : ViewModelBase
     ) : this(imageCache, domain)
     {
         // services
-        _gameManagerService =
-            gameManagerService ?? throw new ArgumentNullException(nameof(gameManagerService));
+        _gameManager =
+            gameManager ?? throw new ArgumentNullException(nameof(gameManager));
         _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
         _launcherService = launcherService ?? throw new ArgumentNullException(nameof(launcherService));
         _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
@@ -97,14 +97,14 @@ public partial class GameItemViewModel : ViewModelBase
     [RelayCommand]
     private async Task AddAsync()
     {
-        string? gameExecutablePath = await _gameManagerService.SelectGameExecutableAsync();
+        string? gameExecutablePath = await _gameManager.SelectGameExecutableAsync();
         if (string.IsNullOrWhiteSpace(gameExecutablePath))
         {
             // user cancelled or no valid selection
             return;
         }
 
-        var newItem = await _gameManagerService.AddGame(gameExecutablePath);
+        var newItem = await _gameManager.AddGame(gameExecutablePath);
         if (newItem is null)
         {
             // user cancelled or no valid selection

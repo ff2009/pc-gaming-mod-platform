@@ -2,7 +2,7 @@
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public class AppPaths : IAppPaths
+internal sealed class AppPaths : IAppPaths
 {
     private string LocalAppData => Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
     public string Root  => Path.Combine(LocalAppData, "PCGamingModPlatform");

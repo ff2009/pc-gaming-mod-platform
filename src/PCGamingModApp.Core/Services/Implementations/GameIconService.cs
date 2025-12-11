@@ -4,7 +4,7 @@ using PCGamingModApp.Core.Services.Interfaces;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public class GameIconService(IAppPaths appPaths, IIconExtractor iconExtractor) : IGameIconService
+internal sealed class GameIconService(IAppPaths appPaths, IIconExtractor iconExtractor) : IGameIconService
 {
     public async Task<string?> SaveIconAsync(string gameTitle, string sourcePath)
     {

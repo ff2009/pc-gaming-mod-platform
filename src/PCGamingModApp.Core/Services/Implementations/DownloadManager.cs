@@ -2,19 +2,14 @@ using System.Collections.Concurrent;
 using CommunityToolkit.Mvvm.Messaging;
 using PCGamingModApp.Core.Messaging.Messages;
 using PCGamingModApp.Core.Models;
+using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-public class DownloadManager
+internal sealed class DownloadManager(IMessenger messenger) : IDownloadManager
 {
     private readonly ConcurrentDictionary<Guid, DownloadProgressTracker> _activeDownloads = new();
-    private readonly IMessenger _messenger;
-
-    public DownloadManager(IMessenger messenger)
-    {
-        _messenger = messenger;
-    }
 
     public ICollection<Guid> GetActiveDownloads()
     {
@@ -46,7 +41,7 @@ public class DownloadManager
 
         tracker.UpdateProgress(downloadedBytes, currentSpeed);
         var download = tracker.GetDownload();
-        _messenger.Send(new DownloadUpdatedMessage(download));
+        messenger.Send(new DownloadUpdatedMessage(download));
     }
 
     /// <summary>
