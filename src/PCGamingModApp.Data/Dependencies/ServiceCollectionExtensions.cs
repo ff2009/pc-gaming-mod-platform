@@ -6,19 +6,24 @@ namespace PCGamingModApp.Data.Dependencies;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddDataRepository(this IServiceCollection services,
-        string connectionString = "DataSource=pcgamingmod.db")
+    extension(IServiceCollection services)
     {
-        services.AddScoped<IDownloadRepository, DownloadRepository>();
-        services.AddScoped<IGameRepository, GameRepository>();
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(connectionString));
+        public void AddDataRepository(string connectionString = "DataSource=pcgamingmod.db")
+        {
+            services.AddScoped<IDownloadRepository, DownloadRepository>();
+            services.AddScoped<IGameRepository, GameRepository>();
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlite(connectionString));
+        }
     }
-    
-    public static void InitializeDatabase(this ServiceProvider serviceProvider)
+
+    extension(ServiceProvider serviceProvider)
     {
-        using var scope = serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        dbContext.Database.EnsureCreated();
+        public void InitializeDatabase()
+        {
+            using var scope = serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            dbContext.Database.EnsureCreated();
+        }
     }
 }

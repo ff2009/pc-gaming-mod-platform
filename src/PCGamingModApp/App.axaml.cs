@@ -14,6 +14,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
+using PCGamingModApp.Core.Dependencies;
 
 namespace PCGamingModApp;
 
@@ -26,67 +27,18 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        // Step 1: Create and initialize AppPaths
-        AppPaths appPaths = new AppPaths();
-        appPaths.EnsureCreated();
-        appPaths.Migrate();
-        
         var services = new ServiceCollection();
-        services.AddHttpClient();
-        services.AddSingleton<IAppPaths>(appPaths);
-        services.AddSingleton<IDialogService, DialogService>();
-        services.AddSingleton<IImageCache, SimpleImageCache>(x=>
-            new SimpleImageCache(Path.Combine(appPaths.GameIcons)));
-        
-        services.AddSingleton<DownloadManager>();
-        services.AddTransient<IDownloadService, DownloadService>();
-        // Register GameInstallationService
-        services.AddTransient<GameManagerService>();
+        services.AddCoreServices();
+        services.AddDownloadServices();
+        services.AddViewModels();
 
-        services.AddSingleton<IIconExtractor, IconExtractorService>();
-        services.AddSingleton<IGameIconService, GameIconService>();
-        services.AddTransient<ILauncherService, LauncherService>();
-        services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
-
-        services.AddSingleton<MainViewModel>();
-
-        // UI ViewModels (transient – new instance per view)
-        services.AddSingleton<MenuViewModel>();
-        services.AddSingleton<GameMenuViewModel>();
-        services.AddTransient<GameItemViewModel>(); // each row gets its own VM
-        
+        var serviceProvider = services.BuildServiceProvider();
+        var appPaths = serviceProvider.GetRequiredService<IAppPaths>();
         services.AddDataRepository(connectionString: $"DataSource={Path.Combine(appPaths.Database, "pcgamingmod.db")}");
-            
-        services.AddSingleton<HomePageViewModel>();
 
-        services.AddTransient<BasePageViewModel>();
-        services.AddTransient<GameSettingsPageViewModel>();
-        services.AddTransient<DownloadsPageViewModel>();
-        services.AddTransient<DownloadItemViewModel>(); // each row gets its own VM
-        services.AddTransient<AddOnsPageViewModel>();
-        services.AddTransient<SystemPageViewModel>();
-        services.AddTransient<AboutPageViewModel>();
-
-        services.AddTransient<DeveloperSettingsPageViewModel>();
-
-        services.AddSingleton<Func<Type, PageViewModel>>(x => type => type switch
-        {
-            _ when type == typeof(HomePageViewModel) => x.GetRequiredService<HomePageViewModel>(),
-            _ when type == typeof(BasePageViewModel) => x.GetRequiredService<BasePageViewModel>(),
-            _ when type == typeof(GameSettingsPageViewModel) => x.GetRequiredService<GameSettingsPageViewModel>(),
-            _ when type == typeof(DownloadsPageViewModel) => x.GetRequiredService<DownloadsPageViewModel>(),
-            _ when type == typeof(AddOnsPageViewModel) => x.GetRequiredService<AddOnsPageViewModel>(),
-            _ when type == typeof(SystemPageViewModel) => x.GetRequiredService<SystemPageViewModel>(),
-            _ when type == typeof(AboutPageViewModel) => x.GetRequiredService<AboutPageViewModel>(),
-            _ when type == typeof(DeveloperSettingsPageViewModel) => x
-                .GetRequiredService<DeveloperSettingsPageViewModel>(),
-            _ => throw new InvalidOperationException($"Page of type {type?.FullName} has no view model"),
-        });
-
-        services.AddSingleton<PageFactory>();
-        
         // TopLevel provider
-        services.AddSingleton<Func<TopLevel?>>(x => () => {
+        services.AddSingleton<Func<TopLevel?>>(x => () =>
+        {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime topWindow)
                 return TopLevel.GetTopLevel(topWindow.MainWindow);
             if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
@@ -94,8 +46,8 @@ public partial class App : Application
 
             return null;
         });
-        
-        var serviceProvider = services.BuildServiceProvider();
+
+        serviceProvider = services.BuildServiceProvider();
         serviceProvider.InitializeDatabase();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
