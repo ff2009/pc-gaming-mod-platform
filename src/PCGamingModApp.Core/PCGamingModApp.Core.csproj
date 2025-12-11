@@ -33,4 +33,9 @@
       </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="PCGamingModApp.Tests.Common" />
+        <InternalsVisibleTo Include="PCGamingModApp.Tests.Integration" />
+        <InternalsVisibleTo Include="PCGamingModApp.Tests.Unit" />
+    </ItemGroup>
 </Project>

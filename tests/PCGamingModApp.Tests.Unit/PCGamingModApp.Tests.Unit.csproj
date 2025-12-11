@@ -27,6 +27,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\PCGamingModApp.Core\PCGamingModApp.Core.csproj" />
       <ProjectReference Include="..\..\src\PCGamingModApp.Data\PCGamingModApp.Data.csproj" />
+      <ProjectReference Include="..\PCGamingModApp.Tests.Common\PCGamingModApp.Tests.Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>

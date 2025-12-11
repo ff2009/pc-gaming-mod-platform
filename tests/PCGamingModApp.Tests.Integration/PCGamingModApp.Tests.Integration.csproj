@@ -11,7 +11,6 @@
   <ItemGroup>
     <PackageReference Include="Castle.Core" />
     <PackageReference Include="coverlet.collector" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
     <PackageReference Include="xunit" />
@@ -24,7 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\PCGamingModApp.Core\PCGamingModApp.Core.csproj" />
     <ProjectReference Include="..\..\src\PCGamingModApp.Data\PCGamingModApp.Data.csproj" />
-    <ProjectReference Include="..\PCGamingModApp.Tests.Utilities\PCGamingModApp.Tests.Utilities.csproj" />
+    <ProjectReference Include="..\PCGamingModApp.Tests.Common\PCGamingModApp.Tests.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

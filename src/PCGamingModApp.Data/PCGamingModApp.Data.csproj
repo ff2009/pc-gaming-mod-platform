@@ -8,20 +8,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Migrations\" />
+        <Folder Include="Migrations\"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        <PrivateAssets>all</PrivateAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite"/>
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="PCGamingModApp.Tests.Integration" />
-        <InternalsVisibleTo Include="PCGamingModApp.Tests.Unit" />
+        <InternalsVisibleTo Include="PCGamingModApp.Tests.Common"/>
+        <InternalsVisibleTo Include="PCGamingModApp.Tests.Integration"/>
+        <InternalsVisibleTo Include="PCGamingModApp.Tests.Unit"/>
     </ItemGroup>
 
 </Project>

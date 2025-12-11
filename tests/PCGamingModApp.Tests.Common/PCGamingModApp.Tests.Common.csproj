@@ -7,7 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\PCGamingModApp.Core\PCGamingModApp.Core.csproj" />
         <ProjectReference Include="..\..\src\PCGamingModApp.Data\PCGamingModApp.Data.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+      <PackageReference Include="Moq" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Repositories\" />
     </ItemGroup>
 
 </Project>
