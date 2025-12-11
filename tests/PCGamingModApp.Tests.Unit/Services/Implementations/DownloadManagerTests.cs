@@ -10,9 +10,26 @@ public class DownloadManagerTests
     private readonly Mock<IMessenger> _mockMessenger = new();
     private readonly DownloadManager _downloadManager;
 
-    public DownloadManagerTests() 
+    public DownloadManagerTests()
     {
         _downloadManager = new DownloadManager(_mockMessenger.Object);
+    }
+
+    [Fact]
+    public void GetDownloadsAsync_ReturnsActiveDownloads()
+    {
+        // Arrange
+        var download1 = new DownloadDataModel { Id = Guid.NewGuid() };
+        var download2 = new DownloadDataModel { Id = Guid.NewGuid() };
+        _downloadManager.StartTracking(download1);
+        _downloadManager.StartTracking(download2);
+
+        // Act
+        var downloads = _downloadManager.GetActiveDownloads();
+
+        // Assert
+        Assert.Multiple(() => { Assert.Equal(2, downloads.Count); });
+        Assert.Contains(downloads, m=> m.Equals(download1.Id));
     }
 
     [Fact]
@@ -30,6 +47,21 @@ public class DownloadManagerTests
     {
         // Arrange
         var download = new DownloadDataModel { Id = Guid.NewGuid() };
+
+        // Act
+        _downloadManager.StartTracking(download);
+
+        // Assert
+        Assert.Single(_downloadManager.GetActiveDownloads());
+    }
+
+    [Fact]
+    public void StartTracking_DoesNotAddDuplicateDownload()
+    {
+        // Arrange
+        var download = new DownloadDataModel { Id = Guid.NewGuid() };
+        
+        _downloadManager.StartTracking(download);
 
         // Act
         _downloadManager.StartTracking(download);
