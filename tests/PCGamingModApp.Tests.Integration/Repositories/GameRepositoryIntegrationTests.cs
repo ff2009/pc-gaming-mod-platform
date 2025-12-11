@@ -10,7 +10,7 @@ namespace PCGamingModApp.Tests.Integration.Repositories;
 public class GameRepositoryIntegrationTests : IDisposable
 {
     private readonly AppDbContext _context;
-    private readonly IGameRepository _repository;
+    private readonly IGameRepository _gameRepository;
 
     public GameRepositoryIntegrationTests()
     {
@@ -20,7 +20,7 @@ public class GameRepositoryIntegrationTests : IDisposable
             .Options;
 
         _context = new AppDbContext(options);
-        _repository = new GameRepository(_context);
+        _gameRepository = new GameRepository(_context);
     }
 
     [Fact]
@@ -30,10 +30,10 @@ public class GameRepositoryIntegrationTests : IDisposable
         var game = new GameDataModel { Id = Guid.NewGuid(), Name = "Test Game", Store = StoreType.EaApp };
 
         // Act
-        await _repository.AddGame(game);
+        await _gameRepository.AddGame(game);
 
         // Assert
-        var games = await _repository.GetAllGames();
+        var games = await _gameRepository.GetAllGames();
         Assert.NotNull(games);
 
         var loadedGame = games.Single();
@@ -45,7 +45,7 @@ public class GameRepositoryIntegrationTests : IDisposable
     public async Task GetAllGames_ShouldReturnEmptyList_WhenNoGamesExist()
     {
         // Act
-        var games = await _repository.GetAllGames();
+        var games = await _gameRepository.GetAllGames();
 
         // Assert
         Assert.Empty(games);
@@ -57,11 +57,11 @@ public class GameRepositoryIntegrationTests : IDisposable
         // Arrange
         var game1 = new GameDataModel() { Id = Guid.NewGuid(), Name = "Game 1" };
         var game2 = new GameDataModel() { Id = Guid.NewGuid(), Name = "Game 2" };
-        await _repository.AddGame(game1);
-        await _repository.AddGame(game2);
+        await _gameRepository.AddGame(game1);
+        await _gameRepository.AddGame(game2);
 
         // Act
-        var games = await _repository.GetAllGames();
+        var games = await _gameRepository.GetAllGames();
 
         // Assert
         Assert.Equal(2, games.Count);
@@ -74,13 +74,13 @@ public class GameRepositoryIntegrationTests : IDisposable
     {
         // Arrange
         var game = new GameDataModel { Id = Guid.NewGuid(), Name = "Game to Delete" };
-        await _repository.AddGame(game);
+        await _gameRepository.AddGame(game);
 
         // Act
-        await _repository.DeleteGame(game.Id);
+        await _gameRepository.DeleteGame(game.Id);
 
         // Assert
-        var games = await _repository.GetAllGames();
+        var games = await _gameRepository.GetAllGames();
         Assert.Empty(games);
     }
 
@@ -89,14 +89,14 @@ public class GameRepositoryIntegrationTests : IDisposable
     {
         // Arrange
         var game = new GameDataModel { Id = Guid.NewGuid(), Name = "Original Name" };
-        await _repository.AddGame(game);
+        await _gameRepository.AddGame(game);
 
         // Act
         game.Name = "Updated Name";
-        await _repository.UpdateGame(game);
+        await _gameRepository.UpdateGame(game);
 
         // Assert
-        var updatedGame = (await _repository.GetAllGames()).First();
+        var updatedGame = (await _gameRepository.GetAllGames()).First();
         Assert.Equal("Updated Name", updatedGame.Name);
     }
 

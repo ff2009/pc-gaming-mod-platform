@@ -1,29 +1,31 @@
 using System.Net;
-using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using PCGamingModApp.Core.Services.Implementations;
 using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
-using PCGamingModApp.Data.Repositories;
-using PCGamingModApp.Tests.Utilities.Helpers;
-using PCGamingModApp.Tests.Utilities.Repositories;
+using PCGamingModApp.Tests.Common;
+using PCGamingModApp.Tests.Common.Helpers;
 using Xunit;
 
 namespace PCGamingModApp.Tests.Integration.Services;
 
-public class DownloadWorkflowTests
+public class DownloadWorkflowTests : TestBase
 {
-    private readonly Mock<IHttpClientFactory> _httpClientFactoryMock = new();
+    private readonly IDownloadManager _downloadManager;
+    private readonly IDownloadService _downloadService;
+
+    public DownloadWorkflowTests()
+    {
+        _downloadService = ServiceProvider.GetRequiredService<IDownloadService>();
+        _downloadManager = ServiceProvider.GetRequiredService<IDownloadManager>();
+    }
 
 
     [Fact]
     public async Task DownloadWorkflow_StartUpdateStop_Succeeds()
     {
-        // Arrange
-        var services = new ServiceCollection();
-
+        // Arrange   
         var mockHandler = new MockHttpMessageHandler((req, ct) =>
             Task.FromResult(new HttpResponseMessage
             {
@@ -32,23 +34,12 @@ public class DownloadWorkflowTests
             }));
 
         var httpClient = new HttpClient(mockHandler);
-
+        
         var mockHttpClientFactory = new Mock<IHttpClientFactory>();
         mockHttpClientFactory
-            .Setup(_ => _.CreateClient(It.IsAny<string>()))
+            .Setup(m => m.CreateClient(It.IsAny<string>()))
             .Returns(httpClient);
-
-        services.AddSingleton<IAppPaths, AppPaths>();
-        services.AddSingleton<DownloadManager>();
-        services.AddSingleton<IHttpClientFactory>(mockHttpClientFactory.Object);
-        services.AddTransient<IDownloadRepository, MockDownloadRepository>();
-        services.AddTransient<IDownloadService, DownloadService>();
-        services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
-
-        var serviceProvider = services.BuildServiceProvider();
-        var downloadService = serviceProvider.GetRequiredService<IDownloadService>();
-        var downloadManager = serviceProvider.GetRequiredService<DownloadManager>();
-
+        
         var download = new DownloadDataModel
         {
             Id = Guid.NewGuid(),
@@ -58,11 +49,11 @@ public class DownloadWorkflowTests
         };
 
         // Act
-        await downloadService.StartDownloadAsync(download.Id);
-        downloadManager.UpdateProgress(download.Id, 500000, 10000);
-        await downloadService.CancelDownloadAsync(download.Id);
+        await _downloadService.StartDownloadAsync(download.Id);
+        _downloadManager.UpdateProgress(download.Id, 500000, 10000);
+        await _downloadService.CancelDownloadAsync(download.Id);
 
         // Assert
-        Assert.Empty(downloadManager.GetActiveDownloads());
+        Assert.Empty(_downloadManager.GetActiveDownloads());
     }
 }

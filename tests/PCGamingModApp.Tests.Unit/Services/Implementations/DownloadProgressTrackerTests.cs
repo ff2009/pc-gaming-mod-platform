@@ -12,17 +12,22 @@ public class DownloadProgressTrackerTests
         var download = new DownloadDataModel
         {
             Id = Guid.NewGuid(),
-            FileSizeInBytes = 1000000, // 1MB
+            FileSizeInBytes = 1_000_000, // 1MB
             DownloadedBytes = 0,
         };
         var tracker = new DownloadProgressTracker(download);
 
         // Act
-        tracker.UpdateProgress(100000, 10000); // 10KB downloaded, 10KB/s speed
-        tracker.UpdateProgress(200000, 20000); // 20KB downloaded, 20KB/s speed
+        tracker.UpdateProgress(10_000, 10_000); // 10KB downloaded, 10KB/s speed
+        tracker.UpdateProgress(20_000, 20_000); // 20KB downloaded, 20KB/s speed
+        tracker.UpdateProgress(40_000, 20_000); // 40KB downloaded, 20KB/s speed
+        tracker.UpdateProgress(60_000, 30_000); // 60KB downloaded, 30KB/s speed
+        tracker.UpdateProgress(90_000, 30_000); // 90KB downloaded, 30KB/s speed
+        tracker.UpdateProgress(120_000, 30_000); // 120KB downloaded, 30KB/s speed
 
         // Assert
-        Assert.InRange(tracker.EstimateRemainingTime().TotalSeconds, 30, 40);
+        var totalDownloaded = tracker.EstimateRemainingTime().TotalSeconds;
+        Assert.InRange(totalDownloaded, 30, 40);
     }
 
     [Fact]

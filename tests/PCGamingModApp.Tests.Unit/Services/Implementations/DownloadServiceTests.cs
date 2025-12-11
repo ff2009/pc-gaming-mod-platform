@@ -1,70 +1,88 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using PCGamingModApp.Core.Services.Implementations;
+using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Repositories;
+using PCGamingModApp.Tests.Common;
 
 namespace PCGamingModApp.Tests.Unit.Services.Implementations;
 
-public class DownloadServiceTests
+public class DownloadServiceTests : TestBase
 {
+    // private readonly IDownloadManager _downloadManager;
+    private readonly Mock<IDownloadManager> _downloadManager;
+    private readonly Mock<IDownloadRepository> _downloadRepository;
+    private readonly IDownloadService _downloadService;
+
+    public DownloadServiceTests()
+    {
+        Mock<IAppPaths> appPathsMock = new();
+        Mock<IHttpClientFactory> httpClientFactoryMock = new();
+        _downloadRepository = new();
+        Mock<IMessenger> messengerMock = new();
+        // _downloadManager = new DownloadManager(messengerMock.Object);
+        _downloadManager = new();
+        _downloadService = new DownloadService(appPathsMock.Object, httpClientFactoryMock.Object,
+            _downloadRepository.Object, _downloadManager.Object, messengerMock.Object);
+    }
+
     [Fact]
     public async Task StartDownloadAsync_StartsTrackingDownload()
     {
         // Arrange
-        var appPathsMock = new Mock<AppPaths>();
-        var httpClientFactoryMock = new Mock<IHttpClientFactory>();
-        var downloadRepositoryMock = new Mock<IDownloadRepository>();
-        var managerMock = new Mock<DownloadManager>();
-        var messengerMock = new Mock<IMessenger>();
-        var service = new DownloadService(appPathsMock.Object, httpClientFactoryMock.Object,
-            downloadRepositoryMock.Object, managerMock.Object, messengerMock.Object);
-        var download = new DownloadDataModel { Id = Guid.NewGuid() };
+        var download = new DownloadDataModel
+        {
+            Id = Guid.NewGuid(),
+            Url = "http://example.com/file.zip",
+            SavePath = "/downloads/file.zip",
+            Status = Data.Enums.DownloadStatus.NotStarted
+        };
+
+        _downloadManager.Setup(m => m.GetActiveDownloads()).Returns(new List<Guid> { download.Id });
+        _downloadRepository.Setup(m => m.GetDownloadById(download.Id)).ReturnsAsync(download);
 
         // Act
-        await service.StartDownloadAsync(download.Id);
+        await _downloadService.StartDownloadAsync(download.Id);
 
         // Assert
-        managerMock.Verify(m => m.StartTracking(It.IsAny<DownloadDataModel>()), Times.Once);
+        _downloadManager.Verify(m => m.StartTracking(It.IsAny<DownloadDataModel>()), Times.Once);
+        Assert.Single(_downloadManager.Object.GetActiveDownloads());
     }
 
     [Fact]
     public async Task CancelDownloadAsync_StopsTrackingDownload()
     {
         // Arrange
-        var appPathsMock = new Mock<AppPaths>();
-        var httpClientFactoryMock = new Mock<IHttpClientFactory>();
-        var downloadRepositoryMock = new Mock<IDownloadRepository>();
-        var managerMock = new Mock<DownloadManager>();
-        var messengerMock = new Mock<IMessenger>();
-        var service = new DownloadService(appPathsMock.Object, httpClientFactoryMock.Object,
-            downloadRepositoryMock.Object, managerMock.Object, messengerMock.Object);
-        var downloadId = Guid.NewGuid();
+        var download = new DownloadDataModel
+        {
+            Id = Guid.NewGuid(),
+            Url = "http://example.com/file.zip",
+            SavePath = "/downloads/file.zip",
+            Status = Data.Enums.DownloadStatus.InProgress
+        };
+
+        _downloadManager.Setup(m => m.GetActiveDownloads()).Returns(new List<Guid>());
+        _downloadRepository.Setup(m => m.GetDownloadById(download.Id)).ReturnsAsync(download);
 
         // Act
-        await service.CancelDownloadAsync(downloadId);
+        await _downloadService.CancelDownloadAsync(download.Id);
 
         // Assert
-        managerMock.Verify(m => m.StopTracking(downloadId), Times.Once);
+        _downloadManager.Verify(m => m.StopTracking(download.Id), Times.Once);
+        Assert.Empty(_downloadManager.Object.GetActiveDownloads());
     }
 
     [Fact]
     public void GetRemainingTime_ReturnsTimeFromManager()
     {
         // Arrange
-        var appPathsMock = new Mock<AppPaths>();
-        var httpClientFactoryMock = new Mock<IHttpClientFactory>();
-        var downloadRepositoryMock = new Mock<IDownloadRepository>();
-        var managerMock = new Mock<DownloadManager>();
-        var messengerMock = new Mock<IMessenger>();
-        var service = new DownloadService(appPathsMock.Object, httpClientFactoryMock.Object,
-            downloadRepositoryMock.Object, managerMock.Object, messengerMock.Object);
         var downloadId = Guid.NewGuid();
         var expectedTime = TimeSpan.FromSeconds(30);
-        managerMock.Setup(m => m.GetRemainingTime(downloadId)).Returns(expectedTime);
+        _downloadManager.Setup(m => m.GetRemainingTime(downloadId)).Returns(expectedTime);
 
         // Act
-        var remainingTime = service.GetRemainingTime(downloadId);
+        var remainingTime = _downloadService.GetRemainingTime(downloadId);
 
         // Assert
         Assert.Equal(expectedTime, remainingTime);

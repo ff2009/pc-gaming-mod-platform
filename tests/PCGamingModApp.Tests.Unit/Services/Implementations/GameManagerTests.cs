@@ -8,7 +8,7 @@ using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp.Tests.Unit.Services.Implementations;
 
-public class GameManagerServiceTests
+public class GameManagerTests
 {
     [Fact]
     public async Task SelectGameExecutable_ShouldReturnSelectedFilePath()
@@ -22,7 +22,7 @@ public class GameManagerServiceTests
             .Setup(x => x.FilePickerAsync(It.IsAny<FilePickerOpenOptions>()))
             .ReturnsAsync("/path/to/game.exe");
 
-        var service = new GameManagerService(dialogService.Object, gameRepository.Object, gameIconService.Object);
+        var service = new GameManager(dialogService.Object, gameRepository.Object, gameIconService.Object);
 
         // Act
         var result = await service.SelectGameExecutableAsync();
@@ -43,7 +43,7 @@ public class GameManagerServiceTests
             .Setup(x => x.FilePickerAsync(It.IsAny<FilePickerOpenOptions>()))
             .ReturnsAsync((string?)null);
 
-        var service = new GameManagerService(dialogService.Object, gameRepository.Object, gameIconService.Object);
+        var service = new GameManager(dialogService.Object, gameRepository.Object, gameIconService.Object);
 
         // Act
         var result = await service.SelectGameExecutableAsync();
@@ -59,7 +59,7 @@ public class GameManagerServiceTests
         mockAppPaths.SetupGet(x => x.GameIcons).Returns("/tmp/test_icons");
 
         var mockGameRepository = new Mock<IGameRepository>();
-        var mockGameManagerService = new Mock<GameManagerService>();
+        var mockGameManagerService = new Mock<GameManager>();
         var mockMessenger = new Mock<IMessenger>();
 
         /*var viewModel = new GameMenuViewModel(mockGameRepository.Object, mockGameManagerService.Object, mockMessenger.Object);
@@ -78,7 +78,7 @@ public class GameManagerServiceTests
         gameRepository.Setup(x => x.GetGameByInstallPath(It.IsAny<string>()))
             .ReturnsAsync(new GameDataModel());
 
-        var service = new GameManagerService(dialogService.Object,
+        var service = new GameManager(dialogService.Object,
             gameRepository.Object,
             gameIconService.Object
         );
