@@ -12,37 +12,35 @@
     </Design.DataContext>
 
     <!-- New Download -->
-    <Grid ColumnDefinitions="*, Auto" RowDefinitions="*, *, Auto, Auto" ShowGridLines="False">
+    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *, Auto, Auto" ShowGridLines="False">
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
             <Label Content="URL" />
             <TextBox Text="{Binding NewDownloadUrl}"
-                     MinHeight="100" AcceptsReturn="True">
+                     AcceptsReturn="True">
             </TextBox>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
-            <DataGrid ItemsSource="{Binding NewDownloadList}"
-                      CanUserResizeColumns="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Filename" Binding="{Binding FileName}" Width="200" />
-                    <DataGridTextColumn Header="Save Path" Binding="{Binding SavePath}" Width="200" />
-                    <DataGridTemplateColumn Header="File Size" Width="100">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Label HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Label.Content>
-                                        <MultiBinding StringFormat=" {0} {1}">
-                                            <Binding Path="FileSize" StringFormat="0.00" />
-                                            <Binding Path="Unit" />
-                                        </MultiBinding>
-                                    </Label.Content>
-                                </Label>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </StackPanel>
+        <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding NewDownloadList}"
+                  CanUserResizeColumns="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Filename" Binding="{Binding FileName}" MinWidth="200" />
+                <DataGridTextColumn Header="Save Path" Binding="{Binding SavePath}" MinWidth="200" />
+                <DataGridTemplateColumn Header="File Size" MinWidth="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Label HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Label.Content>
+                                    <MultiBinding StringFormat=" {0} {1}">
+                                        <Binding Path="FileSize" StringFormat="0.00" />
+                                        <Binding Path="Unit" />
+                                    </MultiBinding>
+                                </Label.Content>
+                            </Label>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
 
         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
             <Label Content="Destination" />

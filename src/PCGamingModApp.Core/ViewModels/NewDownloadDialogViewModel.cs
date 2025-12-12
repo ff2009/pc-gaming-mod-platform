@@ -38,7 +38,8 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
 
     [ObservableProperty] private ObservableCollection<NewDownloadItemViewModel> _newDownloadList = new();
 
-    private string _newDownloadUrl = string.Empty;
+    [ObservableProperty] private string _newDownloadUrl = string.Empty;
+
     [ObservableProperty] private string _progressText = "";
     [ObservableProperty] private string _statusText = "";
 
@@ -66,17 +67,6 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
         LoadData();
     }
 
-    public string NewDownloadUrl
-    {
-        get => _newDownloadUrl;
-        set
-        {
-            GetMetadataURLsAsync(value);
-
-            SetProperty(ref _newDownloadUrl, value);
-        }
-    }
-
     public double DownloadSize
     {
         get
@@ -84,6 +74,11 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
             double downloadSize = ConversionHelper.ConvertBytesToUnit(DownloadFileSizeBytes, Unit);
             return downloadSize;
         }
+    }
+
+    partial void OnNewDownloadUrlChanged(string value)
+    {
+        _ = GetMetadataURLsAsync(value);
     }
 
     public bool NotBusy() => !Busy;
@@ -110,9 +105,9 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
                     FileSizeInBytes = datamodel.FileSizeInBytes,
                     CreatedAt = DateTime.Now
                 });
-            }
 
-            DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
+                DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
+            }
         }
     }
 
