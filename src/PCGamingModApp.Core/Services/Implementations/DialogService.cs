@@ -1,11 +1,24 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using PCGamingModApp.Core.Services.Interfaces;
+using PCGamingModApp.Core.ViewModels;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
 internal sealed class DialogService(Func<TopLevel?> topLevel) : IDialogService
 {
+    public async Task ShowDialog<THost, TDialogViewModel>(THost host, TDialogViewModel dialogViewModel)
+        where THost : IDialogProvider
+        where TDialogViewModel : DialogViewModel
+    {
+        // Set host dialog to provide one
+        host.Dialog = dialogViewModel;
+        dialogViewModel.Show();
+
+        // Wait for dialog to close
+        await dialogViewModel.WaitAsync();
+    }
+
     public async Task<string?> FilePickerAsync(FilePickerOpenOptions? options = null)
     {
         TopLevel? topLevelVisual = topLevel();

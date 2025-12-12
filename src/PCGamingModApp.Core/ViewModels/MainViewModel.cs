@@ -1,15 +1,14 @@
-﻿using System;
-using Avalonia.Controls;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using PCGamingModApp.Core.MainApp;
 using PCGamingModApp.Core.Messaging.Messages;
+using PCGamingModApp.Core.Services.Interfaces;
 
 namespace PCGamingModApp.Core.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+public partial class MainViewModel : ViewModelBase, IDialogProvider
 {
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
@@ -18,6 +17,9 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private ContextViewModel? _currentContext;
 
     [ObservableProperty] private PageViewModel _currentPage;
+    
+    [ObservableProperty]
+    private DialogViewModel _dialog;
     
     private string _filterText;
 
