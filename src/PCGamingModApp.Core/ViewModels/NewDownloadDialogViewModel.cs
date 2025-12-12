@@ -4,7 +4,9 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PCGamingModApp.Core.Helpers;
 using PCGamingModApp.Core.Services.Interfaces;
+using PCGamingModApp.Data.Enums;
 
 namespace PCGamingModApp.Core.ViewModels;
 
@@ -13,37 +15,56 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
     private readonly IDialogService _dialogService;
     private readonly IDownloadService _downloadService;
 
-    [ObservableProperty] private string _title = "Confirm";
-    [ObservableProperty] private string _message = "Are you sure?";
-    [ObservableProperty] private string _confirmText = "Yes";
-    [ObservableProperty] private string _cancelText = "No";
-    [ObservableProperty] private string _iconText = "\xe4e0";
-    [ObservableProperty] private string _statusText = "";
-    [ObservableProperty] private string _progressText = "";
-
-    [ObservableProperty] private double _dialogWidth = double.NaN;
-    [ObservableProperty] private double _dialogHeight = double.NaN;
-
-    [ObservableProperty] private string _downloadDestinationPath = string.Empty;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DownloadSize))]
-    private long _downloadFileSizeBytes = 0;
-
-    private string _newDownloadUrl = string.Empty;
-
-    [ObservableProperty] private bool _isDownloadReady = false;
-
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(CancelCommand))]
     private bool _busy = false;
 
-    public bool NotBusy() => !Busy;
+    [ObservableProperty] private string _cancelText = "No";
 
     [ObservableProperty] private bool _confirmed;
+    [ObservableProperty] private string _confirmText = "Yes";
+    [ObservableProperty] private double _dialogHeight = double.NaN;
+
+    [ObservableProperty] private double _dialogWidth = double.NaN;
+
+    [ObservableProperty] private string _downloadDestinationPath = string.Empty;
+
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(DownloadSize))]
+    private long _downloadFileSizeBytes = 0;
+
+    [ObservableProperty] private string _iconText = "\xe4e0";
+
+    [ObservableProperty] private bool _isDownloadReady = false;
+    [ObservableProperty] private string _message = "Are you sure?";
 
     [ObservableProperty] private ObservableCollection<NewDownloadItemViewModel> _newDownloadList = new();
 
-    [ObservableProperty] private string _unit = "MB"; // in bytes per second
+    private string _newDownloadUrl = string.Empty;
+    [ObservableProperty] private string _progressText = "";
+    [ObservableProperty] private string _statusText = "";
+
+    [ObservableProperty] private string _title = "Confirm";
+
+    [ObservableProperty] private SizeUnit _unit = SizeUnit.MB; // in bytes per second
+
+    /// <summary>
+    /// Design-time constructor
+    /// </summary>
+    public NewDownloadDialogViewModel()
+    {
+        if (Design.IsDesignMode)
+            OnDesignTimeConstructor();
+    }
+
+    public NewDownloadDialogViewModel(
+        IDialogService dialogService,
+        IDownloadService downloadService)
+    {
+        _dialogService = dialogService;
+        _downloadService = downloadService;
+
+
+        LoadData();
+    }
 
     public string NewDownloadUrl
     {
@@ -60,26 +81,12 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
     {
         get
         {
-            double downloadSize;
-            switch (Unit)
-            {
-                case "KB":
-                    downloadSize = DownloadFileSizeBytes / 1024d;
-                    break;
-                case "MB":
-                    downloadSize = DownloadFileSizeBytes / (1024d * 1024d);
-                    break;
-                case "GB":
-                    downloadSize = DownloadFileSizeBytes / (1024d * 1024d * 1024d);
-                    break;
-                default:
-                    downloadSize = DownloadFileSizeBytes;
-                    break;
-            }
-
+            double downloadSize = ConversionHelper.ConvertBytesToUnit(DownloadFileSizeBytes, Unit);
             return downloadSize;
         }
     }
+
+    public bool NotBusy() => !Busy;
 
     private async Task GetMetadataURLsAsync(string urls)
     {
@@ -107,26 +114,6 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
 
             DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
         }
-    }
-
-    /// <summary>
-    /// Design-time constructor
-    /// </summary>
-    public NewDownloadDialogViewModel()
-    {
-        if (Design.IsDesignMode)
-            OnDesignTimeConstructor();
-    }
-
-    public NewDownloadDialogViewModel(
-        IDialogService dialogService,
-        IDownloadService downloadService)
-    {
-        _dialogService = dialogService;
-        _downloadService = downloadService;
-
-
-        LoadData();
     }
 
     private void OnDesignTimeConstructor()

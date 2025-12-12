@@ -29,7 +29,7 @@
                     <DataGridTemplateColumn Header="File Size" Width="100">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Label Grid.Row="2" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Label HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Label.Content>
                                         <MultiBinding StringFormat=" {0} {1}">
                                             <Binding Path="FileSize" StringFormat="0.00" />

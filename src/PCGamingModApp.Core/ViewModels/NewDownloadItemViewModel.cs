@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using PCGamingModApp.Core.Helpers;
 using PCGamingModApp.Data.Entities;
 using PCGamingModApp.Data.Enums;
 
@@ -6,46 +7,29 @@ namespace PCGamingModApp.Core.ViewModels;
 
 public partial class NewDownloadItemViewModel : ViewModelBase
 {
-    [ObservableProperty] private Guid _id;
-    
-    [ObservableProperty] private string _url = string.Empty;
+    [ObservableProperty] private DateTime _createdAt;
 
     [ObservableProperty] private string _fileName = string.Empty;
-    
-    [ObservableProperty] private string _savePath = string.Empty;
 
     [ObservableProperty] private long _fileSizeInBytes;
-    
-    [ObservableProperty] private DateTime _createdAt;
-    
-    [ObservableProperty] private string _unit = "MB"; // in bytes per second
-    
+    [ObservableProperty] private Guid _id;
+
+    [ObservableProperty] private string _savePath = string.Empty;
+
+    [ObservableProperty] private SizeUnit _unit = SizeUnit.MB; // in bytes per second
+
+    [ObservableProperty] private string _url = string.Empty;
+
     public double FileSize
     {
         get
         {
-            double fileSize;
-            switch (Unit)
-            {
-                case "KB":
-                    fileSize = FileSizeInBytes / 1024d;
-                    break;
-                case "MB":
-                    fileSize = FileSizeInBytes / (1024d * 1024d);
-                    break;
-                case "GB":
-                    fileSize = FileSizeInBytes / (1024d * 1024d * 1024d);
-                    break;
-                default:
-                    fileSize = FileSizeInBytes;
-                    break;
-            }
-
+            double fileSize = ConversionHelper.ConvertBytesToUnit(FileSizeInBytes, Unit);
             return fileSize;
         }
     }
-    
-    
+
+
     /*public async Task GetMetadata()
     {
         // Simulate fetching metadata for the new download URL

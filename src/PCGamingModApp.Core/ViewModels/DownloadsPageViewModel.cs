@@ -21,6 +21,8 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
 
+    [ObservableProperty] private double _currentDownloadSpeed = 0;
+
     [ObservableProperty] private ObservableCollection<DownloadItemViewModel> _downloadsList = [];
     [ObservableProperty] private ObservableCollection<DownloadItemViewModel> _filteredDownloadList = [];
 
@@ -30,16 +32,14 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
 
     [ObservableProperty] private bool _isShowingAllDownloads = true;
     [ObservableProperty] private bool _isShowingCompletedDownloads = false;
-    [ObservableProperty] private bool _sortAscending = true;
-
-    [ObservableProperty] private double _currentDownloadSpeed = 0;
     [ObservableProperty] private double _peakDownloadSpeed = 25;
 
     [ObservableProperty] private double _sessionTraffic = 0;
+    [ObservableProperty] private bool _sortAscending = true;
     [ObservableProperty] private double _totalTraffic = 0;
+    [ObservableProperty] private SizeUnit _trafficUnit = SizeUnit.GB; // in bytes per second
 
-    [ObservableProperty] private string _unit = "MB"; // in bytes per second
-    [ObservableProperty] private string _trafficUnit = "GB"; // in bytes per second
+    [ObservableProperty] private SizeUnit _unit = SizeUnit.MB; // in bytes per second
 
     // Design-time constructor
     public DownloadsPageViewModel() : base(ApplicationPageNames.Downloads)
@@ -192,7 +192,7 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
             //    return true;
             //}
         };
-        
+
         var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
         await _dialogService.ShowDialog(mainViewModel, confirmViewModel);
 
