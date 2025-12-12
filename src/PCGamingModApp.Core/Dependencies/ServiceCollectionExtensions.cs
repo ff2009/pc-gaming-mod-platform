@@ -41,13 +41,14 @@ public static class ServiceCollectionExtensions
         }
         
         public void AddViewModels()
-        {        services.AddSingleton<MainViewModel>();
+        {
+            services.AddSingleton<MainViewModel>();
         
             // UI ViewModels (transient – new instance per view)
             services.AddSingleton<MenuViewModel>();
             services.AddSingleton<GameMenuViewModel>();
             services.AddTransient<GameItemViewModel>(); // each row gets its own VM
-        
+
             services.AddSingleton<HomePageViewModel>();
 
             services.AddTransient<BasePageViewModel>();

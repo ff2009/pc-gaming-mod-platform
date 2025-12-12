@@ -1,0 +1,99 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+             xmlns:vm="clr-namespace:PCGamingModApp.Core.ViewModels;assembly=PCGamingModApp.Core"
+             x:DataType="vm:NewDownloadDialogViewModel"
+             x:Class="PCGamingModApp.Views.NewDownloadDialogView">
+
+    <Design.DataContext>
+        <vm:NewDownloadDialogViewModel />
+    </Design.DataContext>
+
+    <!-- New Download -->
+    <Grid ColumnDefinitions="*, Auto" RowDefinitions="*, *, Auto, Auto" ShowGridLines="False">
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
+            <Label Content="URL" />
+            <TextBox Text="{Binding NewDownloadUrl}"
+                     MinHeight="100" AcceptsReturn="True">
+            </TextBox>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
+            <DataGrid ItemsSource="{Binding NewDownloadList}"
+                      CanUserResizeColumns="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Filename" Binding="{Binding FileName}" Width="200" />
+                    <DataGridTextColumn Header="Save Path" Binding="{Binding SavePath}" Width="200" />
+                    <DataGridTemplateColumn Header="File Size" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Grid.Row="2" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <Label.Content>
+                                        <MultiBinding StringFormat=" {0} {1}">
+                                            <Binding Path="FileSize" StringFormat="0.00" />
+                                            <Binding Path="Unit" />
+                                        </MultiBinding>
+                                    </Label.Content>
+                                </Label>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
+            <Label Content="Destination" />
+            <TextBox Text="{Binding DownloadDestinationPath}">
+                <TextBox.InnerRightContent>
+                    <Button Background="Transparent"
+                            Command="{Binding SelectDownloadDestinationPathCommand}"
+                            Margin="0 0 8 0"
+                            Padding="0">
+                        <Label Classes="icon-only" Content="&#xe248;" />
+                    </Button>
+                </TextBox.InnerRightContent>
+            </TextBox>
+        </StackPanel>
+
+        <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">
+            <Label.Content>
+                <MultiBinding StringFormat=" {0} {1}">
+                    <Binding Path="DownloadSize" StringFormat="0.00" />
+                    <Binding Path="Unit" />
+                </MultiBinding>
+            </Label.Content>
+        </Label>
+
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+            <Button Command="{Binding StartNewDownloadCommand}"
+                    IsEnabled="{Binding IsDownloadReady}"
+                    Margin="0,4,0,4"
+                    MinWidth="80">
+                <StackPanel Orientation="Horizontal">
+                    <Label Classes="icon-only" Content="&#xe20a;" />
+                    <Label Content="Start" />
+                </StackPanel>
+            </Button>
+            <Button Command="{Binding StartDownloadLaterCommand}"
+                    IsEnabled="{Binding IsDownloadReady}"
+                    Margin="0,4,0,4"
+                    MinWidth="80">
+                <StackPanel Orientation="Horizontal">
+                    <Label Classes="icon-only" Content="&#xe248;" />
+                    <Label Content="Later" />
+                </StackPanel>
+            </Button>
+            <Button Command="{Binding CancelCommand}"
+                    Margin="0,4,0,4"
+                    MinWidth="80">
+                <StackPanel Orientation="Horizontal">
+                    <Label Classes="icon-only" Content="&#xe4fa;" />
+                    <Label Content="Cancel" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

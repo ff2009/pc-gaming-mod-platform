@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
-using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -27,26 +26,18 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
 
     // UI state
     [ObservableProperty] private string _filterText = string.Empty;
-    [ObservableProperty] private bool _isDownloadReady = false;
     [ObservableProperty] private bool _isShowingActiveDownloads = false;
 
     [ObservableProperty] private bool _isShowingAllDownloads = true;
     [ObservableProperty] private bool _isShowingCompletedDownloads = false;
-    [ObservableProperty] private bool _isShowingNewDownload = false;
-    [ObservableProperty] private string _newDownloadDestinationPath = string.Empty;
-
-    [ObservableProperty] private string _newDownloadFilename = string.Empty;
-    [ObservableProperty] private double _newDownloadFileSizeBytes = 0;
-
-    [ObservableProperty] private string _newDownloadUrl = string.Empty;
     [ObservableProperty] private bool _sortAscending = true;
-    
+
     [ObservableProperty] private double _currentDownloadSpeed = 0;
     [ObservableProperty] private double _peakDownloadSpeed = 25;
-    
+
     [ObservableProperty] private double _sessionTraffic = 0;
     [ObservableProperty] private double _totalTraffic = 0;
-    
+
     [ObservableProperty] private string _unit = "MB"; // in bytes per second
     [ObservableProperty] private string _trafficUnit = "GB"; // in bytes per second
 
@@ -70,7 +61,7 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
         _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-        _messenger?.RegisterAll(this);
+        _messenger.RegisterAll(this);
         _ = LoadData();
 
         ApplyFiltersAndSorting();
@@ -151,23 +142,6 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
         DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
     }
 
-    public async Task GetMetadata()
-    {
-        // Simulate fetching metadata for the new download URL
-        if (Uri.IsWellFormedUriString(NewDownloadUrl, UriKind.Absolute))
-        {
-            var datamodel = await _downloadService.GetDownloadMetadataAsync(NewDownloadUrl);
-            NewDownloadFileSizeBytes = datamodel.FileSizeInBytes;
-            NewDownloadDestinationPath = datamodel.SavePath;
-            NewDownloadFilename = datamodel.FileName;
-            IsDownloadReady = true;
-            return;
-        }
-
-        NewDownloadFileSizeBytes = 0;
-        IsDownloadReady = false;
-    }
-
     /// <summary>
     /// Filtering / Sorting logic (called whenever a related property changes)
     /// </summary>
@@ -201,55 +175,41 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     }
 
     [RelayCommand]
-    private void NewDownload()
+    private async Task NewDownloadAsync()
     {
-        IsShowingNewDownload = true;
-    }
-
-    [RelayCommand]
-    private async Task SelectDownloadDestinationPathAsync()
-    {
-        if (string.IsNullOrWhiteSpace(NewDownloadDestinationPath) ||
-            !Path.Exists(Path.GetDirectoryName(NewDownloadDestinationPath)))
-            return;
-
-        string? destinationPath = Path.GetDirectoryName(NewDownloadDestinationPath);
-        FolderPickerOpenOptions options = new()
+        var confirmViewModel = new NewDownloadDialogViewModel(_dialogService, _downloadService)
         {
-            Title = "Select download path",
-            AllowMultiple = false,
-            SuggestedFileName = Path.GetFileName(NewDownloadDestinationPath)
+            Title = $"New Download",
+            //OnConfirm = async (vm) => {
+            //    await Task.Delay(2000);
+
+            //    vm.ProgressText = "This is taking a while...";
+
+            //    await Task.Delay(2000);
+
+            //    vm.StatusText = "Oh no, something went wrong...";
+
+            //    return true;
+            //}
         };
+        
+        var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+        await _dialogService.ShowDialog(mainViewModel, confirmViewModel);
 
-        destinationPath = await _dialogService.FolderPickerAsync(options);
-        if (!string.IsNullOrWhiteSpace(destinationPath))
-            NewDownloadDestinationPath = Path.Combine(destinationPath, NewDownloadFilename);
+        // Ignore if we clicked cancel
+        if (!confirmViewModel.Confirmed)
+            return;
     }
 
+
     [RelayCommand]
-    private async Task StartDownloadLaterAsync()
+    private void StartNewDownload()
     {
-        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, NewDownloadDestinationPath);
+        /*var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, NewDownloadDestinationPath);
         var download = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(_serviceProvider, newDownload);
-        DownloadsList.Add(download);
-        IsShowingNewDownload = false;
-        ApplyFiltersAndSorting();
-    }
+        DownloadsList.Add(download);*/
 
-    [RelayCommand]
-    private async Task StartNewDownload()
-    {
-        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, NewDownloadDestinationPath);
-        var download = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(_serviceProvider, newDownload);
-        DownloadsList.Add(download);
-        IsShowingNewDownload = false;
         ApplyFiltersAndSorting();
-    }
-
-    [RelayCommand]
-    private void CancelNewDownload()
-    {
-        IsShowingNewDownload = false;
     }
 
     [RelayCommand]

@@ -56,8 +56,9 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
         if (!Design.IsDesignMode)
         {
             _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
-            _messenger?.Register<DownloadUpdatedMessage>(this);
+            _messenger?.Register(this);
         }
+
         ArgumentNullException.ThrowIfNull(domain);
 
         _id = domain.Id;
@@ -69,12 +70,57 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
         _downloadedBytes = domain.DownloadedBytes;
         _status = domain.Status;
         _createdAt = domain.CreatedAt;
-
     }
 
-    public long FileSize => FileSizeInBytes / 1024 / 1024;
+    public long FileSize
+    {
+        get
+        {
+            long fileSize;
+            switch (Unit)
+            {
+                case "KB":
+                    fileSize = FileSizeInBytes / 1024;
+                    break;
+                case "MB":
+                    fileSize = FileSizeInBytes / (1024 * 1024);
+                    break;
+                case "GB":
+                    fileSize = FileSizeInBytes / (1024 * 1024 * 1024);
+                    break;
+                default:
+                    fileSize = FileSizeInBytes;
+                    break;
+            }
 
-    public long DownloadedSize => DownloadedBytes / 1024 / 1024;
+            return fileSize;
+        }
+    }
+
+    public long DownloadedSize
+    {
+        get
+        {
+            long downloadSize;
+            switch (Unit)
+            {
+                case "KB":
+                    downloadSize = DownloadedBytes / 1024;
+                    break;
+                case "MB":
+                    downloadSize = DownloadedBytes / (1024 * 1024);
+                    break;
+                case "GB":
+                    downloadSize = DownloadedBytes / (1024 * 1024 * 1024);
+                    break;
+                default:
+                    downloadSize = DownloadedBytes;
+                    break;
+            }
+
+            return downloadSize;
+        }
+    }
 
     public double DownloadSpeed
     {
