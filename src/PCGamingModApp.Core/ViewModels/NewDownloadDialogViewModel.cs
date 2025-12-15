@@ -12,6 +12,7 @@ namespace PCGamingModApp.Core.ViewModels;
 
 public partial class NewDownloadDialogViewModel : DialogViewModel
 {
+    private readonly IAppPaths _appPaths;
     private readonly IDialogService _dialogService;
     private readonly IDownloadService _downloadService;
 
@@ -26,7 +27,7 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
 
     [ObservableProperty] private double _dialogWidth = double.NaN;
 
-    [ObservableProperty] private string _downloadDestinationPath = string.Empty;
+    [ObservableProperty] private string _destinationPath = string.Empty;
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(DownloadSize))]
     private long _downloadFileSizeBytes = 0;
@@ -57,12 +58,13 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
     }
 
     public NewDownloadDialogViewModel(
+        IAppPaths appPaths,
         IDialogService dialogService,
         IDownloadService downloadService)
     {
-        _dialogService = dialogService;
-        _downloadService = downloadService;
-
+        _appPaths = appPaths ?? throw new ArgumentNullException(nameof(appPaths));
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
 
         LoadData();
     }
@@ -101,7 +103,7 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
                 NewDownloadList.Add(new NewDownloadItemViewModel()
                 {
                     FileName = datamodel.FileName,
-                    SavePath = datamodel.SavePath,
+                    SavePath = Path.Combine(DestinationPath, datamodel.FileName),
                     FileSizeInBytes = datamodel.FileSizeInBytes,
                     CreatedAt = DateTime.Now
                 });
@@ -109,10 +111,13 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
                 DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
             }
         }
+        
+        IsDownloadReady = NewDownloadList.Count > 0 && NewDownloadList.Count == parts.Length;
     }
 
     private void OnDesignTimeConstructor()
     {
+        DestinationPath = "\\Downloads";
         var downloadListMock = new List<NewDownloadItemViewModel>()
         {
             new()
@@ -151,33 +156,34 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
 
     private void LoadData()
     {
+        DestinationPath = _appPaths.Downloads;
         var downloadListMock = new List<NewDownloadItemViewModel>()
         {
             new()
             {
                 FileName = "OptiScaler_0.7.9.7z",
-                SavePath = "\\Downloads\\OptiScaler_0.7.9.7z",
+                SavePath = $"{DestinationPath}\\OptiScaler_0.7.9.7z",
                 FileSizeInBytes = 123456789,
                 CreatedAt = DateTime.Now
             },
             new()
             {
                 FileName = "Optiscaler_0.9.0-pre5 (20251031).7z",
-                SavePath = "\\Downloads\\Optiscaler_0.9.0-pre5 (20251031).7z",
+                SavePath = $"{DestinationPath}\\Optiscaler_0.9.0-pre5 (20251031).7z",
                 FileSizeInBytes = 324535560,
                 CreatedAt = DateTime.Now
             },
             new()
             {
                 FileName = "dlssg-to-fsr3-0.130-738-0-130-1742150748.zip",
-                SavePath = "\\Downloads\\dlssg-to-fsr3-0.130-738-0-130-1742150748.zip",
+                SavePath = $"{DestinationPath}\\dlssg-to-fsr3-0.130-738-0-130-1742150748.zip",
                 FileSizeInBytes = 23452352,
                 CreatedAt = DateTime.Now
             },
             new()
             {
                 FileName = "FidelityFX-SDK-v1.1.4.zip",
-                SavePath = "\\Downloads\\FidelityFX-SDK-v1.1.4.zip",
+                SavePath = $"{DestinationPath}\\FidelityFX-SDK-v1.1.4.zip",
                 FileSizeInBytes = 223413453,
                 CreatedAt = DateTime.Now
             },
@@ -190,37 +196,41 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
     [RelayCommand]
     private async Task SelectDownloadDestinationPathAsync()
     {
-        if (string.IsNullOrWhiteSpace(DownloadDestinationPath) ||
-            !Path.Exists(Path.GetDirectoryName(DownloadDestinationPath)))
+        if (string.IsNullOrWhiteSpace(DestinationPath) || !Path.Exists(DestinationPath))
             return;
 
-        string? destinationPath = Path.GetDirectoryName(DownloadDestinationPath);
+        // string? previousDestinationPath = DestinationPath;
         FolderPickerOpenOptions options = new()
         {
             Title = "Select download path",
             AllowMultiple = false,
-            SuggestedFileName = Path.GetFileName(DownloadDestinationPath)
         };
 
-        destinationPath = await _dialogService.FolderPickerAsync(options);
-        if (!string.IsNullOrWhiteSpace(destinationPath))
-            DownloadDestinationPath = destinationPath;
+        var tempFolder = await _dialogService.FolderPickerAsync(options);
+        if (!string.IsNullOrWhiteSpace(tempFolder) && Path.Exists(tempFolder))
+            DestinationPath = tempFolder;
+
+        // Update save paths
+        foreach (var download in NewDownloadList)
+        {
+            download.SavePath = Path.Combine(DestinationPath, download.FileName);
+        }
     }
 
     [RelayCommand]
     private async Task StartDownloadLaterAsync()
     {
-        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, DownloadDestinationPath);
+        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, DestinationPath);
     }
 
     [RelayCommand]
     private async Task StartNewDownload()
     {
-        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, DownloadDestinationPath);
+        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, DestinationPath);
     }
 
     [RelayCommand(CanExecute = nameof(NotBusy))]
-    public void Cancel()
+    private void Cancel()
     {
         Confirmed = false;
         Close();

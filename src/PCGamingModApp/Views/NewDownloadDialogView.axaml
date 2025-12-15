@@ -16,12 +16,15 @@
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
             <Label Content="URL" />
             <TextBox Text="{Binding NewDownloadUrl}"
-                     AcceptsReturn="True">
+                     AcceptsReturn="True"
+                     MinHeight="120">
             </TextBox>
         </StackPanel>
 
-        <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding NewDownloadList}"
-                  CanUserResizeColumns="True">
+        <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                  ItemsSource="{Binding NewDownloadList}"
+                  CanUserResizeColumns="True"
+                  MinHeight="120">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Filename" Binding="{Binding FileName}" MinWidth="200" />
                 <DataGridTextColumn Header="Save Path" Binding="{Binding SavePath}" MinWidth="200" />
@@ -42,9 +45,9 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
             <Label Content="Destination" />
-            <TextBox Text="{Binding DownloadDestinationPath}">
+            <TextBox Text="{Binding DestinationPath}">
                 <TextBox.InnerRightContent>
                     <Button Background="Transparent"
                             Command="{Binding SelectDownloadDestinationPathCommand}"

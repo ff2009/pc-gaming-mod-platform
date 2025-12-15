@@ -177,9 +177,9 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     [RelayCommand]
     private async Task NewDownloadAsync()
     {
-        var confirmViewModel = new NewDownloadDialogViewModel(_dialogService, _downloadService)
+        var confirmViewModel = _serviceProvider.GetRequiredService<NewDownloadDialogViewModel>();
+        confirmViewModel.Title = "New Download";
         {
-            Title = $"New Download",
             //OnConfirm = async (vm) => {
             //    await Task.Delay(2000);
 

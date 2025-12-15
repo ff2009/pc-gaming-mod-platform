@@ -55,6 +55,7 @@ public static class ServiceCollectionExtensions
             services.AddTransient<GameSettingsPageViewModel>();
             services.AddTransient<DownloadsPageViewModel>();
             services.AddTransient<DownloadItemViewModel>(); // each row gets its own VM
+            services.AddTransient<NewDownloadDialogViewModel>();
             services.AddTransient<AddOnsPageViewModel>();
             services.AddTransient<SystemPageViewModel>();
             services.AddTransient<AboutPageViewModel>();
