@@ -36,18 +36,24 @@ internal sealed class DialogService(Func<TopLevel?> topLevel) : IDialogService
         if (path == null) return null;
         return path.IsAbsoluteUri ? path.LocalPath : path.OriginalString;
     }
-
-    public async Task<string?> FolderPickerAsync(FolderPickerOpenOptions? options = null)
+    
+    public async Task<string?> FolderPickerAsync(FolderPickerOpenOptions? options,
+        string? suggestedStartLocation = null)
     {
         TopLevel? topLevelVisual = topLevel();
         if (topLevelVisual == null) return null;
-
+        
         options ??= new FolderPickerOpenOptions()
         {
             AllowMultiple = false,
             Title = "Select a folder"
         };
-
+        
+        if (!string.IsNullOrWhiteSpace(suggestedStartLocation))
+        {
+            options.SuggestedStartLocation = await topLevelVisual.StorageProvider.TryGetFolderFromPathAsync(suggestedStartLocation);
+        }
+        
         IReadOnlyList<IStorageFolder> folders = await topLevelVisual.StorageProvider.OpenFolderPickerAsync(options);
 
         Uri? path = folders.FirstOrDefault()?.Path;

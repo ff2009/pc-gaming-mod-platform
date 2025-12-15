@@ -11,5 +11,5 @@ public interface IDialogService
     
     Task<string?> FilePickerAsync(FilePickerOpenOptions? options = null);
     
-    Task<string?> FolderPickerAsync(FolderPickerOpenOptions? options = null);
+    Task<string?> FolderPickerAsync(FolderPickerOpenOptions? options = null, string? suggestedStartLocation = null);
 }
