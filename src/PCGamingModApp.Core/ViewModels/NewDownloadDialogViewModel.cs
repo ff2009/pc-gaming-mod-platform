@@ -14,7 +14,7 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
 {
     private readonly IAppPaths _appPaths;
     private readonly IDialogService _dialogService;
-    private readonly IDownloadService _downloadService;
+    private readonly IDownloadManager _downloadManager;
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(CancelCommand))]
     private bool _busy = false;
@@ -60,11 +60,11 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
     public NewDownloadDialogViewModel(
         IAppPaths appPaths,
         IDialogService dialogService,
-        IDownloadService downloadService)
+        IDownloadManager downloadManager)
     {
         _appPaths = appPaths ?? throw new ArgumentNullException(nameof(appPaths));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
-        _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
+        _downloadManager = downloadManager ?? throw new ArgumentNullException(nameof(downloadManager));
 
         LoadData();
     }
@@ -99,7 +99,7 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
                 if (!regex.IsMatch(url))
                     continue;
 
-                var datamodel = await _downloadService.GetDownloadMetadataAsync(url);
+                var datamodel = await _downloadManager.GetDownloadMetadataAsync(url);
                 NewDownloadList.Add(new NewDownloadItemViewModel()
                 {
                     FileName = datamodel.FileName,
@@ -210,23 +210,33 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
         if (!string.IsNullOrWhiteSpace(tempFolder) && Path.Exists(tempFolder))
             DestinationPath = tempFolder;
 
-        // Update save paths
-        foreach (var download in NewDownloadList)
-        {
-            download.SavePath = Path.Combine(DestinationPath, download.FileName);
-        }
+            // Update download paths
+            foreach (var download in NewDownloadList)
+            {
+                download.SavePath = Path.Combine(DestinationPath, download.FileName);
+            }
     }
 
     [RelayCommand]
     private async Task StartDownloadLaterAsync()
     {
-        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, DestinationPath);
+        var newDownload = await _downloadManager.CreateDownloadAsync(NewDownloadUrl, DestinationPath);
     }
 
     [RelayCommand]
     private async Task StartNewDownload()
     {
-        var newDownload = await _downloadService.CreateDownloadAsync(NewDownloadUrl, DestinationPath);
+        var newDownload = await _downloadManager.CreateDownloadAsync(NewDownloadUrl, DestinationPath);
+    }
+    
+    private async Task<List<Guid>> SaveDownloads()
+    {
+        List<Guid> downloadIds = new();
+        foreach (var download in NewDownloadList)
+        {
+            await _downloadManager.CreateDownloadAsync(download.Url, download.SavePath);
+        }
+        return downloadIds;
     }
 
     [RelayCommand(CanExecute = nameof(NotBusy))]

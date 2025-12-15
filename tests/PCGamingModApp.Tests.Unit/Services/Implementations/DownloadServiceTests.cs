@@ -11,20 +11,20 @@ namespace PCGamingModApp.Tests.Unit.Services.Implementations;
 public class DownloadServiceTests : TestBase
 {
     // private readonly IDownloadManager _downloadManager;
-    private readonly Mock<IDownloadManager> _downloadManager;
-    private readonly Mock<IDownloadRepository> _downloadRepository;
+    private readonly  Mock<IHttpClientFactory> _httpClientFactoryMock = new();
+    private readonly Mock<IDownloadManager> _downloadManager = new();
+    private readonly Mock<IDownloadRepository> _downloadRepository = new();
+    private readonly Mock<IMessenger> _mockMessenger = new();
+    
     private readonly IDownloadService _downloadService;
 
     public DownloadServiceTests()
     {
-        Mock<IAppPaths> appPathsMock = new();
-        Mock<IHttpClientFactory> httpClientFactoryMock = new();
-        _downloadRepository = new();
-        Mock<IMessenger> messengerMock = new();
-        // _downloadManager = new DownloadManager(messengerMock.Object);
-        _downloadManager = new();
-        _downloadService = new DownloadService(appPathsMock.Object, httpClientFactoryMock.Object,
-            _downloadRepository.Object, _downloadManager.Object, messengerMock.Object);
+        _downloadService = new DownloadService(
+            _httpClientFactoryMock.Object,
+            _downloadManager.Object,
+            _downloadRepository.Object, 
+            _mockMessenger.Object);
     }
 
     [Fact]

@@ -17,7 +17,7 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     IRecipient<DownloadDeletedMessage>
 {
     private readonly IDialogService _dialogService;
-    private readonly IDownloadService _downloadService;
+    private readonly IDownloadManager _downloadManager;
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
 
@@ -52,12 +52,13 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
 
     public DownloadsPageViewModel(
         IDialogService dialogService,
+        IDownloadManager downloadManager,
         IDownloadService downloadService,
         IMessenger messenger,
         IServiceProvider serviceProvider) : base(ApplicationPageNames.Downloads)
     {
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
-        _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
+        _downloadManager = downloadManager ?? throw new ArgumentNullException(nameof(downloadManager));
         _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
@@ -126,14 +127,14 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
         };
 
         List<DownloadItemViewModel> vmList = downloadListMock
-            .Select(dm => new DownloadItemViewModel(new DownloadService(null, null, null, null, null), null, dm))
+            .Select(dm => new DownloadItemViewModel(new DownloadService(null, null, null, null), null, dm))
             .ToList();
         DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
     }
 
     private async Task LoadData()
     {
-        var downloads = await _downloadService.GetDownloadsAsync();
+        var downloads = await _downloadManager.GetDownloadsAsync();
         if (!downloads.Any())
             return;
 

@@ -1,18 +1,28 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using PCGamingModApp.Core.Services.Implementations;
+using PCGamingModApp.Core.Services.Interfaces;
 using PCGamingModApp.Data.Entities;
+using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp.Tests.Unit.Services.Implementations;
 
 public class DownloadManagerTests
 {
+    private readonly Mock<IAppPaths> _appPaths = new();
+    private readonly Mock<IHttpClientFactory> _httpClientFactoryMock = new();
+    private readonly Mock<IDownloadRepository> _downloadRepository = new();
     private readonly Mock<IMessenger> _mockMessenger = new();
+    
     private readonly DownloadManager _downloadManager;
 
     public DownloadManagerTests()
     {
-        _downloadManager = new DownloadManager(_mockMessenger.Object);
+        _downloadManager = new DownloadManager(
+            _appPaths.Object,
+            _httpClientFactoryMock.Object,
+            _downloadRepository.Object,
+            _mockMessenger.Object);
     }
 
     [Fact]
@@ -29,7 +39,7 @@ public class DownloadManagerTests
 
         // Assert
         Assert.Multiple(() => { Assert.Equal(2, downloads.Count); });
-        Assert.Contains(downloads, m=> m.Equals(download1.Id));
+        Assert.Contains(downloads, m => m.Equals(download1.Id));
     }
 
     [Fact]
@@ -60,7 +70,7 @@ public class DownloadManagerTests
     {
         // Arrange
         var download = new DownloadDataModel { Id = Guid.NewGuid() };
-        
+
         _downloadManager.StartTracking(download);
 
         // Act
