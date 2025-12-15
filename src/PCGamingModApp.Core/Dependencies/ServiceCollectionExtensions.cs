@@ -55,12 +55,13 @@ public static class ServiceCollectionExtensions
             services.AddTransient<GameSettingsPageViewModel>();
             services.AddTransient<DownloadsPageViewModel>();
             services.AddTransient<DownloadItemViewModel>(); // each row gets its own VM
-            services.AddTransient<NewDownloadDialogViewModel>();
+            services.AddScoped<NewDownloadDialogViewModel>();
             services.AddTransient<AddOnsPageViewModel>();
             services.AddTransient<SystemPageViewModel>();
             services.AddTransient<AboutPageViewModel>();
 
             services.AddTransient<DeveloperSettingsPageViewModel>();
+            services.AddScoped<ConfirmDialogViewModel>();
 
             services.AddSingleton<Func<Type, PageViewModel>>(x => type => type switch
             {
