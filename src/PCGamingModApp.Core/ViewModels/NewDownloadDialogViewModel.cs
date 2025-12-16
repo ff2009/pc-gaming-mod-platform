@@ -102,6 +102,7 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
                 var datamodel = await _downloadManager.GetDownloadMetadataAsync(url);
                 NewDownloadList.Add(new NewDownloadItemViewModel()
                 {
+                    Url = url,
                     FileName = datamodel.FileName,
                     SavePath = Path.Combine(DestinationPath, datamodel.FileName),
                     FileSizeInBytes = datamodel.FileSizeInBytes,
@@ -111,7 +112,7 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
                 DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
             }
         }
-        
+
         IsDownloadReady = NewDownloadList.Count > 0 && NewDownloadList.Count == parts.Length;
     }
 
@@ -210,25 +211,37 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
         if (!string.IsNullOrWhiteSpace(tempFolder) && Path.Exists(tempFolder))
             DestinationPath = tempFolder;
 
-            // Update download paths
-            foreach (var download in NewDownloadList)
-            {
-                download.SavePath = Path.Combine(DestinationPath, download.FileName);
-            }
+        // Update download paths
+        foreach (var download in NewDownloadList)
+        {
+            download.SavePath = Path.Combine(DestinationPath, download.FileName);
+        }
     }
 
     [RelayCommand]
     private async Task StartDownloadLaterAsync()
     {
-        var newDownload = await _downloadManager.CreateDownloadAsync(NewDownloadUrl, DestinationPath);
+        foreach (var download in NewDownloadList)
+        {
+            var newDownload = await _downloadManager.CreateDownloadAsync(download.Url, download.SavePath);
+        }
+
+        Confirmed = true;
+        Close();
     }
 
     [RelayCommand]
     private async Task StartNewDownload()
     {
-        var newDownload = await _downloadManager.CreateDownloadAsync(NewDownloadUrl, DestinationPath);
+        foreach (var download in NewDownloadList)
+        {
+            var newDownload = await _downloadManager.CreateDownloadAsync(download.Url, download.SavePath);
+        }
+
+        Confirmed = true;
+        Close();
     }
-    
+
     private async Task<List<Guid>> SaveDownloads()
     {
         List<Guid> downloadIds = new();
