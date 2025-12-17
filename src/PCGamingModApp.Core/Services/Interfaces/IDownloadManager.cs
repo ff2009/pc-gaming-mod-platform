@@ -9,6 +9,8 @@ public interface IDownloadManager
     Task<List<DownloadDataModel>> GetDownloadsAsync();
     
     Task<DownloadDataModel> GetDownloadMetadataAsync(string url);
+
+    Task<List<DownloadDataModel>> GetAllDownloadsMetadataAsync(string[] urls);
     
     Task<DownloadDataModel> CreateDownloadAsync(string url, string savePath);
     

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PCGamingModApp.Core.Helpers;
@@ -10,18 +11,14 @@ using PCGamingModApp.Data.Enums;
 
 namespace PCGamingModApp.Core.ViewModels;
 
-public partial class NewDownloadDialogViewModel : DialogViewModel
+public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
 {
     private readonly IAppPaths _appPaths;
     private readonly IDialogService _dialogService;
     private readonly IDownloadManager _downloadManager;
 
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(CancelCommand))]
-    private bool _busy = false;
-
     [ObservableProperty] private string _cancelText = "No";
 
-    [ObservableProperty] private bool _confirmed;
     [ObservableProperty] private string _confirmText = "Yes";
     [ObservableProperty] private double _dialogHeight = double.NaN;
 
@@ -41,10 +38,7 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
 
     [ObservableProperty] private string _newDownloadUrl = string.Empty;
 
-    [ObservableProperty] private string _progressText = "";
-    [ObservableProperty] private string _statusText = "";
-
-    [ObservableProperty] private string _title = "Confirm";
+    [ObservableProperty] private string _title = "Download";
 
     [ObservableProperty] private SizeUnit _unit = SizeUnit.MB; // in bytes per second
 
@@ -88,32 +82,36 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
     private async Task GetMetadataURLsAsync(string urls)
     {
         string[] parts = urls.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length > 0)
-        {
-            Regex regex =
-                new Regex(
-                    "(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})(\\.[a-zA-Z0-9]{2,})?");
-            NewDownloadList.Clear();
-            foreach (string url in parts)
-            {
-                if (!regex.IsMatch(url))
-                    continue;
+        if (parts.Length == 0) return;
 
-                var datamodel = await _downloadManager.GetDownloadMetadataAsync(url);
+        // Filter valid URLs upfront
+        Regex regex = new Regex(
+            "(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})(\\.[a-zA-Z0-9]{2,})?");
+        var validUrls = parts.Where(url => regex.IsMatch(url)).ToArray();
+        if (validUrls.Length == 0) return;
+
+        // Fetch all metadata in parallel
+        var metadataList = await _downloadManager.GetAllDownloadsMetadataAsync(validUrls);
+
+        // Update UI-bound properties on the UI thread
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            NewDownloadList.Clear();
+            foreach (var metadata in metadataList)
+            {
                 NewDownloadList.Add(new NewDownloadItemViewModel()
                 {
-                    Url = url,
-                    FileName = datamodel.FileName,
-                    SavePath = Path.Combine(DestinationPath, datamodel.FileName),
-                    FileSizeInBytes = datamodel.FileSizeInBytes,
+                    Url = metadata.Url,
+                    FileName = metadata.FileName,
+                    SavePath = Path.Combine(DestinationPath, metadata.FileName),
+                    FileSizeInBytes = metadata.FileSizeInBytes,
                     CreatedAt = DateTime.Now
                 });
-
-                DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
             }
-        }
 
-        IsDownloadReady = NewDownloadList.Count > 0 && NewDownloadList.Count == parts.Length;
+            DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
+            IsDownloadReady = NewDownloadList.Count == validUrls.Length;
+        });
     }
 
     private void OnDesignTimeConstructor()
@@ -221,25 +219,17 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
     [RelayCommand]
     private async Task StartDownloadLaterAsync()
     {
-        foreach (var download in NewDownloadList)
-        {
-            var newDownload = await _downloadManager.CreateDownloadAsync(download.Url, download.SavePath);
-        }
+        await SaveDownloads();
 
-        Confirmed = true;
-        Close();
+        await ConfirmAsync();
     }
 
     [RelayCommand]
     private async Task StartNewDownload()
     {
-        foreach (var download in NewDownloadList)
-        {
-            var newDownload = await _downloadManager.CreateDownloadAsync(download.Url, download.SavePath);
-        }
-
-        Confirmed = true;
-        Close();
+        await SaveDownloads();
+        
+        await ConfirmAsync();
     }
 
     private async Task<List<Guid>> SaveDownloads()
@@ -249,13 +239,7 @@ public partial class NewDownloadDialogViewModel : DialogViewModel
         {
             await _downloadManager.CreateDownloadAsync(download.Url, download.SavePath);
         }
-        return downloadIds;
-    }
 
-    [RelayCommand(CanExecute = nameof(NotBusy))]
-    private void Cancel()
-    {
-        Confirmed = false;
-        Close();
+        return downloadIds;
     }
 }

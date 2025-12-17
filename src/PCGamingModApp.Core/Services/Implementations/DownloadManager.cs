@@ -38,6 +38,13 @@ internal sealed class DownloadManager(
             CreatedAt = DateTime.Now
         };
     }
+    
+    public async Task<List<DownloadDataModel>> GetAllDownloadsMetadataAsync(string[] urls)
+    {
+        var tasks = urls.Select(GetDownloadMetadataAsync);
+        var results = await Task.WhenAll(tasks);
+        return results.ToList();
+    }
 
     public async Task<DownloadDataModel> CreateDownloadAsync(string url, string savePath)
     {
