@@ -133,6 +133,9 @@ internal sealed class DownloadService(
             int bytesRead;
             var stopwatch = Stopwatch.StartNew();
             long bytesDownloadedThisSecond = 0;
+            
+            download.IsPaused = false;
+            download.Status = DownloadStatus.InProgress;
 
             while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
             {

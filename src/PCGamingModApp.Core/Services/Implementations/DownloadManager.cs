@@ -53,6 +53,10 @@ internal sealed class DownloadManager(
         download.CreatedAt = DateTime.Now;
 
         await downloadRepository.AddDownload(download);
+
+        // Notify the UI after adding
+        messenger.Send(new DownloadAddedMessage(download));
+
         return download;
     }
 
@@ -66,24 +70,12 @@ internal sealed class DownloadManager(
         return _activeDownloads.Keys;
     }
 
-    /// <summary>
-    /// Starts tracking a new download.
-    /// </summary>
-    /// <param name="download">Download to track.</param>
     public void StartTracking(DownloadDataModel download)
     {
         if (!_activeDownloads.TryAdd(download.Id, new DownloadProgressTracker(download)))
             return;
-
-        //_messenger.Send(new DownloadUpdatedMessage(download));
     }
 
-    /// <summary>
-    /// Updates the progress for a download.
-    /// </summary>
-    /// <param name="downloadId">ID of the download.</param>
-    /// <param name="downloadedBytes">Current downloaded bytes.</param>
-    /// <param name="currentSpeed">Current download speed in bytes/second.</param>
     public void UpdateProgress(Guid downloadId, long downloadedBytes, double currentSpeed)
     {
         if (!_activeDownloads.TryGetValue(downloadId, out var tracker))
@@ -94,11 +86,6 @@ internal sealed class DownloadManager(
         messenger.Send(new DownloadUpdatedMessage(download));
     }
 
-    /// <summary>
-    /// Gets the remaining time for a download.
-    /// </summary>
-    /// <param name="downloadId">ID of the download.</param>
-    /// <returns>TimeSpan representing remaining time.</returns>
     public TimeSpan GetRemainingTime(Guid downloadId)
     {
         return _activeDownloads.TryGetValue(downloadId, out var tracker)
@@ -106,15 +93,10 @@ internal sealed class DownloadManager(
             : TimeSpan.Zero;
     }
 
-    /// <summary>
-    /// Stops tracking a download.
-    /// </summary>
-    /// <param name="downloadId">ID of the download.</param>
     public void StopTracking(Guid downloadId)
     {
         if (_activeDownloads.TryRemove(downloadId, out _))
         {
-            //_messenger.Send(new DownloadUpdatedMessage(downloadId));
         }
     }
 }
