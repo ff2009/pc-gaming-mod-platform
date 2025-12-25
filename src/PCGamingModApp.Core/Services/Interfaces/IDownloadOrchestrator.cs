@@ -4,7 +4,7 @@ using PCGamingModApp.Data.Entities;
 
 namespace PCGamingModApp.Core.Services.Interfaces;
 
-public interface IDownloadManager
+public interface IDownloadOrchestrator
 {
     Task<List<DownloadDataModel>> GetDownloadsAsync();
     

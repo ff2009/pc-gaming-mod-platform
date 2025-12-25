@@ -8,19 +8,19 @@ using PCGamingModApp.Tests.Common;
 
 namespace PCGamingModApp.Tests.Unit.Services.Implementations;
 
-public class DownloadServiceTests : TestBase
+public class SingleSingleDownloadServiceTests : TestBase
 {
     // private readonly IDownloadManager _downloadManager;
     private readonly  Mock<IHttpClientFactory> _httpClientFactoryMock = new();
-    private readonly Mock<IDownloadManager> _downloadManager = new();
+    private readonly Mock<IDownloadOrchestrator> _downloadManager = new();
     private readonly Mock<IDownloadRepository> _downloadRepository = new();
     private readonly Mock<IMessenger> _mockMessenger = new();
     
-    private readonly IDownloadService _downloadService;
+    private readonly ISingleDownloadService _singleDownloadService;
 
-    public DownloadServiceTests()
+    public SingleSingleDownloadServiceTests()
     {
-        _downloadService = new DownloadService(
+        _singleDownloadService = new SingleSingleDownloadService(
             _httpClientFactoryMock.Object,
             _downloadManager.Object,
             _downloadRepository.Object, 
@@ -43,7 +43,7 @@ public class DownloadServiceTests : TestBase
         _downloadRepository.Setup(m => m.GetDownloadById(download.Id)).ReturnsAsync(download);
 
         // Act
-        await _downloadService.StartDownloadAsync(download.Id);
+        await _singleDownloadService.StartDownloadAsync(download.Id);
 
         // Assert
         _downloadManager.Verify(m => m.StartTracking(It.IsAny<DownloadDataModel>()), Times.Once);
@@ -66,7 +66,7 @@ public class DownloadServiceTests : TestBase
         _downloadRepository.Setup(m => m.GetDownloadById(download.Id)).ReturnsAsync(download);
 
         // Act
-        await _downloadService.CancelDownloadAsync(download.Id);
+        await _singleDownloadService.CancelDownloadAsync(download.Id);
 
         // Assert
         _downloadManager.Verify(m => m.StopTracking(download.Id), Times.Once);
@@ -82,7 +82,7 @@ public class DownloadServiceTests : TestBase
         _downloadManager.Setup(m => m.GetRemainingTime(downloadId)).Returns(expectedTime);
 
         // Act
-        var remainingTime = _downloadService.GetRemainingTime(downloadId);
+        var remainingTime = _singleDownloadService.GetRemainingTime(downloadId);
 
         // Assert
         Assert.Equal(expectedTime, remainingTime);

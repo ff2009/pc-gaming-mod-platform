@@ -9,11 +9,11 @@ using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-internal sealed class DownloadManager(
+internal sealed class DownloadOrchestrator(
     IAppPaths appPaths,
     IHttpClientFactory httpClientFactory,
     IDownloadRepository downloadRepository, 
-    IMessenger messenger) : IDownloadManager
+    IMessenger messenger) : IDownloadOrchestrator
 {
     private readonly ConcurrentDictionary<Guid, DownloadProgressTracker> _activeDownloads = new();
     

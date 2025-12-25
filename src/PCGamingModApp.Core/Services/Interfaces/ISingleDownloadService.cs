@@ -2,7 +2,7 @@ using PCGamingModApp.Data.Entities;
 
 namespace PCGamingModApp.Core.Services.Interfaces;
 
-public interface IDownloadService
+public interface ISingleDownloadService
 {
     Task StartDownloadAsync(Guid id);
     Task PauseDownloadAsync(Guid id);

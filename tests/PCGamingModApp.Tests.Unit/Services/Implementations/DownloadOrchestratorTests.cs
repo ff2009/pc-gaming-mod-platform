@@ -10,20 +10,20 @@ using PCGamingModApp.Tests.Common.Helpers;
 
 namespace PCGamingModApp.Tests.Unit.Services.Implementations;
 
-public class DownloadManagerTests
+public class DownloadOrchestratorTests
 {
     private readonly Mock<IAppPaths> _appPaths = new();
     private readonly Mock<IHttpClientFactory> _httpClientFactoryMock = new();
     private readonly Mock<IDownloadRepository> _downloadRepository = new();
     private readonly Mock<IMessenger> _mockMessenger = new();
 
-    private readonly DownloadManager _downloadManager;
+    private readonly DownloadOrchestrator _downloadOrchestrator;
 
-    public DownloadManagerTests()
+    public DownloadOrchestratorTests()
     {
         _appPaths.SetupGet(a => a.Downloads).Returns(@"C:\Downloads");
 
-        _downloadManager = new DownloadManager(
+        _downloadOrchestrator = new DownloadOrchestrator(
             _appPaths.Object,
             _httpClientFactoryMock.Object,
             _downloadRepository.Object,
@@ -49,7 +49,7 @@ public class DownloadManagerTests
         _httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
         // Act
-        var metadata = await _downloadManager.GetDownloadMetadataAsync(url);
+        var metadata = await _downloadOrchestrator.GetDownloadMetadataAsync(url);
 
         // Assert
         Assert.Equal(url, metadata.Url);
@@ -78,7 +78,7 @@ public class DownloadManagerTests
 
 
         // Act & Assert
-        await Assert.ThrowsAsync<HttpRequestException>(() => _downloadManager.GetDownloadMetadataAsync(url));
+        await Assert.ThrowsAsync<HttpRequestException>(() => _downloadOrchestrator.GetDownloadMetadataAsync(url));
     }
 
     [Fact]
@@ -87,11 +87,11 @@ public class DownloadManagerTests
         // Arrange
         var download1 = new DownloadDataModel { Id = Guid.NewGuid() };
         var download2 = new DownloadDataModel { Id = Guid.NewGuid() };
-        _downloadManager.StartTracking(download1);
-        _downloadManager.StartTracking(download2);
+        _downloadOrchestrator.StartTracking(download1);
+        _downloadOrchestrator.StartTracking(download2);
 
         // Act
-        var downloads = _downloadManager.GetActiveDownloads();
+        var downloads = _downloadOrchestrator.GetActiveDownloads();
 
         // Assert
         Assert.Multiple(() => { Assert.Equal(2, downloads.Count); });
@@ -102,7 +102,7 @@ public class DownloadManagerTests
     public void GetDownloadsAsync_ReturnsEmptyList_WhenNoDownloadsExist()
     {
         // Act
-        var downloads = _downloadManager.GetActiveDownloads();
+        var downloads = _downloadOrchestrator.GetActiveDownloads();
 
         // Assert
         Assert.Empty(downloads);
@@ -115,10 +115,10 @@ public class DownloadManagerTests
         var download = new DownloadDataModel { Id = Guid.NewGuid() };
 
         // Act
-        _downloadManager.StartTracking(download);
+        _downloadOrchestrator.StartTracking(download);
 
         // Assert
-        Assert.Single(_downloadManager.GetActiveDownloads());
+        Assert.Single(_downloadOrchestrator.GetActiveDownloads());
     }
 
     [Fact]
@@ -127,12 +127,12 @@ public class DownloadManagerTests
         // Arrange
         var download = new DownloadDataModel { Id = Guid.NewGuid() };
 
-        _downloadManager.StartTracking(download);
+        _downloadOrchestrator.StartTracking(download);
 
         // Act
-        _downloadManager.StartTracking(download);
+        _downloadOrchestrator.StartTracking(download);
 
         // Assert
-        Assert.Single(_downloadManager.GetActiveDownloads());
+        Assert.Single(_downloadOrchestrator.GetActiveDownloads());
     }
 }

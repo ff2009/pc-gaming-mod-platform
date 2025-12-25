@@ -12,13 +12,13 @@ namespace PCGamingModApp.Tests.Integration.Services;
 
 public class DownloadWorkflowTests : TestBase
 {
-    private readonly IDownloadManager _downloadManager;
-    private readonly IDownloadService _downloadService;
+    private readonly IDownloadOrchestrator _downloadOrchestrator;
+    private readonly ISingleDownloadService _singleDownloadService;
 
     public DownloadWorkflowTests()
     {
-        _downloadService = ServiceProvider.GetRequiredService<IDownloadService>();
-        _downloadManager = ServiceProvider.GetRequiredService<IDownloadManager>();
+        _singleDownloadService = ServiceProvider.GetRequiredService<ISingleDownloadService>();
+        _downloadOrchestrator = ServiceProvider.GetRequiredService<IDownloadOrchestrator>();
     }
 
 
@@ -49,11 +49,11 @@ public class DownloadWorkflowTests : TestBase
         };
 
         // Act
-        await _downloadService.StartDownloadAsync(download.Id);
-        _downloadManager.UpdateProgress(download.Id, 500000, 10000);
-        await _downloadService.CancelDownloadAsync(download.Id);
+        await _singleDownloadService.StartDownloadAsync(download.Id);
+        _downloadOrchestrator.UpdateProgress(download.Id, 500000, 10000);
+        await _singleDownloadService.CancelDownloadAsync(download.Id);
 
         // Assert
-        Assert.Empty(_downloadManager.GetActiveDownloads());
+        Assert.Empty(_downloadOrchestrator.GetActiveDownloads());
     }
 }

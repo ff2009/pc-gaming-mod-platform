@@ -24,7 +24,7 @@ public class TestBase
             options.UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()));
 
         // Register services for integration tests
-        services.AddTransient<IDownloadService, DownloadService>();
+        services.AddTransient<ISingleDownloadService, SingleSingleDownloadService>();
         services.AddSingleton<IAppPaths, AppPaths>();
         
         var mockHandler = new MockHttpMessageHandler((req, ct) =>
@@ -43,9 +43,9 @@ public class TestBase
         
         services.AddSingleton(mockHttpClientFactory.Object);
         
-        services.AddSingleton<IDownloadManager, DownloadManager>();
+        services.AddSingleton<IDownloadOrchestrator, DownloadOrchestrator>();
         services.AddTransient<IDownloadRepository, DownloadRepository>();
-        services.AddTransient<IDownloadService, DownloadService>();
+        services.AddTransient<ISingleDownloadService, SingleSingleDownloadService>();
         services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         
         ServiceProvider = services.BuildServiceProvider();

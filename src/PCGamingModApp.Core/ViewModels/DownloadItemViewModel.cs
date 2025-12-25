@@ -12,7 +12,7 @@ namespace PCGamingModApp.Core.ViewModels;
 
 public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadUpdatedMessage>
 {
-    private readonly IDownloadService _downloadService;
+    private readonly ISingleDownloadService _singleDownloadService;
     private readonly IMessenger _messenger;
 
     private DateTime _createdAt;
@@ -50,9 +50,9 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
         }
     }
 
-    public DownloadItemViewModel(IDownloadService downloadService, IMessenger messenger, DownloadDataModel domain)
+    public DownloadItemViewModel(ISingleDownloadService singleDownloadService, IMessenger messenger, DownloadDataModel domain)
     {
-        _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
+        _singleDownloadService = singleDownloadService ?? throw new ArgumentNullException(nameof(singleDownloadService));
         if (!Design.IsDesignMode)
         {
             _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
@@ -170,7 +170,7 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
             DownloadedBytes = message.Download.DownloadedBytes;
             DownloadSpeedInBytes = message.Download.DownloadSpeedInBytes;
             Status = message.Download.Status;
-            Eta = _downloadService.GetRemainingTime(Id);
+            Eta = _singleDownloadService.GetRemainingTime(Id);
         }
     }
 
@@ -190,14 +190,14 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
     [RelayCommand]
     private async Task ResumeDownloadAsync()
     {
-        await _downloadService.ResumeDownloadAsync(Id);
+        await _singleDownloadService.ResumeDownloadAsync(Id);
         IsPaused = false;
     }
 
     [RelayCommand]
     private async Task PauseDownloadAsync()
     {
-        await _downloadService.PauseDownloadAsync(Id);
+        await _singleDownloadService.PauseDownloadAsync(Id);
         IsPaused = true;
     }
 
@@ -221,7 +221,7 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
     private async Task CancelDownloadAsync()
     {
         // await _downloadService.CancelDownloadAsync(Id);
-        await _downloadService.DeleteDownloadAsync(Id);
+        await _singleDownloadService.DeleteDownloadAsync(Id);
         _messenger.Send(new DownloadDeletedMessage(Id));
         IsPaused = true;
     }

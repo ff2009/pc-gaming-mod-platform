@@ -9,13 +9,13 @@ using PCGamingModApp.Data.Repositories;
 
 namespace PCGamingModApp.Core.Services.Implementations;
 
-internal sealed class DownloadService(
+internal sealed class SingleSingleDownloadService(
     IHttpClientFactory httpClientFactory,
-    IDownloadManager downloadManager,
+    IDownloadOrchestrator downloadOrchestrator,
     IDownloadRepository downloadRepository,
     IMessenger messenger,
     int maxParallelDownloads = 3)
-    : IDownloadService
+    : ISingleDownloadService
 {
     private readonly SemaphoreSlim _downloadSemaphore = new(maxParallelDownloads);
 
@@ -28,7 +28,7 @@ internal sealed class DownloadService(
                 or DownloadStatus.Failed
             })
         {
-            downloadManager.StartTracking(download);
+            downloadOrchestrator.StartTracking(download);
             _ = DownloadFileAsync(download); // Start download in background
         }
     }
@@ -39,7 +39,7 @@ internal sealed class DownloadService(
         if (download is { Status: DownloadStatus.InProgress })
         {
             download.IsPaused = true;
-            downloadManager.StopTracking(id);
+            downloadOrchestrator.StopTracking(id);
             await downloadRepository.UpdateDownload(download);
         }
     }
@@ -54,7 +54,7 @@ internal sealed class DownloadService(
             })
         {
             download.IsPaused = false;
-            downloadManager.StartTracking(download);
+            downloadOrchestrator.StartTracking(download);
             await downloadRepository.UpdateDownload(download);
             _ = DownloadFileAsync(download); // Restart download
         }
@@ -65,7 +65,7 @@ internal sealed class DownloadService(
         var download = await downloadRepository.GetDownloadById(id);
         if (download != null)
         {
-            downloadManager.StopTracking(id);
+            downloadOrchestrator.StopTracking(id);
             download.Status = DownloadStatus.Canceled;
             await downloadRepository.UpdateDownload(download);
             messenger.Send(new DownloadUpdatedMessage(download)); // Async UI update
@@ -77,14 +77,14 @@ internal sealed class DownloadService(
         var download = await downloadRepository.GetDownloadById(id);
         if (download != null)
         {
-            downloadManager.StopTracking(id);
+            downloadOrchestrator.StopTracking(id);
             await downloadRepository.DeleteDownload(id);
         }
     }
 
     public TimeSpan GetRemainingTime(Guid id)
     {
-        return downloadManager.GetRemainingTime(id);
+        return downloadOrchestrator.GetRemainingTime(id);
     }
 
     // Other methods (e.g., GetDownloadByIdAsync, GetDownloadsAsync) remain unchanged.
@@ -162,7 +162,7 @@ internal sealed class DownloadService(
                 if (stopwatch.ElapsedMilliseconds >= 1000)
                 {
                     download.DownloadSpeedInBytes = bytesDownloadedThisSecond;
-                    downloadManager.UpdateProgress(download.Id, download.DownloadedBytes, bytesDownloadedThisSecond);
+                    downloadOrchestrator.UpdateProgress(download.Id, download.DownloadedBytes, bytesDownloadedThisSecond);
                     stopwatch.Restart();
                     bytesDownloadedThisSecond = 0;
                     messenger.Send(new DownloadUpdatedMessage(download)); // Async UI update

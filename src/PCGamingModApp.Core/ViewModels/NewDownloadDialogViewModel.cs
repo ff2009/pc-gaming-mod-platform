@@ -15,7 +15,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
 {
     private readonly IAppPaths _appPaths;
     private readonly IDialogService _dialogService;
-    private readonly IDownloadManager _downloadManager;
+    private readonly IDownloadOrchestrator _downloadOrchestrator;
 
     [ObservableProperty] private string _cancelText = "No";
 
@@ -54,11 +54,11 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
     public NewDownloadDialogViewModel(
         IAppPaths appPaths,
         IDialogService dialogService,
-        IDownloadManager downloadManager)
+        IDownloadOrchestrator downloadOrchestrator)
     {
         _appPaths = appPaths ?? throw new ArgumentNullException(nameof(appPaths));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
-        _downloadManager = downloadManager ?? throw new ArgumentNullException(nameof(downloadManager));
+        _downloadOrchestrator = downloadOrchestrator ?? throw new ArgumentNullException(nameof(downloadOrchestrator));
 
         LoadData();
     }
@@ -91,7 +91,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         if (validUrls.Length == 0) return;
 
         // Fetch all metadata in parallel
-        var metadataList = await _downloadManager.GetAllDownloadsMetadataAsync(validUrls);
+        var metadataList = await _downloadOrchestrator.GetAllDownloadsMetadataAsync(validUrls);
 
         // Update UI-bound properties on the UI thread
         await Dispatcher.UIThread.InvokeAsync(() =>
@@ -237,7 +237,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         List<Guid> downloadIds = new();
         foreach (var download in NewDownloadList)
         {
-            await _downloadManager.CreateDownloadAsync(download.Url, download.SavePath);
+            await _downloadOrchestrator.CreateDownloadAsync(download.Url, download.SavePath);
         }
 
         return downloadIds;
