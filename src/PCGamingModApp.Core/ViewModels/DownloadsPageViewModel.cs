@@ -53,7 +53,6 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     public DownloadsPageViewModel(
         IDialogService dialogService,
         IDownloadOrchestrator downloadOrchestrator,
-        ISingleDownloadService singleDownloadService,
         IMessenger messenger,
         IServiceProvider serviceProvider) : base(ApplicationPageNames.Downloads)
     {
@@ -63,7 +62,7 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         _messenger.RegisterAll(this);
-        _ = LoadData();
+        LoadData();
 
         ApplyFiltersAndSorting();
     }
@@ -72,8 +71,11 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
 
     public void Receive(DownloadAddedMessage message)
     {
-        var download = message.Download;
-        var downloadItem = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(_serviceProvider, download);
+        var downloadItem = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(
+            _serviceProvider,
+            message.DownloadService,  // Pass the service
+            _messenger);               // Pass the messenger
+
         DownloadsList.Add(downloadItem);
         ApplyFiltersAndSorting();
     }
@@ -127,14 +129,14 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
         };
 
         List<DownloadItemViewModel> vmList = downloadListMock
-            .Select(dm => new DownloadItemViewModel(new SingleSingleDownloadService(null, null, null, null), null, dm))
+            .Select(dm => new DownloadItemViewModel(new SingleDownloadService(dm, null,null,null,null,null), null))
             .ToList();
         DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
     }
 
-    private async Task LoadData()
+    private void LoadData()
     {
-        var downloads = await _downloadOrchestrator.GetDownloadsAsync();
+        var downloads = _downloadOrchestrator.GetDownloadServices();
         if (!downloads.Any())
             return;
 

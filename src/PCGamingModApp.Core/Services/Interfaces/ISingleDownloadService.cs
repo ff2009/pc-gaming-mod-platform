@@ -1,13 +1,27 @@
-using PCGamingModApp.Data.Entities;
+using PCGamingModApp.Data.Enums;
 
 namespace PCGamingModApp.Core.Services.Interfaces;
 
 public interface ISingleDownloadService
 {
-    Task StartDownloadAsync(Guid id);
-    Task PauseDownloadAsync(Guid id);
-    Task ResumeDownloadAsync(Guid id);
-    Task CancelDownloadAsync(Guid id);
-    Task DeleteDownloadAsync(Guid id);
-    TimeSpan GetRemainingTime(Guid id);
+    Guid Id { get; }
+    string FileName { get; }
+    string Url { get; }
+    string SavePath { get; }
+    long FileSizeInBytes { get; }
+    long DownloadedBytes { get; }
+    DownloadStatus Status { get; }
+    DateTime CreatedAt { get; }
+    
+    long CurrentSpeedBytesPerSecond { get; }
+    void UpdateSpeedLimit(long newLimit);
+    
+    Task StartDownloadAsync();
+    void PauseDownload();
+    Task ResumeDownloadAsync();
+    Task CancelDownloadAsync();
+    Task DeleteDownloadAsync();
+    TimeSpan GetRemainingTime();
+    void ValidateDownloadMetadataAsync();
+    Task SplitDownloadIntoPartsAsync(int parts);
 }

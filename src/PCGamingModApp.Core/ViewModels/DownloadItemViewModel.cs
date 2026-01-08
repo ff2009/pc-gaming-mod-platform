@@ -15,32 +15,44 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
     private readonly ISingleDownloadService _singleDownloadService;
     private readonly IMessenger _messenger;
 
-    private DateTime _createdAt;
-
-    [NotifyPropertyChangedFor(nameof(Progress))] [NotifyPropertyChangedFor(nameof(DownloadedSize))] [ObservableProperty]
-    private long _downloadedBytes;
-
-    [NotifyPropertyChangedFor(nameof(DownloadSpeed))] [ObservableProperty]
-    private double _downloadSpeedInBytes; // in bytes per second
-
-    [NotifyPropertyChangedFor(nameof(ETA))] [ObservableProperty]
-    private TimeSpan _eta = TimeSpan.MaxValue;
-
-    [ObservableProperty] private string _fileName = string.Empty;
-
-    [ObservableProperty] private long _fileSizeInBytes;
-
     [ObservableProperty] private Guid _id;
 
-    [ObservableProperty] private bool _isPaused = true;
-    [ObservableProperty] private string _savePath = string.Empty;
+    [ObservableProperty] private string _url;
 
+    [ObservableProperty] private string _fileName;
+
+    [ObservableProperty] private string _savePath;
+
+    [NotifyPropertyChangedFor(nameof(DownloadedSize))] 
+    [NotifyPropertyChangedFor(nameof(Progress))] 
+    [ObservableProperty]
+    private long _downloadedBytes;
+    
+    [NotifyPropertyChangedFor(nameof(FileSize))] 
+    [ObservableProperty]
+    private long _fileSizeInBytes;
+
+    [NotifyPropertyChangedFor(nameof(InProgress))] 
+    [NotifyPropertyChangedFor(nameof(IsResumeButtonVisible))] 
+    [NotifyPropertyChangedFor(nameof(IsPauseButtonVisible))] 
     [ObservableProperty] private DownloadStatus _status;
 
-    [ObservableProperty] private TimeSpan _timeElapsed = TimeSpan.Zero;
+    [ObservableProperty] private DateTime _createdAt;
+    
+    [NotifyPropertyChangedFor(nameof(DownloadSpeed))] 
+    [ObservableProperty]
+    private double _downloadSpeedInBytes; // in bytes per second
 
+    [NotifyPropertyChangedFor(nameof(ETA))] 
+    [ObservableProperty]
+    private TimeSpan _eta = TimeSpan.MaxValue;
+    
     [ObservableProperty] private string _unit = "MB"; // in bytes per second
-    [ObservableProperty] private string _url = string.Empty;
+
+    public bool InProgress => Status == DownloadStatus.InProgress;
+    
+    public bool IsResumeButtonVisible => Status != DownloadStatus.InProgress && Status != DownloadStatus.Completed;
+    public bool IsPauseButtonVisible => Status == DownloadStatus.InProgress;
 
     public DownloadItemViewModel()
     {
@@ -50,7 +62,7 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
         }
     }
 
-    public DownloadItemViewModel(ISingleDownloadService singleDownloadService, IMessenger messenger, DownloadDataModel domain)
+    public DownloadItemViewModel(ISingleDownloadService singleDownloadService, IMessenger messenger)
     {
         _singleDownloadService = singleDownloadService ?? throw new ArgumentNullException(nameof(singleDownloadService));
         if (!Design.IsDesignMode)
@@ -59,17 +71,7 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
             _messenger?.Register(this);
         }
 
-        ArgumentNullException.ThrowIfNull(domain);
-
-        _id = domain.Id;
-        _fileName = domain.FileName;
-        _url = domain.Url;
-        _savePath = domain.SavePath;
-        // Map other properties as needed
-        _fileSizeInBytes = domain.FileSizeInBytes;
-        _downloadedBytes = domain.DownloadedBytes;
-        _status = domain.Status;
-        _createdAt = domain.CreatedAt;
+        LoadData();
     }
 
     public long FileSize
@@ -167,38 +169,49 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
     {
         if (message.Download.Id == Id)
         {
-            DownloadedBytes = message.Download.DownloadedBytes;
-            DownloadSpeedInBytes = message.Download.DownloadSpeedInBytes;
-            Status = message.Download.Status;
-            Eta = _singleDownloadService.GetRemainingTime(Id);
+            DownloadSpeedInBytes = message.CurrentSpeedBytesPerSecond; // From message, not DB
+            DownloadedBytes = _singleDownloadService.DownloadedBytes;
+            Eta = _singleDownloadService.GetRemainingTime();
+            Status = _singleDownloadService.Status;
         }
     }
 
     private void OnDesignTimeConstructor()
     {
-        FileName = "FidelityFX-SDK-v1.1.4.zip";
+        //FileName = "FidelityFX-SDK-v1.1.4.zip";
         FileSizeInBytes = 52428800; // 50 MB
         DownloadedBytes = 34078720; // ~32.5 MB
         Status = DownloadStatus.InProgress;
-        _createdAt = DateTime.Now.AddMinutes(-5);
+        //CreatedAt = DateTime.Now.AddMinutes(-5);
         DownloadSpeedInBytes = 1048576; // 1 MB/s
         Unit = "MB";
         Eta = TimeSpan.FromMinutes(3666);
-        IsPaused = false;
+    }
+
+    private void LoadData()
+    {
+        Id = _singleDownloadService.Id;
+        Url = _singleDownloadService.Url;
+        FileName = _singleDownloadService.FileName;
+        SavePath = _singleDownloadService.SavePath;
+        FileSizeInBytes = _singleDownloadService.FileSizeInBytes;
+        DownloadedBytes = _singleDownloadService.DownloadedBytes;
+        Status = _singleDownloadService.Status;
+        CreatedAt = _singleDownloadService.CreatedAt;
     }
 
     [RelayCommand]
     private async Task ResumeDownloadAsync()
     {
-        await _singleDownloadService.ResumeDownloadAsync(Id);
-        IsPaused = false;
+        await _singleDownloadService.ResumeDownloadAsync();
+        Status = _singleDownloadService.Status;
     }
 
     [RelayCommand]
-    private async Task PauseDownloadAsync()
+    private void PauseDownload()
     {
-        await _singleDownloadService.PauseDownloadAsync(Id);
-        IsPaused = true;
+        _singleDownloadService.PauseDownload();
+        Status = _singleDownloadService.Status;
     }
 
     [RelayCommand]
@@ -220,10 +233,8 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
     [RelayCommand]
     private async Task CancelDownloadAsync()
     {
-        // await _downloadService.CancelDownloadAsync(Id);
-        await _singleDownloadService.DeleteDownloadAsync(Id);
+        await _singleDownloadService.DeleteDownloadAsync();
         _messenger.Send(new DownloadDeletedMessage(Id));
-        IsPaused = true;
     }
 }
 
@@ -233,7 +244,6 @@ public static class DownloadItemViewModelExtensions
     /// Map the Game View Model to the Data Model (useful for persistence)
     /// </summary>
     /// <returns></returns>
-    ///
     extension(DownloadItemViewModel viewModel)
     {
         public DownloadDataModel ToDataModel() => new()
@@ -242,8 +252,10 @@ public static class DownloadItemViewModelExtensions
             FileName = viewModel.FileName,
             Url = viewModel.Url,
             SavePath = viewModel.SavePath,
+            DownloadedBytes = viewModel.DownloadedBytes,
             FileSizeInBytes = viewModel.FileSizeInBytes,
             Status = viewModel.Status,
+            CreatedAt = viewModel.CreatedAt,
         };
     }
 }

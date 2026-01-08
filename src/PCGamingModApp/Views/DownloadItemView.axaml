@@ -15,12 +15,15 @@
                     Margin="4 0">
             <Label Content="{Binding FileName, Mode=OneWay}" />
         </StackPanel>
-
-        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal"
-                    VerticalAlignment="Center" HorizontalAlignment="Right"
-                    Margin="4 0">
-            <Label Content="{Binding Progress, Mode=OneWay, StringFormat=0.00}" />
-            <Label Content="%" />
+        
+        <!-- Downloaded Size / Total Size -->
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" 
+                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Margin="0">
+            <Label Content="{Binding DownloadedSize, Mode=OneWay}" />
+            <Label Content="/" />
+            <Label Content="{Binding FileSize, Mode=OneWay}" />
+            <Label Content="{Binding Unit, Mode=OneWay}" />
         </StackPanel>
 
         <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right"
@@ -29,7 +32,7 @@
             <Button Height="24" Width="24" Background="Transparent"
                     Command="{Binding ResumeDownloadCommand}"
                     Padding="2 2 0 2"
-                    IsVisible="{Binding IsPaused}">
+                    IsVisible="{Binding IsResumeButtonVisible}">
                 <StackPanel Orientation="Horizontal">
                     <Label Classes="icon-only-small" Content="&#xe3d0;" />
                 </StackPanel>
@@ -39,7 +42,7 @@
             <Button Height="24" Width="24" Background="Transparent"
                     Command="{Binding PauseDownloadCommand}"
                     Padding="2 2 0 2"
-                    IsVisible="{Binding !IsPaused}">
+                    IsVisible="{Binding IsPauseButtonVisible}">
                 <StackPanel Orientation="Horizontal">
                     <Label Classes="icon-only-small" Content="&#xe39e;" />
                 </StackPanel>
@@ -71,23 +74,23 @@
             </Button>
         </StackPanel>
 
-        <ProgressBar Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1"
+        <ProgressBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                      Margin="8 0" Height="8"
                      Padding="0"
                      Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}" />
 
-        <StackPanel Grid.Column="0" Grid.Row="2"
-                    Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left"
-                    Margin="4 0">
-            <Label Content="{Binding DownloadedSize, Mode=OneWay}" />
-            <Label Content="/" />
-            <Label Content="{Binding FileSize, Mode=OneWay}" />
-            <Label Content="{Binding Unit, Mode=OneWay}" />
+        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    Margin="4 0"
+                    IsVisible="{Binding InProgress}">
+            <Label Content="{Binding Progress, Mode=OneWay, StringFormat=0.00}" />
+            <Label Content="%" />
         </StackPanel>
-
+        
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal"
                     VerticalAlignment="Center" HorizontalAlignment="Right"
-                    Margin="4 0">
+                    Margin="4 0"
+                    IsVisible="{Binding InProgress}">
             <Label Content="{Binding DownloadSpeed, Mode=OneWay, StringFormat=0.00}" />
             <Label Content="{Binding Unit, Mode=OneWay}" />
             <Label Content="/s" Margin="-7 0" />
@@ -96,7 +99,8 @@
         <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal"
                     VerticalAlignment="Center" HorizontalAlignment="Right"
                     Margin="4 0"
-                    MinWidth="80">
+                    MinWidth="80"
+                    IsVisible="{Binding InProgress}">
             <Label Content="{Binding ETA, Mode=OneWay}" />
         </StackPanel>
     </Grid>

@@ -37,7 +37,7 @@ public static class ServiceCollectionExtensions
         public void AddDownloadServices()
         {
             services.AddSingleton<IDownloadOrchestrator, DownloadOrchestrator>();
-            services.AddTransient<ISingleDownloadService, SingleSingleDownloadService>();
+            services.AddSingleton<IDownloadServiceFactory, DownloadServiceFactory>();
         }
         
         public void AddViewModels()

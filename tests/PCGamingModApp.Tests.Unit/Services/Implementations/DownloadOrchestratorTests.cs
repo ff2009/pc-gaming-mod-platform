@@ -15,6 +15,7 @@ public class DownloadOrchestratorTests
     private readonly Mock<IAppPaths> _appPaths = new();
     private readonly Mock<IHttpClientFactory> _httpClientFactoryMock = new();
     private readonly Mock<IDownloadRepository> _downloadRepository = new();
+    private readonly Mock<IDownloadServiceFactory> _downloadServiceFactory = new();
     private readonly Mock<IMessenger> _mockMessenger = new();
 
     private readonly DownloadOrchestrator _downloadOrchestrator;
@@ -27,6 +28,7 @@ public class DownloadOrchestratorTests
             _appPaths.Object,
             _httpClientFactoryMock.Object,
             _downloadRepository.Object,
+            _downloadServiceFactory.Object,
             _mockMessenger.Object);
     }
 

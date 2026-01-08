@@ -49,9 +49,9 @@ public class DownloadWorkflowTests : TestBase
         };
 
         // Act
-        await _singleDownloadService.StartDownloadAsync(download.Id);
-        _downloadOrchestrator.UpdateProgress(download.Id, 500000, 10000);
-        await _singleDownloadService.CancelDownloadAsync(download.Id);
+        await _singleDownloadService.StartDownloadAsync();
+        //_downloadOrchestrator.UpdateProgress(download.Id, 500000, 10000);
+        await _singleDownloadService.CancelDownloadAsync();
 
         // Assert
         Assert.Empty(_downloadOrchestrator.GetActiveDownloads());

@@ -1,3 +1,4 @@
+using System.Collections;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using PCGamingModApp.Core.Services.Implementations;
@@ -8,23 +9,25 @@ using PCGamingModApp.Tests.Common;
 
 namespace PCGamingModApp.Tests.Unit.Services.Implementations;
 
-public class SingleSingleDownloadServiceTests : TestBase
+public class SingleDownloadServiceTests : TestBase
 {
     // private readonly IDownloadManager _downloadManager;
-    private readonly  Mock<IHttpClientFactory> _httpClientFactoryMock = new();
-    private readonly Mock<IDownloadOrchestrator> _downloadManager = new();
+    private readonly Mock<IHttpClientFactory> _httpClientFactoryMock = new();
+    private readonly Mock<IDownloadOrchestrator> _downloadOrchestrator = new();
     private readonly Mock<IDownloadRepository> _downloadRepository = new();
     private readonly Mock<IMessenger> _mockMessenger = new();
     
     private readonly ISingleDownloadService _singleDownloadService;
 
-    public SingleSingleDownloadServiceTests()
+    public SingleDownloadServiceTests()
     {
-        _singleDownloadService = new SingleSingleDownloadService(
+        _singleDownloadService = new SingleDownloadService(
+            null, // domain model
             _httpClientFactoryMock.Object,
-            _downloadManager.Object,
             _downloadRepository.Object, 
-            _mockMessenger.Object);
+            _mockMessenger.Object,
+            null,
+            null);
     }
 
     [Fact]
@@ -39,15 +42,15 @@ public class SingleSingleDownloadServiceTests : TestBase
             Status = Data.Enums.DownloadStatus.NotStarted
         };
 
-        _downloadManager.Setup(m => m.GetActiveDownloads()).Returns(new List<Guid> { download.Id });
+        _downloadOrchestrator.Setup(m => m.GetActiveDownloads()).Returns(new List<ISingleDownloadService>());
         _downloadRepository.Setup(m => m.GetDownloadById(download.Id)).ReturnsAsync(download);
 
         // Act
-        await _singleDownloadService.StartDownloadAsync(download.Id);
+        await _singleDownloadService.StartDownloadAsync();
 
         // Assert
-        _downloadManager.Verify(m => m.StartTracking(It.IsAny<DownloadDataModel>()), Times.Once);
-        Assert.Single(_downloadManager.Object.GetActiveDownloads());
+        _downloadOrchestrator.Verify(m => m.StartTracking(It.IsAny<DownloadDataModel>()), Times.Once);
+        Assert.Single(_downloadOrchestrator.Object.GetActiveDownloads());
     }
 
     [Fact]
@@ -62,15 +65,15 @@ public class SingleSingleDownloadServiceTests : TestBase
             Status = Data.Enums.DownloadStatus.InProgress
         };
 
-        _downloadManager.Setup(m => m.GetActiveDownloads()).Returns(new List<Guid>());
+        _downloadOrchestrator.Setup(m => m.GetActiveDownloads()).Returns(new List<ISingleDownloadService>());
         _downloadRepository.Setup(m => m.GetDownloadById(download.Id)).ReturnsAsync(download);
 
         // Act
-        await _singleDownloadService.CancelDownloadAsync(download.Id);
+        await _singleDownloadService.CancelDownloadAsync();
 
         // Assert
-        _downloadManager.Verify(m => m.StopTracking(download.Id), Times.Once);
-        Assert.Empty(_downloadManager.Object.GetActiveDownloads());
+        _downloadOrchestrator.Verify(m => m.StopTracking(download.Id), Times.Once);
+        Assert.Empty(_downloadOrchestrator.Object.GetActiveDownloads());
     }
 
     [Fact]
@@ -79,10 +82,9 @@ public class SingleSingleDownloadServiceTests : TestBase
         // Arrange
         var downloadId = Guid.NewGuid();
         var expectedTime = TimeSpan.FromSeconds(30);
-        _downloadManager.Setup(m => m.GetRemainingTime(downloadId)).Returns(expectedTime);
-
+        
         // Act
-        var remainingTime = _singleDownloadService.GetRemainingTime(downloadId);
+        var remainingTime = _singleDownloadService.GetRemainingTime();
 
         // Assert
         Assert.Equal(expectedTime, remainingTime);

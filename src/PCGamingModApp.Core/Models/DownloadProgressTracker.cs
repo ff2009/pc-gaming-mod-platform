@@ -18,7 +18,7 @@ public class DownloadProgressTracker(DownloadDataModel download)
     /// <param name="currentSpeed">Current download speed in bytes/second.</param>
     public void UpdateProgress(long downloadedBytes, double currentSpeed)
     {
-        download.DownloadedBytes = downloadedBytes;
+        //download.DownloadedBytes = downloadedBytes;
         if (_emaSpeed == 0)
             _emaSpeed = (long)currentSpeed; // Initialize EMA
         else
@@ -37,6 +37,4 @@ public class DownloadProgressTracker(DownloadDataModel download)
         long remainingBytes = download.FileSizeInBytes - download.DownloadedBytes;
         return TimeSpan.FromSeconds(remainingBytes / _emaSpeed);
     }
-
-    public DownloadDataModel GetDownload() => download;
 }
