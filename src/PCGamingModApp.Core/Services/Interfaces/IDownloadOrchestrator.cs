@@ -5,6 +5,8 @@ namespace PCGamingModApp.Core.Services.Interfaces;
 
 public interface IDownloadOrchestrator
 {
+    Task InitializeDownloadOrchestrator();
+
     Task<List<DownloadDataModel>> GetAllDownloadsMetadataAsync(string[] urls);
     Task<DownloadDataModel> GetDownloadMetadataAsync(string url);
     Task<List<DownloadDataModel>> GetDownloadsAsync();

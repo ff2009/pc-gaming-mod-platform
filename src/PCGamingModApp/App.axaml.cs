@@ -49,6 +49,7 @@ public partial class App : Application
 
         serviceProvider = services.BuildServiceProvider();
         serviceProvider.InitializeDatabase();
+        serviceProvider.InitializeDownloadManager();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

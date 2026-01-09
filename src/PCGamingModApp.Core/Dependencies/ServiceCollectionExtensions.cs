@@ -9,41 +9,41 @@ namespace PCGamingModApp.Core.Dependencies;
 
 public static class ServiceCollectionExtensions
 {
-    extension (IServiceCollection services)
+    extension(IServiceCollection services)
     {
         public void AddCoreServices()
-        {        
+        {
             // Step 1: Create and initialize AppPaths
             IAppPaths appPaths = new AppPaths();
             appPaths.EnsureCreated();
             appPaths.Migrate();
-        
+
             services.AddHttpClient();
             services.AddSingleton(appPaths);
             services.AddSingleton<IDialogService, DialogService>();
-            services.AddSingleton<IImageCache, SimpleImageCache>(x=>
+            services.AddSingleton<IImageCache, SimpleImageCache>(x =>
                 new SimpleImageCache(Path.Combine(appPaths.GameIcons)));
-        
+
             // Register GameInstallationService
             services.AddTransient<IGameManager, GameManager>();
 
             services.AddSingleton<IIconExtractor, IconExtractorService>();
             services.AddSingleton<IGameIconService, GameIconService>();
             services.AddTransient<ILauncherService, LauncherService>();
-            
+
             services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         }
-        
+
         public void AddDownloadServices()
         {
             services.AddSingleton<IDownloadOrchestrator, DownloadOrchestrator>();
             services.AddSingleton<IDownloadServiceFactory, DownloadServiceFactory>();
         }
-        
+
         public void AddViewModels()
         {
             services.AddSingleton<MainViewModel>();
-        
+
             // UI ViewModels (transient – new instance per view)
             services.AddSingleton<MenuViewModel>();
             services.AddSingleton<GameMenuViewModel>();
@@ -78,6 +78,15 @@ public static class ServiceCollectionExtensions
             });
 
             services.AddSingleton<PageFactory>();
+        }
+    }
+
+    extension(ServiceProvider serviceProvider)
+    {
+        public void InitializeDownloadManager()
+        {
+            var downloadOrchestrator = serviceProvider.GetRequiredService<IDownloadOrchestrator>();
+            downloadOrchestrator.InitializeDownloadOrchestrator();
         }
     }
 }

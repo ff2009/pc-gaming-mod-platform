@@ -21,8 +21,7 @@ public static class ServiceCollectionExtensions
     {
         public void InitializeDatabase()
         {
-            using var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
             dbContext.Database.EnsureCreated();
         }
     }

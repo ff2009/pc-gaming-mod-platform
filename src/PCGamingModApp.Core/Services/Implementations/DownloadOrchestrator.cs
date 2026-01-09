@@ -36,9 +36,13 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
         _downloadRepository = downloadRepository;
         _downloadServiceFactory = downloadServiceFactory;
         _messenger = messenger;
-        
-        var downloads = _downloadRepository.GetAllDownloads();
-        foreach (var download in downloads.Result)
+    }
+
+    public async Task InitializeDownloadOrchestrator()
+    {
+        // Load existing downloads from repository and start tracking them
+        var downloads = await _downloadRepository.GetAllDownloads();
+        foreach (var download in downloads)
         {
             StartTracking(download);
         }
