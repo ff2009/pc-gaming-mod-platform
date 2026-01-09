@@ -137,8 +137,7 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
         return new DownloadStatistics
         {
             TotalDownloads = downloads.Count,
-            SuccessRate = downloads.Count(d => d.Status == DownloadStatus.Completed) / (double)downloads.Count,
-            TotalBandwidthUsed = downloads.Sum(d => d.DownloadedBytes)
+            TotalTrafficInBytes = downloads.Sum(d => d.DownloadedBytes)
         };
     }
 

@@ -14,32 +14,42 @@ using PCGamingModApp.Data.Enums;
 namespace PCGamingModApp.Core.ViewModels;
 
 public partial class DownloadsPageViewModel : PageViewModel, IRecipient<DownloadAddedMessage>,
-    IRecipient<DownloadDeletedMessage>
+    IRecipient<DownloadDeletedMessage>, IRecipient<DownloadStatisticsMessage>
 {
     private readonly IDialogService _dialogService;
     private readonly IDownloadOrchestrator _downloadOrchestrator;
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
 
-    [ObservableProperty] private double _currentDownloadSpeed = 0;
 
     [ObservableProperty] private ObservableCollection<DownloadItemViewModel> _downloadsList = [];
     [ObservableProperty] private ObservableCollection<DownloadItemViewModel> _filteredDownloadList = [];
 
     // UI state
-    [ObservableProperty] private string _filterText = string.Empty;
-    [ObservableProperty] private bool _isShowingActiveDownloads = false;
-
-    [ObservableProperty] private bool _isShowingAllDownloads = true;
-    [ObservableProperty] private bool _isShowingCompletedDownloads = false;
-    [ObservableProperty] private double _peakDownloadSpeed = 25;
-
-    [ObservableProperty] private double _sessionTraffic = 0;
-    [ObservableProperty] private bool _sortAscending = true;
-    [ObservableProperty] private double _totalTraffic = 0;
+    [NotifyPropertyChangedFor(nameof(CurrentDownloadSpeed))] 
+    [ObservableProperty] private long _currentDownloadSpeedInBytes;
+    
+    [NotifyPropertyChangedFor(nameof(PeakDownloadSpeed))] 
+    [ObservableProperty] private long _peakDownloadSpeedInBytes;
+    
+    [NotifyPropertyChangedFor(nameof(SessionTraffic))] 
+    [ObservableProperty] private long _sessionTrafficInBytes;
+    
+    [NotifyPropertyChangedFor(nameof(TotalTraffic))] 
+    [ObservableProperty] private long _totalTrafficInBytes;
+    
     [ObservableProperty] private SizeUnit _trafficUnit = SizeUnit.GB; // in bytes per second
 
     [ObservableProperty] private SizeUnit _unit = SizeUnit.MB; // in bytes per second
+
+    // Filtering / Sorting properties
+    [ObservableProperty] private string _filterText = string.Empty;
+    [ObservableProperty] private bool _isShowingActiveDownloads;
+
+    [ObservableProperty] private bool _isShowingAllDownloads = true;
+    [ObservableProperty] private bool _isShowingCompletedDownloads;
+
+    [ObservableProperty] private bool _sortAscending = true;
 
     // Design-time constructor
     public DownloadsPageViewModel() : base(ApplicationPageNames.Downloads)
@@ -62,33 +72,21 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         _messenger.RegisterAll(this);
-        LoadData();
+        _ = LoadData();
 
         ApplyFiltersAndSorting();
     }
 
     public override string PageTitle => "Downloads";
 
-    public void Receive(DownloadAddedMessage message)
-    {
-        var downloadItem = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(
-            _serviceProvider,
-            message.DownloadService,  // Pass the service
-            _messenger);               // Pass the messenger
 
-        DownloadsList.Add(downloadItem);
-        ApplyFiltersAndSorting();
-    }
+    public long CurrentDownloadSpeed => Helpers.ConversionHelper.ConvertBytesToUnit(CurrentDownloadSpeedInBytes, Unit);
 
-    public void Receive(DownloadDeletedMessage message)
-    {
-        var downloadToRemove = DownloadsList.FirstOrDefault(g => g.Id == message.DownloadId);
-        if (downloadToRemove != null)
-        {
-            DownloadsList.Remove(downloadToRemove);
-            ApplyFiltersAndSorting();
-        }
-    }
+    public long PeakDownloadSpeed => Helpers.ConversionHelper.ConvertBytesToUnit(PeakDownloadSpeedInBytes, Unit);
+
+    public long SessionTraffic => Helpers.ConversionHelper.ConvertBytesToUnit(SessionTrafficInBytes, TrafficUnit);
+
+    public long TotalTraffic => Helpers.ConversionHelper.ConvertBytesToUnit(TotalTrafficInBytes, TrafficUnit);
 
     private void OnDesignTimeConstructor()
     {
@@ -129,13 +127,16 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
         };
 
         List<DownloadItemViewModel> vmList = downloadListMock
-            .Select(dm => new DownloadItemViewModel(new SingleDownloadService(dm, null,null,null,null,null), null))
+            .Select(dm => new DownloadItemViewModel(new SingleDownloadService(dm, null, null, null, null, null), null))
             .ToList();
         DownloadsList = new ObservableCollection<DownloadItemViewModel>(vmList);
     }
 
-    private void LoadData()
+    private async Task LoadData()
     {
+        var statistics = await _downloadOrchestrator.GetSystemStatisticsAsync();
+        TotalTrafficInBytes = statistics.TotalTrafficInBytes;
+
         var downloads = _downloadOrchestrator.GetDownloadServices();
         if (!downloads.Any())
             return;
@@ -194,7 +195,8 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
 
             //    return true;
             //}
-        };
+        }
+        ;
 
         var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
         await _dialogService.ShowDialog(mainViewModel, confirmViewModel);
@@ -219,5 +221,35 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     private void GoToDownloadSettings()
     {
         // TODO
+    }
+
+
+    public void Receive(DownloadAddedMessage message)
+    {
+        var downloadItem = ActivatorUtilities.CreateInstance<DownloadItemViewModel>(
+            _serviceProvider,
+            message.DownloadService, // Pass the service
+            _messenger); // Pass the messenger
+
+        DownloadsList.Add(downloadItem);
+        ApplyFiltersAndSorting();
+    }
+
+    public void Receive(DownloadDeletedMessage message)
+    {
+        var downloadToRemove = DownloadsList.FirstOrDefault(g => g.Id == message.DownloadId);
+        if (downloadToRemove != null)
+        {
+            DownloadsList.Remove(downloadToRemove);
+            ApplyFiltersAndSorting();
+        }
+    }
+
+    public void Receive(DownloadStatisticsMessage message)
+    {
+        CurrentDownloadSpeedInBytes = message.DownloadStatistics.CurrentDownloadSpeedInBytes;
+        PeakDownloadSpeedInBytes = message.DownloadStatistics.PeakDownloadSpeedInBytes;
+        SessionTrafficInBytes = message.DownloadStatistics.SessionTrafficInBytes;
+        TotalTrafficInBytes = message.DownloadStatistics.TotalTrafficInBytes;
     }
 }

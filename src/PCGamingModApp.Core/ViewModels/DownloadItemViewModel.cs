@@ -41,13 +41,13 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
     
     [NotifyPropertyChangedFor(nameof(DownloadSpeed))] 
     [ObservableProperty]
-    private double _downloadSpeedInBytes; // in bytes per second
+    private long _downloadSpeedInBytes; // in bytes per second
 
     [NotifyPropertyChangedFor(nameof(ETA))] 
     [ObservableProperty]
     private TimeSpan _eta = TimeSpan.MaxValue;
     
-    [ObservableProperty] private string _unit = "MB"; // in bytes per second
+    [ObservableProperty] private SizeUnit _unit = SizeUnit.MB; // in bytes per second
 
     public bool InProgress => Status == DownloadStatus.InProgress;
     
@@ -74,80 +74,11 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
         LoadData();
     }
 
-    public long FileSize
-    {
-        get
-        {
-            long fileSize;
-            switch (Unit)
-            {
-                case "KB":
-                    fileSize = FileSizeInBytes / 1024;
-                    break;
-                case "MB":
-                    fileSize = FileSizeInBytes / (1024 * 1024);
-                    break;
-                case "GB":
-                    fileSize = FileSizeInBytes / (1024 * 1024 * 1024);
-                    break;
-                default:
-                    fileSize = FileSizeInBytes;
-                    break;
-            }
+    public long FileSize => Helpers.ConversionHelper.ConvertBytesToUnit(FileSizeInBytes, Unit);
 
-            return fileSize;
-        }
-    }
+    public long DownloadedSize => Helpers.ConversionHelper.ConvertBytesToUnit(DownloadedBytes, Unit);
 
-    public long DownloadedSize
-    {
-        get
-        {
-            long downloadSize;
-            switch (Unit)
-            {
-                case "KB":
-                    downloadSize = DownloadedBytes / 1024;
-                    break;
-                case "MB":
-                    downloadSize = DownloadedBytes / (1024 * 1024);
-                    break;
-                case "GB":
-                    downloadSize = DownloadedBytes / (1024 * 1024 * 1024);
-                    break;
-                default:
-                    downloadSize = DownloadedBytes;
-                    break;
-            }
-
-            return downloadSize;
-        }
-    }
-
-    public double DownloadSpeed
-    {
-        get
-        {
-            double speed;
-            switch (Unit)
-            {
-                case "KB":
-                    speed = DownloadSpeedInBytes / 1024d;
-                    break;
-                case "MB":
-                    speed = DownloadSpeedInBytes / (1024d * 1024d);
-                    break;
-                case "GB":
-                    speed = DownloadSpeedInBytes / (1024d * 1024d * 1024d);
-                    break;
-                default:
-                    speed = DownloadSpeedInBytes;
-                    break;
-            }
-
-            return speed;
-        }
-    }
+    public double DownloadSpeed => Helpers.ConversionHelper.ConvertBytesToUnit(DownloadSpeedInBytes, Unit);
 
     public double Progress =>
         Math.Clamp(Math.Round(DownloadedBytes * 100d / FileSizeInBytes, 2), 0, 100); // as percentage
@@ -184,7 +115,7 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
         Status = DownloadStatus.InProgress;
         //CreatedAt = DateTime.Now.AddMinutes(-5);
         DownloadSpeedInBytes = 1048576; // 1 MB/s
-        Unit = "MB";
+        //Unit = "MB";
         Eta = TimeSpan.FromMinutes(3666);
     }
 

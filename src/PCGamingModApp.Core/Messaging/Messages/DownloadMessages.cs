@@ -19,3 +19,8 @@ public class DownloadDeletedMessage(Guid downloadId)
 {
     public Guid DownloadId { get; } = downloadId;
 }
+
+public class DownloadStatisticsMessage(DownloadStatistics downloadStatistics)
+{
+    public DownloadStatistics DownloadStatistics { get; } = downloadStatistics;
+}

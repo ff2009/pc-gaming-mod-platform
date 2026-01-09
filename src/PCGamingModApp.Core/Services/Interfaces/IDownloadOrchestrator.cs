@@ -15,9 +15,9 @@ public interface IDownloadOrchestrator
     IReadOnlyList<ISingleDownloadService> GetActiveDownloads();
     IReadOnlyList<ISingleDownloadService> GetDownloadServicesByStatus(DownloadStatus status);
 
-    
+
     Task<DownloadDataModel> CreateDownloadAsync(string url, string savePath);
-    
+
     void EnforceConcurrencyLimitAsync(int maxConcurrentDownloads);
     void EnforceSpeedLimitAsync(long maxSpeedBytesPerSecond);
     Task<DownloadStatistics> GetSystemStatisticsAsync();
@@ -28,9 +28,11 @@ public interface IDownloadOrchestrator
     void ReportBandwidthUsage(long speed);
 }
 
-public class DownloadStatistics
+public struct DownloadStatistics
 {
-    public int TotalDownloads { get; set; }
-    public double SuccessRate { get; set; }
-    public long TotalBandwidthUsed { get; set; }
+    public int TotalDownloads;
+    public long CurrentDownloadSpeedInBytes;
+    public long PeakDownloadSpeedInBytes;
+    public long SessionTrafficInBytes;
+    public long TotalTrafficInBytes;
 }
