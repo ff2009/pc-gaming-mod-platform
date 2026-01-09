@@ -6,5 +6,11 @@ public enum SizeUnit
     KB,
     MB,
     GB,
-    TB
+    TB,
+    PB,
+    EB,
+    ZB,
+    YB,
+    RB,
+    QR
 }
