@@ -10,7 +10,7 @@ using PCGamingModApp.Data.Enums;
 
 namespace PCGamingModApp.Core.ViewModels;
 
-public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadUpdatedMessage>
+public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadStatusUpdatedMessage>, IRecipient<DownloadProgressUpdatedMessage>
 {
     private readonly ISingleDownloadService _singleDownloadService;
     private readonly IMessenger _messenger;
@@ -68,7 +68,7 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
         if (!Design.IsDesignMode)
         {
             _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
-            _messenger?.Register(this);
+            _messenger?.Register<DownloadItemViewModel, DownloadStatusUpdatedMessage>(this, (r, m) => r.Receive(m));
         }
 
         LoadData();
@@ -100,10 +100,39 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
     {
         if (message.Download.Id == Id)
         {
-            DownloadSpeedInBytes = message.CurrentSpeedBytesPerSecond; // From message, not DB
+            //DownloadSpeedInBytes = message.CurrentSpeedBytesPerSecond;
             DownloadedBytes = _singleDownloadService.DownloadedBytes;
             Eta = _singleDownloadService.GetRemainingTime();
             Status = _singleDownloadService.Status;
+        }
+    }
+
+    public void Receive(DownloadStatusUpdatedMessage message)
+    {
+        if (message.DownloadId == Id)
+        {
+            Status = message.Status;
+            switch (message.Status)
+            {
+                case DownloadStatus.InProgress:
+                    _messenger.Register<DownloadItemViewModel, DownloadProgressUpdatedMessage>(this,
+                        (r, m) => r.Receive(m));
+                    break;
+                
+                default:
+                    _messenger.Unregister<DownloadProgressUpdatedMessage>(this);
+                    break;
+            }
+        }
+    }
+
+    public void Receive(DownloadProgressUpdatedMessage message)
+    {
+        if (message.DownloadId == Id)
+        {
+            DownloadSpeedInBytes = message.CurrentSpeedBytesPerSecond; // From message, not DB
+            DownloadedBytes = message.DownloadedBytes;
+            Eta = message.ETA;
         }
     }
 
@@ -132,17 +161,17 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadU
     }
 
     [RelayCommand]
-    private async Task ResumeDownloadAsync()
+    private void ResumeDownload()
     {
-        await _singleDownloadService.ResumeDownloadAsync();
-        Status = _singleDownloadService.Status;
+        _singleDownloadService.ResumeDownloadAsync();
+        //Status = _singleDownloadService.Status;
     }
 
     [RelayCommand]
     private void PauseDownload()
     {
         _singleDownloadService.PauseDownload();
-        Status = _singleDownloadService.Status;
+        //Status = _singleDownloadService.Status;
     }
 
     [RelayCommand]

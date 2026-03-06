@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using PCGamingModApp.Data.Entities;
 
 namespace PCGamingModApp.Core.Models;
@@ -12,17 +13,40 @@ public class DownloadProgressTracker(DownloadDataModel download)
     private long _emaSpeed = 0;
 
     /// <summary>
-    /// Updates the progress and recalculates EMA speed.
+    /// Total time elapsed since the download started
+    /// </summary>
+    private Stopwatch _stopwatch = Stopwatch.StartNew();
+    
+    /// <summary>
+    /// Current download speed in bytes per second
+    /// </summary>
+    public long CurrentSpeedBytesPerSecond { get; private set; } = 0;
+    
+    private const int WindowSize = 10; // 10 seconds
+    private Queue<(long Bytes, DateTime Timestamp)> _speedWindow = new();
+
+    /// <summary>
+    /// Updates the progress and recalculates the average speed over the last 60 seconds.
     /// </summary>
     /// <param name="downloadedBytes">Current downloaded bytes.</param>
-    /// <param name="currentSpeed">Current download speed in bytes/second.</param>
-    public void UpdateProgress(long downloadedBytes, double currentSpeed)
+    public void UpdateProgress(long downloadedBytes)
     {
-        //download.DownloadedBytes = downloadedBytes;
+        _speedWindow.Enqueue((downloadedBytes, DateTime.Now));
+
+        // Remove samples outside the window
+        while (_speedWindow.Count > 0 && (DateTime.Now - _speedWindow.Peek().Timestamp).TotalSeconds > WindowSize)
+            _speedWindow.Dequeue();
+
+        // Calculate the elapsed time
+        var elapsedTime = (DateTime.Now - _speedWindow.Peek().Timestamp).TotalSeconds;
+
+        // Calculate the average speed over the last 60 seconds
+        CurrentSpeedBytesPerSecond = (long)(_speedWindow.Sum(s => s.Bytes) / elapsedTime);
+
         if (_emaSpeed == 0)
-            _emaSpeed = (long)currentSpeed; // Initialize EMA
+            _emaSpeed = CurrentSpeedBytesPerSecond; // Initialize EMA
         else
-            _emaSpeed = (long)(currentSpeed * SmoothingFactor + _emaSpeed * (1 - SmoothingFactor));
+            _emaSpeed = (long)(CurrentSpeedBytesPerSecond * SmoothingFactor + _emaSpeed * (1 - SmoothingFactor));
     }
 
     /// <summary>

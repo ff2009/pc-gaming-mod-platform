@@ -31,8 +31,7 @@ internal sealed class SingleDownloadService : ISingleDownloadService
     public DownloadStatus Status => this._download.Status;
     public DateTime CreatedAt => this._download.CreatedAt;
 
-    private long _currentSpeedBytesPerSecond; // Runtime-only, not persisted
-    public long CurrentSpeedBytesPerSecond => _currentSpeedBytesPerSecond;
+    public long CurrentSpeedBytesPerSecond => _progressTracker.CurrentSpeedBytesPerSecond; //_currentSpeedBytesPerSecond;
 
     public SingleDownloadService(DownloadDataModel download,
         IHttpClientFactory httpClientFactory,
@@ -71,6 +70,7 @@ internal sealed class SingleDownloadService : ISingleDownloadService
         if (_download.Status == DownloadStatus.InProgress)
         {
             _download.Status = DownloadStatus.Paused;
+            _messenger.Send(new DownloadStatusUpdatedMessage(_download.Id, _download.Status));
         }
     }
 
@@ -88,8 +88,9 @@ internal sealed class SingleDownloadService : ISingleDownloadService
     public async Task CancelDownloadAsync()
     {
         _download.Status = DownloadStatus.Canceled;
+        _messenger.Send(new DownloadStatusUpdatedMessage(_download.Id, _download.Status));
         await _downloadRepository.UpdateDownload(_download);
-        _messenger.Send(new DownloadUpdatedMessage(_download, _currentSpeedBytesPerSecond));
+        _messenger.Send(new DownloadUpdatedMessage(_download));
     }
 
     public Task DeleteDownloadAsync()
@@ -151,9 +152,9 @@ internal sealed class SingleDownloadService : ISingleDownloadService
             var buffer = new byte[bufferSize];
             int bytesRead;
             var stopwatch = Stopwatch.StartNew();
-            long bytesDownloadedThisSecond = 0;
 
             _download.Status = DownloadStatus.InProgress;
+            _messenger.Send(new DownloadStatusUpdatedMessage(_download.Id, _download.Status));
             await _downloadRepository.UpdateDownload(_download);
 
             while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
@@ -166,36 +167,39 @@ internal sealed class SingleDownloadService : ISingleDownloadService
 
                 await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
                 _download.DownloadedBytes += bytesRead;
-                bytesDownloadedThisSecond += bytesRead;
-
-                // Report speed to orchestrator
-                _reportBandwidthUsage(bytesDownloadedThisSecond);
+                _progressTracker.UpdateProgress(bytesRead);
 
                 // Apply dynamic throttling
-                if (_currentSpeedLimit > 0 && bytesDownloadedThisSecond > _currentSpeedLimit)
+                if (_currentSpeedLimit > 0 && _progressTracker.CurrentSpeedBytesPerSecond > _currentSpeedLimit)
                     await Task.Delay(100); // Throttle if exceeding fair share
-
-                if (stopwatch.ElapsedMilliseconds >= 1000)
+                
+                // Report speed to orchestrator
+                _reportBandwidthUsage(_progressTracker.CurrentSpeedBytesPerSecond);
+                
+                if (stopwatch.ElapsedMilliseconds >= 100)
                 {
-                    _currentSpeedBytesPerSecond = bytesDownloadedThisSecond;
+                    //_currentSpeedBytesPerSecond = bytesDownloadedThisSecond;
                     stopwatch.Restart();
-                    bytesDownloadedThisSecond = 0;
-                    _progressTracker.UpdateProgress(bytesRead, _currentSpeedBytesPerSecond);
+                    //_progressTracker.UpdateProgress(bytesRead, _currentSpeedBytesPerSecond);
+                    _messenger.Send(new DownloadProgressUpdatedMessage(_download.Id, _progressTracker.CurrentSpeedBytesPerSecond, _download.DownloadedBytes, GetRemainingTime()));
                 }
 
-                _messenger.Send(new DownloadUpdatedMessage(_download, _currentSpeedBytesPerSecond));
+                _messenger.Send(new DownloadUpdatedMessage(_download));
             }
 
+            _messenger.Send(new DownloadProgressUpdatedMessage(_download.Id, _progressTracker.CurrentSpeedBytesPerSecond, _download.DownloadedBytes, GetRemainingTime()));
             _download.Status = DownloadStatus.Completed;
+            _messenger.Send(new DownloadStatusUpdatedMessage(_download.Id, _download.Status));
             _download.CompletedAt = DateTime.Now;
             await _downloadRepository.UpdateDownload(_download);
-            _messenger.Send(new DownloadUpdatedMessage(_download, _currentSpeedBytesPerSecond));
+            _messenger.Send(new DownloadUpdatedMessage(_download));
         }
         catch (Exception ex)
         {
             _download.Status = DownloadStatus.Failed;
+            _messenger.Send(new DownloadStatusUpdatedMessage(_download.Id, _download.Status));
             await _downloadRepository.UpdateDownload(_download);
-            _messenger.Send(new DownloadUpdatedMessage(_download, _currentSpeedBytesPerSecond));
+            _messenger.Send(new DownloadUpdatedMessage(_download));
         }
         finally
         {
