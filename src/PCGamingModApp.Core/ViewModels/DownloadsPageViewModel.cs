@@ -80,13 +80,13 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     public override string PageTitle => "Downloads";
 
 
-    public long CurrentDownloadSpeed => Helpers.ConversionHelper.ConvertBytesToUnit(CurrentDownloadSpeedInBytes, Unit);
+    public double CurrentDownloadSpeed => Helpers.ConversionHelper.ConvertBytesToUnit(CurrentDownloadSpeedInBytes, Unit);
 
-    public long PeakDownloadSpeed => Helpers.ConversionHelper.ConvertBytesToUnit(PeakDownloadSpeedInBytes, Unit);
+    public double PeakDownloadSpeed => Helpers.ConversionHelper.ConvertBytesToUnit(PeakDownloadSpeedInBytes, Unit);
 
-    public long SessionTraffic => Helpers.ConversionHelper.ConvertBytesToUnit(SessionTrafficInBytes, TrafficUnit);
+    public double SessionTraffic => Helpers.ConversionHelper.ConvertBytesToUnit(SessionTrafficInBytes, TrafficUnit);
 
-    public long TotalTraffic => Helpers.ConversionHelper.ConvertBytesToUnit(TotalTrafficInBytes, TrafficUnit);
+    public double TotalTraffic => Helpers.ConversionHelper.ConvertBytesToUnit(TotalTrafficInBytes, TrafficUnit);
 
     private void OnDesignTimeConstructor()
     {

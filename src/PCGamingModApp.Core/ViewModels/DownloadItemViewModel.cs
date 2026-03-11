@@ -74,9 +74,9 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadS
         LoadData();
     }
 
-    public long FileSize => Helpers.ConversionHelper.ConvertBytesToUnit(FileSizeInBytes, Unit);
+    public double FileSize => Helpers.ConversionHelper.ConvertBytesToUnit(FileSizeInBytes, Unit);
 
-    public long DownloadedSize => Helpers.ConversionHelper.ConvertBytesToUnit(DownloadedBytes, Unit);
+    public double DownloadedSize => Helpers.ConversionHelper.ConvertBytesToUnit(DownloadedBytes, Unit);
 
     public double DownloadSpeed => Helpers.ConversionHelper.ConvertBytesToUnit(DownloadSpeedInBytes, Unit);
 

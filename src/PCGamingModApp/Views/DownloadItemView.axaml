@@ -20,9 +20,9 @@
         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" 
                     HorizontalAlignment="Right" VerticalAlignment="Center"
                     Margin="0">
-            <Label Content="{Binding DownloadedSize, Mode=OneWay}" />
+            <Label Content="{Binding DownloadedSize, Mode=OneWay, StringFormat=0.00}" />
             <Label Content="/" />
-            <Label Content="{Binding FileSize, Mode=OneWay}" />
+            <Label Content="{Binding FileSize, Mode=OneWay, StringFormat=0.00}" />
             <Label Content="{Binding Unit, Mode=OneWay}" />
         </StackPanel>
 
