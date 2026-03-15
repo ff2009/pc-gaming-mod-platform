@@ -87,6 +87,11 @@ public class DownloadProgressTracker(DownloadDataModel download)
     {
         lock (_lock)
         {
+            if (download.FileSizeInBytes > 0 && download.FileSizeInBytes == download.DownloadedBytes)
+            {
+                _speedWindow.Clear();
+            }
+            
             if (_speedWindow.Count == 0)
             {
                 _currentSpeedBytesPerSecond = 0;
@@ -104,7 +109,7 @@ public class DownloadProgressTracker(DownloadDataModel download)
 
             // Calculate current speed
             var elapsedTime = (now - _speedWindow.Peek().Timestamp).TotalSeconds;
-            if (elapsedTime <= 0)
+            if (elapsedTime <= 0.05) // Clamp to avoid division by very small numbers
             {
                 _currentSpeedBytesPerSecond = 0;
             }
@@ -130,6 +135,11 @@ public class DownloadProgressTracker(DownloadDataModel download)
     {
         lock (_lock)
         {
+            if (download.FileSizeInBytes > 0 && download.FileSizeInBytes == download.DownloadedBytes)
+            {
+                _longTermSpeedWindow.Clear();
+            }
+            
             if (_longTermSpeedWindow.Count == 0)
             {
                 _longTermEmaSpeed = 0;
@@ -147,7 +157,7 @@ public class DownloadProgressTracker(DownloadDataModel download)
 
             // Calculate long-term speed
             var elapsedTime = (now - _longTermSpeedWindow.Peek().Timestamp).TotalSeconds;
-            if (elapsedTime <= 0)
+            if (elapsedTime <= 0.05) // Clamp to avoid division by very small numbers
             {
                 _longTermEmaSpeed = 0;
             }
@@ -173,6 +183,10 @@ public class DownloadProgressTracker(DownloadDataModel download)
         if (LongTermEmaSpeedBytesPerSecond <= 0 || download.FileSizeInBytes <= 0)
             return TimeSpan.Zero;
 
+        
+        if (download.FileSizeInBytes == download.DownloadedBytes)
+            return TimeSpan.Zero;
+        
         long remainingBytes = download.FileSizeInBytes - download.DownloadedBytes;
         return TimeSpan.FromSeconds(remainingBytes / LongTermEmaSpeedBytesPerSecond);
     }
