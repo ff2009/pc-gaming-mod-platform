@@ -15,6 +15,7 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
     private readonly IDownloadRepository _downloadRepository;
     private readonly IDownloadServiceFactory _downloadServiceFactory;
     private readonly IMessenger _messenger;
+    private readonly IDownloadSettingsService _settingsService;
 
     /// <summary>
     /// Store all download services
@@ -29,13 +30,19 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
         IHttpClientFactory httpClientFactory,
         IDownloadRepository downloadRepository,
         IDownloadServiceFactory downloadServiceFactory,
-        IMessenger messenger)
+        IMessenger messenger,
+        IDownloadSettingsService settingsService)
     {
         _appPaths = appPaths;
         _httpClientFactory = httpClientFactory;
         _downloadRepository = downloadRepository;
         _downloadServiceFactory = downloadServiceFactory;
         _messenger = messenger;
+        _settingsService = settingsService;
+        
+        // Register for settings changes
+        _messenger.Register<DownloadSettingsChangedMessage>(this, (recipient, message) => 
+            ApplySettings(message.Settings));
     }
 
     public async Task InitializeDownloadOrchestrator()
@@ -191,5 +198,20 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
         long fairShare = _globalSpeedLimitBytesPerSecond / Math.Max(1, _allDownloads.Count);
         foreach (var service in _allDownloads.Values)
             service.UpdateSpeedLimit(fairShare);
+    }
+    
+    private void ApplySettings(DownloadSettings settings)
+    {
+        // Apply bandwidth settings
+        EnforceSpeedLimitAsync(settings.MaxBandwidthBytesPerSecond);
+        
+        // Apply concurrency settings  
+        EnforceConcurrencyLimitAsync(settings.MaxConcurrentDownloads);
+        
+        // Apply parts per download settings (would need to be implemented in SingleDownloadService)
+        // TODO: Implement parts per download configuration
+        
+        // Apply adaptive bandwidth setting
+        // TODO: Implement adaptive bandwidth logic
     }
 }

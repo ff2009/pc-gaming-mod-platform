@@ -38,6 +38,7 @@ public static class ServiceCollectionExtensions
         {
             services.AddSingleton<IDownloadOrchestrator, DownloadOrchestrator>();
             services.AddSingleton<IDownloadServiceFactory, DownloadServiceFactory>();
+            services.AddSingleton<IDownloadSettingsService, DownloadSettingsService>();
         }
 
         public void AddViewModels()
@@ -62,6 +63,7 @@ public static class ServiceCollectionExtensions
 
             services.AddTransient<DeveloperSettingsPageViewModel>();
             services.AddScoped<ConfirmDialogViewModel>();
+            services.AddTransient<DownloadSettingsPageViewModel>();
 
             services.AddSingleton<Func<Type, PageViewModel>>(x => type => type switch
             {
@@ -72,8 +74,8 @@ public static class ServiceCollectionExtensions
                 _ when type == typeof(AddOnsPageViewModel) => x.GetRequiredService<AddOnsPageViewModel>(),
                 _ when type == typeof(SystemPageViewModel) => x.GetRequiredService<SystemPageViewModel>(),
                 _ when type == typeof(AboutPageViewModel) => x.GetRequiredService<AboutPageViewModel>(),
-                _ when type == typeof(DeveloperSettingsPageViewModel) => x
-                    .GetRequiredService<DeveloperSettingsPageViewModel>(),
+                _ when type == typeof(DeveloperSettingsPageViewModel) => x.GetRequiredService<DeveloperSettingsPageViewModel>(),
+                _ when type == typeof(DownloadSettingsPageViewModel) => x.GetRequiredService<DownloadSettingsPageViewModel>(),
                 _ => throw new InvalidOperationException($"Page of type {type?.FullName} has no view model"),
             });
 

@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
         {
             services.AddScoped<IDownloadRepository, DownloadRepository>();
             services.AddScoped<IGameRepository, GameRepository>();
+            services.AddScoped<IDownloadSettingsRepository, DownloadSettingsRepository>();
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(connectionString));
         }
@@ -23,6 +24,10 @@ public static class ServiceCollectionExtensions
         {
             var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
             dbContext.Database.EnsureCreated();
+            
+            // Initialize default download settings
+            var settingsRepository = serviceProvider.GetRequiredService<IDownloadSettingsRepository>();
+            settingsRepository.InitializeDefaultSettingsAsync().Wait();
         }
     }
 }

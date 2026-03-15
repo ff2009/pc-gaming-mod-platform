@@ -7,6 +7,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<DownloadDataModel> Downloads { get; set; }
     public DbSet<GameDataModel> Games { get; set; }
+    public DbSet<DownloadSettings> DownloadSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,5 +20,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         // Games
         modelBuilder.Entity<GameDataModel>()
             .HasKey(f => f.Id);
+            
+        // Download Settings
+        modelBuilder.Entity<DownloadSettings>()
+            .HasKey(s => s.Id);
     }
 }

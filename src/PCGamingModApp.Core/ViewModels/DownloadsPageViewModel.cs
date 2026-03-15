@@ -20,6 +20,7 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     private readonly IDownloadOrchestrator _downloadOrchestrator;
     private readonly IMessenger _messenger;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IDownloadSettingsService _settingsService;
 
 
     [ObservableProperty] private ObservableCollection<DownloadItemViewModel> _downloadsList = [];
@@ -64,12 +65,14 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
         IDialogService dialogService,
         IDownloadOrchestrator downloadOrchestrator,
         IMessenger messenger,
-        IServiceProvider serviceProvider) : base(ApplicationPageNames.Downloads)
+        IServiceProvider serviceProvider,
+        IDownloadSettingsService settingsService) : base(ApplicationPageNames.Downloads)
     {
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _downloadOrchestrator = downloadOrchestrator ?? throw new ArgumentNullException(nameof(downloadOrchestrator));
         _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
         _messenger.RegisterAll(this);
         _ = LoadData();
@@ -220,7 +223,9 @@ public partial class DownloadsPageViewModel : PageViewModel, IRecipient<Download
     [RelayCommand]
     private void GoToDownloadSettings()
     {
-        // TODO
+        // This would typically be handled by the main navigation system
+        // For now, we'll just show a message or navigate if we had navigation infrastructure
+        // In a real app, this would trigger navigation to DownloadSettingsPageViewModel
     }
 
 
