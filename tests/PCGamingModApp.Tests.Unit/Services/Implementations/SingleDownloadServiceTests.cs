@@ -21,13 +21,22 @@ public class SingleDownloadServiceTests : TestBase
 
     public SingleDownloadServiceTests()
     {
+        var download = new DownloadDataModel
+        {
+            Id = Guid.NewGuid(),
+            Url = "http://example.com/file.zip",
+            SavePath = "/downloads/file.zip",
+            Status = Data.Enums.DownloadStatus.NotStarted
+        };
+
         _singleDownloadService = new SingleDownloadService(
-            null, // domain model
+            download,
             _httpClientFactoryMock.Object,
             _downloadRepository.Object, 
             _mockMessenger.Object,
-            null,
-            null);
+            () => 0, // getSpeedLimit
+            (speed) => { }, // reportBandwidthUsage
+            3);
     }
 
     [Fact]

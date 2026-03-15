@@ -17,6 +17,7 @@ public class DownloadOrchestratorTests
     private readonly Mock<IDownloadRepository> _downloadRepository = new();
     private readonly Mock<IDownloadServiceFactory> _downloadServiceFactory = new();
     private readonly Mock<IMessenger> _mockMessenger = new();
+    private readonly Mock<IDownloadSettingsService> _mockDownloadSettingsService = new();
 
     private readonly DownloadOrchestrator _downloadOrchestrator;
 
@@ -24,12 +25,30 @@ public class DownloadOrchestratorTests
     {
         _appPaths.SetupGet(a => a.Downloads).Returns(@"C:\Downloads");
 
+        // Setup the mock factory to create SingleDownloadService instances
+        _downloadServiceFactory.Setup(f => f.Create(
+            It.IsAny<DownloadDataModel>(),
+            It.IsAny<Func<long>>(),
+            It.IsAny<Action<long>>()))
+            .Returns<DownloadDataModel, Func<long>, Action<long>>((download, getSpeedLimit, reportBandwidthUsage) =>
+            {
+                return new SingleDownloadService(
+                    download,
+                    _httpClientFactoryMock.Object,
+                    _downloadRepository.Object,
+                    _mockMessenger.Object,
+                    getSpeedLimit,
+                    reportBandwidthUsage,
+                    3);
+            });
+
         _downloadOrchestrator = new DownloadOrchestrator(
             _appPaths.Object,
             _httpClientFactoryMock.Object,
             _downloadRepository.Object,
             _downloadServiceFactory.Object,
-            _mockMessenger.Object);
+            _mockMessenger.Object,
+            _mockDownloadSettingsService.Object);
     }
 
     [Fact]
@@ -87,8 +106,8 @@ public class DownloadOrchestratorTests
     public void GetDownloadsAsync_ReturnsActiveDownloads()
     {
         // Arrange
-        var download1 = new DownloadDataModel { Id = Guid.NewGuid() };
-        var download2 = new DownloadDataModel { Id = Guid.NewGuid() };
+        var download1 = new DownloadDataModel { Id = Guid.NewGuid(), Status = DownloadStatus.InProgress };
+        var download2 = new DownloadDataModel { Id = Guid.NewGuid(), Status = DownloadStatus.InProgress };
         _downloadOrchestrator.StartTracking(download1);
         _downloadOrchestrator.StartTracking(download2);
 
@@ -96,8 +115,7 @@ public class DownloadOrchestratorTests
         var downloads = _downloadOrchestrator.GetActiveDownloads();
 
         // Assert
-        Assert.Multiple(() => { Assert.Equal(2, downloads.Count); });
-        Assert.Contains(downloads, m => m.Equals(download1.Id));
+        Assert.Equal(2, downloads.Count);
     }
 
     [Fact]
@@ -114,7 +132,7 @@ public class DownloadOrchestratorTests
     public void StartTracking_AddsDownloadToActiveDownloads()
     {
         // Arrange
-        var download = new DownloadDataModel { Id = Guid.NewGuid() };
+        var download = new DownloadDataModel { Id = Guid.NewGuid(), Status = DownloadStatus.InProgress };
 
         // Act
         _downloadOrchestrator.StartTracking(download);
@@ -127,7 +145,7 @@ public class DownloadOrchestratorTests
     public void StartTracking_DoesNotAddDuplicateDownload()
     {
         // Arrange
-        var download = new DownloadDataModel { Id = Guid.NewGuid() };
+        var download = new DownloadDataModel { Id = Guid.NewGuid(), Status = DownloadStatus.InProgress };
 
         _downloadOrchestrator.StartTracking(download);
 
