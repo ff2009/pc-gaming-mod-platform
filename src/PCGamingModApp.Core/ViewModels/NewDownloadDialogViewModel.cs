@@ -101,6 +101,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
             {
                 NewDownloadList.Add(new NewDownloadItemViewModel()
                 {
+                    Id = metadata.Id,
                     Url = metadata.Url,
                     FileName = metadata.FileName,
                     SavePath = Path.Combine(DestinationPath, metadata.FileName),
@@ -121,6 +122,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         {
             new()
             {
+                Id = Guid.NewGuid(),
                 FileName = "OptiScaler_0.7.9.7z",
                 SavePath = "\\Downloads\\OptiScaler_0.7.9.7z",
                 FileSizeInBytes = 123456789,
@@ -216,6 +218,13 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         }
     }
 
+    [RelayCommand]
+    private void DeleteDownload(Guid id)
+    {
+        if (NewDownloadList.FirstOrDefault(x => x.Id == id) is { } download)
+            NewDownloadList.Remove(download);
+    }
+    
     [RelayCommand]
     private async Task StartDownloadLaterAsync()
     {
