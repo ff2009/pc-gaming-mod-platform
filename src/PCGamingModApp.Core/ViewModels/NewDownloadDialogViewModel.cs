@@ -32,6 +32,9 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
     [ObservableProperty] private string _iconText = "\xe4e0";
 
     [ObservableProperty] private bool _isDownloadReady = false;
+    [ObservableProperty] private bool _isLoadingMetadata = false;
+    [ObservableProperty] private int _metadataProgress = 0;
+    [ObservableProperty] private int _metadataProgressMax = 100;
     [ObservableProperty] private string _message = "Are you sure?";
 
     [ObservableProperty] private ObservableCollection<NewDownloadItemViewModel> _newDownloadList = new();
@@ -72,6 +75,18 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         }
     }
 
+    public string DownloadStatistics
+    {
+        get
+        {
+            if (NewDownloadList.Count == 0)
+                return "No downloads";
+
+            double totalSize = ConversionHelper.ConvertBytesToUnit(DownloadFileSizeBytes, Unit);
+            return $"{NewDownloadList.Count} files, {totalSize:0.00} {Unit}";
+        }
+    }
+
     partial void OnNewDownloadUrlChanged(string value)
     {
         _ = GetMetadataURLsAsync(value);
@@ -90,27 +105,72 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         var validUrls = parts.Where(url => regex.IsMatch(url)).ToArray();
         if (validUrls.Length == 0) return;
 
-        // Fetch all metadata in parallel
-        var metadataList = await _downloadOrchestrator.GetAllDownloadsMetadataAsync(validUrls);
-
-        // Update UI-bound properties on the UI thread
+        // Show progress bar and reset progress
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
+            IsLoadingMetadata = true;
+            MetadataProgress = 0;
+            MetadataProgressMax = validUrls.Length;
             NewDownloadList.Clear();
-            foreach (var metadata in metadataList)
-            {
-                NewDownloadList.Add(new NewDownloadItemViewModel()
-                {
-                    Id = metadata.Id,
-                    Url = metadata.Url,
-                    FileName = metadata.FileName,
-                    SavePath = Path.Combine(DestinationPath, metadata.FileName),
-                    FileSizeInBytes = metadata.FileSizeInBytes,
-                    CreatedAt = DateTime.Now
-                });
-            }
+        });
 
-            DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
+        // Fetch metadata asynchronously and add to list as they complete
+        var tasks = validUrls.Select<string, Task<object>>(async (url, index) =>
+        {
+            try
+            {
+                var metadata = await _downloadOrchestrator.GetDownloadMetadataAsync(url);
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    var newItem = new NewDownloadItemViewModel()
+                    {
+                        Id = metadata.Id,
+                        Url = metadata.Url,
+                        FileName = metadata.FileName,
+                        SavePath = Path.Combine(DestinationPath, metadata.FileName),
+                        FileSizeInBytes = metadata.FileSizeInBytes,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    NewDownloadList.Add(newItem);
+
+                    MetadataProgress = index + 1;
+                    DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
+                });
+
+                return metadata;
+            }
+            catch (Exception ex)
+            {
+                // Handle error for individual URL - create a failed download item
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    var failedItem = new NewDownloadItemViewModel()
+                    {
+                        Id = Guid.NewGuid(),
+                        Url = url,
+                        FileName = Path.GetFileName(new Uri(url).LocalPath),
+                        SavePath = Path.Combine(DestinationPath, Path.GetFileName(new Uri(url).LocalPath)),
+                        FileSizeInBytes = 0,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    NewDownloadList.Add(failedItem);
+                    MetadataProgress = index + 1;
+                    DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
+                });
+                return null;
+            }
+        });
+
+        // Wait for all tasks to complete
+        var results = await Task.WhenAll(tasks);
+
+        // Hide progress bar when done
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            IsLoadingMetadata = false;
             IsDownloadReady = NewDownloadList.Count == validUrls.Length;
         });
     }
@@ -201,11 +261,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
             return;
 
         // string? previousDestinationPath = DestinationPath;
-        FolderPickerOpenOptions options = new()
-        {
-            Title = "Select download path",
-            AllowMultiple = false,
-        };
+        FolderPickerOpenOptions options = new() { Title = "Select download path", AllowMultiple = false, };
 
         var tempFolder = await _dialogService.FolderPickerAsync(options);
         if (!string.IsNullOrWhiteSpace(tempFolder) && Path.Exists(tempFolder))
@@ -224,7 +280,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         if (NewDownloadList.FirstOrDefault(x => x.Id == id) is { } download)
             NewDownloadList.Remove(download);
     }
-    
+
     [RelayCommand]
     private async Task StartDownloadLaterAsync()
     {
@@ -237,7 +293,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
     private async Task StartNewDownload()
     {
         await SaveDownloads();
-        
+
         await ConfirmAsync();
     }
 

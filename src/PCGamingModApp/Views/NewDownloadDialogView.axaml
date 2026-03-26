@@ -12,13 +12,22 @@
     </Design.DataContext>
 
     <!-- New Download -->
-    <Grid RowDefinitions="Auto, *, *, Auto" ColumnDefinitions="*, Auto" Margin="16" ShowGridLines="False">
+    <Grid RowDefinitions="Auto, *, *, Auto, Auto, Auto" ColumnDefinitions="48, *, Auto, 48" Margin="16" ShowGridLines="False">
         <!-- URL Input -->
-        <Label Grid.Column="0" Grid.ColumnSpan="2"
+        <Label Grid.Column="1" Grid.ColumnSpan="2"
                Grid.Row="0"
                Content="URL"
                Margin="8,8,8,0" />
-        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2"
+        
+        <!-- Statistics -->
+        <StackPanel Grid.Column="2" Grid.Row="0"
+              Margin="8,8,8,0"
+              HorizontalAlignment="Right">
+            <Label Grid.Column="0" Content="{Binding DownloadStatistics}"
+                   VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Column="1" Grid.ColumnSpan="2"
                       Grid.Row="1"
                       Margin="8,8,8,0">
             <TextBox Text="{Binding NewDownloadUrl}"
@@ -27,8 +36,24 @@
                      MinHeight="60" />
         </ScrollViewer>
 
+        <!-- Statistics -->
+        <Grid Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3"
+              Margin="8,8,8,0"
+              ColumnDefinitions="*, Auto">
+            <ProgressBar Grid.Column="0"
+                         Minimum="0"
+                         Maximum="{Binding MetadataProgressMax}"
+                         Value="{Binding MetadataProgress}"
+                         IsIndeterminate="False"
+                         Height="2"
+                         Margin="0,4"/>
+            <TextBlock Grid.Column="1"
+                      Text="{Binding MetadataProgress, StringFormat='{}{0}/{1}'}"
+                      VerticalAlignment="Center"/>
+        </Grid>
+
         <!-- File List -->
-        <DataGrid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2"
+        <DataGrid Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2"
                   ItemsSource="{Binding NewDownloadList}"
                   CanUserResizeColumns="True"
                   MinHeight="200"
@@ -67,10 +92,9 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-
         <!-- Destination Path -->
-        <Grid Grid.Column="0"
-              Grid.Row="3"
+        <Grid Grid.Column="1"
+              Grid.Row="4"
               ColumnDefinitions="Auto, *"
               Margin="8,8,8,0">
             <Label Grid.Column="0" Content="Destination:"
@@ -92,8 +116,8 @@
         </Grid>
 
         <!-- Action Buttons -->
-        <StackPanel Grid.Column="1"
-                    Grid.Row="3" Orientation="Horizontal"
+        <StackPanel Grid.Column="2"
+                    Grid.Row="4" Orientation="Horizontal"
                     Margin="8,8,8,0"
                     HorizontalAlignment="Right"
                     MinWidth="120">

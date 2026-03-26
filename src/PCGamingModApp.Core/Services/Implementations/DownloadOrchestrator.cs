@@ -39,9 +39,9 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
         _downloadServiceFactory = downloadServiceFactory;
         _messenger = messenger;
         _settingsService = settingsService;
-        
+
         // Register for settings changes
-        _messenger.Register<DownloadSettingsChangedMessage>(this, (recipient, message) => 
+        _messenger.Register<DownloadSettingsChangedMessage>(this, (recipient, message) =>
             ApplySettings(message.Settings));
     }
 
@@ -82,7 +82,6 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
         var contentLength = response.Content.Headers.ContentLength ?? 0;
         var fileName = Path.GetFileName(new Uri(url).LocalPath);
         var savePath = Path.Combine(_appPaths.Downloads, fileName);
-
         return new DownloadDataModel
         {
             Url = url,
@@ -147,8 +146,7 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
         var downloads = await _downloadRepository.GetAllDownloads();
         return new DownloadStatistics
         {
-            TotalDownloads = downloads.Count,
-            TotalTrafficInBytes = downloads.Sum(d => d.DownloadedBytes)
+            TotalDownloads = downloads.Count, TotalTrafficInBytes = downloads.Sum(d => d.DownloadedBytes)
         };
     }
 
@@ -199,18 +197,18 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
         foreach (var service in _allDownloads.Values)
             service.UpdateSpeedLimit(fairShare);
     }
-    
+
     private void ApplySettings(DownloadSettings settings)
     {
         // Apply bandwidth settings
         EnforceSpeedLimitAsync(settings.MaxBandwidthBytesPerSecond);
-        
+
         // Apply concurrency settings  
         EnforceConcurrencyLimitAsync(settings.MaxConcurrentDownloads);
-        
+
         // Apply parts per download settings (would need to be implemented in SingleDownloadService)
         // TODO: Implement parts per download configuration
-        
+
         // Apply adaptive bandwidth setting
         // TODO: Implement adaptive bandwidth logic
     }
