@@ -13,7 +13,7 @@
     </Design.DataContext>
 
     <Grid ColumnDefinitions="300, *"
-          RowDefinitions="Auto, Auto, *, Auto">
+          RowDefinitions="Auto, Auto, *, Auto" ShowGridLines="False">
 
         <!-- Logo and app name -->
         <StackPanel Grid.Column="0"
@@ -32,56 +32,66 @@
 
 
         <!-- Search bar -->
-        <StackPanel Grid.Column="0"
-                    Grid.Row="1"
-                    Margin="8"
-                    Orientation="Horizontal"
-                    IsHitTestVisible="True">
-
-            <TextBox HorizontalAlignment="Stretch"
-                     Watermark="Search..."
-                     Width="260"
-                     Text="{Binding FilterText}">
-                <TextBox.InnerLeftContent>
-                    <Button Background="Transparent"
-                            Command="{Binding SearchCommand}"
-                            Margin="8 0 0 0"
-                            Padding="0">
-                        <Label Classes="icon-only" Content="&#xe30c;" />
-                    </Button>
-                </TextBox.InnerLeftContent>
-            </TextBox>
-        </StackPanel>
+        <TextBox Grid.Column="0" Grid.Row="1"
+                 HorizontalAlignment="Stretch"
+                 Margin="8 0"
+                 Watermark="Search..."
+                 Text="{Binding FilterText}">
+            <TextBox.InnerLeftContent>
+                <Button Background="Transparent"
+                        Command="{Binding SearchCommand}"
+                        Margin="8 0 0 0"
+                        Padding="0">
+                    <Label Classes="icon-only" Content="&#xe30c;" />
+                </Button>
+            </TextBox.InnerLeftContent>
+        </TextBox>
 
         <!-- Context section -->
         <ContentControl Grid.Column="0" Grid.Row="2"
                         Margin="8 0"
                         Content="{Binding CurrentContext}" />
 
-        
-        
         <Button Grid.Row="3" Grid.Column="0"
                 Margin="12"
                 Command="{Binding GoToSettingsCommand}"
                 IsVisible="{Binding SideMenuGameMenuVisible}">
             <Label Classes="icon-fill-only" Content="&#xe272;" />
         </Button>
-        
+
         <Button Grid.Row="3" Grid.Column="0"
                 Margin="12"
                 Command="{Binding GoBackCommand}"
                 IsVisible="{Binding !SideMenuGameMenuVisible}">
             <Label Classes="icon-fill-only" Content="&#xe07e;" />
         </Button>
-        
+
         <!-- Main Content section -->
         <ContentControl Grid.Row="0" Grid.Column="1"
                         Grid.RowSpan="4"
                         Content="{Binding CurrentPage}" />
 
-        <Grid Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" Grid.ColumnSpan="2" 
-              Name="DialogOverlay" 
-              IsVisible="{Binding #DialogOverlay.Opacity}" 
+        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" Grid.ColumnSpan="2"
+                Background="{DynamicResource CalendarDatePickerBackground}"
+                IsVisible="{Binding #DialogOverlay.Opacity}"
+                Opacity="{Binding Dialog.IsDialogOpen, FallbackValue=0}">
+
+            <Border.Styles>
+                <Style Selector="Grid">
+                    <Setter Property="Transitions">
+                        <Transitions>
+                            <DoubleTransition Property="Opacity" Duration="0:0:0.1"></DoubleTransition>
+                        </Transitions>
+                    </Setter>
+                </Style>
+            </Border.Styles>
+        </Border>
+
+        <Grid Grid.Row="0" Grid.RowSpan="4" Grid.Column="1"
+              RowDefinitions="96, *, 48"
+              ColumnDefinitions="48, *, 48"
+              Name="DialogOverlay"
+              IsVisible="{Binding #DialogOverlay.Opacity}"
               Opacity="{Binding Dialog.IsDialogOpen, FallbackValue=0}">
 
             <Grid.Styles>
@@ -93,14 +103,15 @@
                     </Setter>
                 </Style>
             </Grid.Styles>
-      
-            <Border Background="Black" Opacity="0.5"/>
-            <ContentControl Content="{Binding Dialog}"
+
+            <ContentControl Grid.Column="1" Grid.Row="1"
+                            Background="{DynamicResource CalendarDatePickerBackground}"
+                            BorderBrush="{DynamicResource CalendarDatePickerBorderBrush}"
+                            BorderThickness="{DynamicResource CalendarDatePickerBorderThemeThickness}"
+                            CornerRadius="8"
+                            Content="{Binding Dialog}"
                             HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            />
+                            VerticalAlignment="Center" />
         </Grid>
-        
-        
     </Grid>
 </UserControl>
