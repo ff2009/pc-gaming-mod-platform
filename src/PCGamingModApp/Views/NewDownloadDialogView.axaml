@@ -12,48 +12,33 @@
     </Design.DataContext>
 
     <!-- New Download -->
-    <Grid RowDefinitions="Auto, *, *, Auto, Auto, Auto" ColumnDefinitions="48, *, Auto, 48" Margin="16" ShowGridLines="False">
-        <!-- URL Input -->
-        <Label Grid.Column="1" Grid.ColumnSpan="2"
+    <Grid RowDefinitions="Auto, *, *, Auto, Auto, Auto" ColumnDefinitions="*, Auto" Margin="16" ShowGridLines="False">
+
+        <Label Grid.Column="0" Grid.ColumnSpan="2"
                Grid.Row="0"
-               Content="URL"
+               Classes="normal"
+               Content="Add new downloads"
                Margin="8,8,8,0" />
-        
+
         <!-- Statistics -->
-        <StackPanel Grid.Column="2" Grid.Row="0"
-              Margin="8,8,8,0"
-              HorizontalAlignment="Right">
-            <Label Grid.Column="0" Content="{Binding DownloadStatistics}"
-                   VerticalAlignment="Center"/>
+        <StackPanel Grid.Column="1" Grid.Row="0"
+                    Margin="8,8,8,0"
+                    HorizontalAlignment="Right">
+            <Label Content="{Binding DownloadStatistics}"
+                   VerticalAlignment="Center" />
         </StackPanel>
 
-        <ScrollViewer Grid.Column="1" Grid.ColumnSpan="2"
-                      Grid.Row="1"
-                      Margin="8,8,8,0">
-            <TextBox Text="{Binding NewDownloadUrl}"
-                     AcceptsReturn="True"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     MinHeight="60" />
-        </ScrollViewer>
-
-        <!-- Statistics -->
-        <Grid Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3"
-              Margin="8,8,8,0"
-              ColumnDefinitions="*, Auto">
-            <ProgressBar Grid.Column="0"
-                         Minimum="0"
-                         Maximum="{Binding MetadataProgressMax}"
-                         Value="{Binding MetadataProgress}"
-                         IsIndeterminate="False"
-                         Height="2"
-                         Margin="0,4"/>
-            <TextBlock Grid.Column="1"
-                      Text="{Binding MetadataProgress, StringFormat='{}{0}/{1}'}"
-                      VerticalAlignment="Center"/>
-        </Grid>
+        <!-- URL Input -->
+        <TextBox Grid.Column="0" Grid.ColumnSpan="2"
+                 Grid.Row="1"
+                 Margin="8,8,8,0"
+                 Text="{Binding NewDownloadUrl}"
+                 AcceptsReturn="True"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 MinHeight="60" />
 
         <!-- File List -->
-        <DataGrid Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2"
+        <DataGrid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2"
                   ItemsSource="{Binding NewDownloadList}"
                   CanUserResizeColumns="True"
                   MinHeight="200"
@@ -92,8 +77,18 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <!-- Statistics -->
+        <ProgressBar Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3"
+                     Minimum="0"
+                     Maximum="{Binding MetadataProgressMax}"
+                     Value="{Binding MetadataProgress}"
+                     IsIndeterminate="False"
+                     Height="2"
+                     Margin="8,8,8,0" />
+
         <!-- Destination Path -->
-        <Grid Grid.Column="1"
+        <Grid Grid.Column="0"
               Grid.Row="4"
               ColumnDefinitions="Auto, *"
               Margin="8,8,8,0">
@@ -116,7 +111,7 @@
         </Grid>
 
         <!-- Action Buttons -->
-        <StackPanel Grid.Column="2"
+        <StackPanel Grid.Column="1"
                     Grid.Row="4" Orientation="Horizontal"
                     Margin="8,8,8,0"
                     HorizontalAlignment="Right"
