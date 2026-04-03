@@ -12,6 +12,9 @@
 
     <Application.Styles>
         <FluentTheme />
+        <Style Selector=":is(TopLevel)">
+            <Setter Property="FontFamily" Value="{DynamicResource Nunito}" />
+        </Style>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
 
         <StyleInclude Source="Styles/Labels.axaml"></StyleInclude>
@@ -22,7 +25,7 @@
         <ResourceDictionary>
             <valueConverters:StoreToIconConverter x:Key="StoreToIconConverter" />
         </ResourceDictionary>
-        
+        <FontFamily x:Key="Nunito">/Assets/Fonts/Nunito-VariableFont_wght.ttf#Nunito</FontFamily>
         <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
         <FontFamily x:Key="PhosphorFill">/Assets/Fonts/Phosphor-Fill.ttf#Phosphor-Fill</FontFamily>
     </Application.Resources>
