@@ -138,13 +138,13 @@ public partial class DownloadItemViewModel : ViewModelBase, IRecipient<DownloadS
 
     private void OnDesignTimeConstructor()
     {
-        //FileName = "FidelityFX-SDK-v1.1.4.zip";
+        FileName = "FidelityFX-SDK-v1.1.4.zip";
         FileSizeInBytes = 52428800; // 50 MB
         DownloadedBytes = 34078720; // ~32.5 MB
         Status = DownloadStatus.InProgress;
         //CreatedAt = DateTime.Now.AddMinutes(-5);
         DownloadSpeedInBytes = 1048576; // 1 MB/s
-        //Unit = "MB";
+        Unit = SizeUnit.MB;
         Eta = TimeSpan.FromMinutes(3666);
     }
 

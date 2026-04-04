@@ -15,7 +15,7 @@
         <!-- Header -->
         <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
                Classes="h1" Content="{Binding PageTitle}" />
-        
+
         <!-- Statistics -->
         <Grid Grid.Row="0" Grid.Column="2"
               ColumnDefinitions="Auto, Auto, 8, Auto, Auto"
@@ -59,7 +59,7 @@
                 </Label.Content>
             </Label>
         </Grid>
-        
+
         <!-- Filter Buttons -->
         <StackPanel Grid.Column="2" Grid.Row="1"
                     Orientation="Horizontal"
@@ -110,7 +110,7 @@
 
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border Padding="4 0">
+                    <Border Padding="4 -4">
                         <views:DownloadItemView DataContext="{Binding}" />
                     </Border>
                 </DataTemplate>
