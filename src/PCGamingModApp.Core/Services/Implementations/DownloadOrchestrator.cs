@@ -55,6 +55,21 @@ internal sealed class DownloadOrchestrator : IDownloadOrchestrator
         }
     }
 
+    public async Task<DownloadDataModel> AddDownloadAsync(DownloadDataModel download)
+    {
+        download.CreatedAt = DateTime.Now;
+
+        await _downloadRepository.AddDownload(download);
+
+        // Start tracking
+        var service = StartTracking(download);
+
+        // Send message with both download and service
+        _messenger.Send(new DownloadAddedMessage(download, service));
+
+        return download;
+    }
+
     public async Task<DownloadDataModel> CreateDownloadAsync(string url, string savePath)
     {
         var download = await GetDownloadMetadataAsync(url);

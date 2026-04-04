@@ -18,6 +18,7 @@ public interface IDownloadOrchestrator
     IReadOnlyList<ISingleDownloadService> GetDownloadServicesByStatus(DownloadStatus status);
 
 
+    Task<DownloadDataModel> AddDownloadAsync(DownloadDataModel download);
     Task<DownloadDataModel> CreateDownloadAsync(string url, string savePath);
 
     void EnforceConcurrencyLimitAsync(int maxConcurrentDownloads);
