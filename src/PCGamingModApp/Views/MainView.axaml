@@ -13,28 +13,12 @@
     </Design.DataContext>
 
     <Grid ColumnDefinitions="300, *"
-          RowDefinitions="Auto, Auto, *, Auto" ShowGridLines="False">
-
-        <!-- Logo and app name -->
-        <StackPanel Grid.Column="0"
-                    Grid.Row="0"
-                    Orientation="Horizontal"
-                    VerticalAlignment="Center"
-                    Margin="8"
-                    IsHitTestVisible="False">
-            <Image Source="avares://PCGamingModApp/Assets/avalonia-logo.ico" MaxWidth="32" />
-            <TextBlock Text="PC Gaming App"
-                       Margin="8 0"
-                       FontFamily="SegoeUI"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Center" />
-        </StackPanel>
-
+          RowDefinitions="Auto, *, Auto" ShowGridLines="False">
 
         <!-- Search bar -->
-        <TextBox Grid.Column="0" Grid.Row="1"
+        <TextBox Grid.Column="0" Grid.Row="0"
                  HorizontalAlignment="Stretch"
-                 Margin="8 0"
+                 Margin="8 8 8 0"
                  Watermark="Search..."
                  Text="{Binding FilterText}">
             <TextBox.InnerLeftContent>
@@ -48,19 +32,19 @@
         </TextBox>
 
         <!-- Context section -->
-        <ContentControl Grid.Column="0" Grid.Row="2"
-                        Margin="8 0"
+        <ContentControl Grid.Column="0" Grid.Row="1"
+                        Margin="0 0"
                         Content="{Binding CurrentContext}" />
 
-        <Button Grid.Row="3" Grid.Column="0"
-                Margin="12"
+        <Button Grid.Row="2" Grid.Column="0"
+                Margin="8"
                 Command="{Binding GoToSettingsCommand}"
                 IsVisible="{Binding SideMenuGameMenuVisible}">
             <Label Classes="icon-fill-only" Content="&#xe272;" />
         </Button>
 
-        <Button Grid.Row="3" Grid.Column="0"
-                Margin="12"
+        <Button Grid.Row="2" Grid.Column="0"
+                Margin="8"
                 Command="{Binding GoBackCommand}"
                 IsVisible="{Binding !SideMenuGameMenuVisible}">
             <Label Classes="icon-fill-only" Content="&#xe07e;" />
@@ -68,14 +52,18 @@
 
         <!-- Main Content section -->
         <ContentControl Grid.Row="0" Grid.Column="1"
-                        Grid.RowSpan="4"
-                        Content="{Binding CurrentPage}" />
+                        Grid.RowSpan="3"
+                        Content="{Binding CurrentPage}" >
+            
+            <ContentControl.Effect>
+                <BlurEffect Radius="{Binding Dialog.ContentBlurRadius, Mode=OneWay, FallbackValue=0}" />
+            </ContentControl.Effect>
+        </ContentControl>
 
-        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" Grid.ColumnSpan="2"
+        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Grid.ColumnSpan="2"
                 Background="{DynamicResource CalendarDatePickerBackground}"
                 IsVisible="{Binding #DialogOverlay.Opacity}"
                 Opacity="{Binding Dialog.IsDialogOpen, FallbackValue=0}">
-
             <Border.Styles>
                 <Style Selector="Grid">
                     <Setter Property="Transitions">
@@ -87,8 +75,8 @@
             </Border.Styles>
         </Border>
 
-        <Grid Grid.Row="0" Grid.RowSpan="4" Grid.Column="1"
-              RowDefinitions="96, *, 48"
+        <Grid Grid.Row="0" Grid.RowSpan="3" Grid.Column="1"
+              RowDefinitions="48, *, 48"
               ColumnDefinitions="48, *, 48"
               Name="DialogOverlay"
               IsVisible="{Binding #DialogOverlay.Opacity}"

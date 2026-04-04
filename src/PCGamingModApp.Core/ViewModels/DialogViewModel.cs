@@ -4,10 +4,13 @@ namespace PCGamingModApp.Core.ViewModels;
 
 public partial class DialogViewModel : ViewModelBase
 {
-    [ObservableProperty]
-    private bool _isDialogOpen;
+    [NotifyPropertyChangedFor(nameof(ContentBlurRadius))]
+    [ObservableProperty] private bool _isDialogOpen;
 
-    protected TaskCompletionSource closeTask = new TaskCompletionSource();
+    public double ContentBlurRadius => IsDialogOpen ? 256 : 0;
+    
+    protected TaskCompletionSource closeTask = new();
+
     public async Task WaitAsync()
     {
         await closeTask.Task;
@@ -17,7 +20,7 @@ public partial class DialogViewModel : ViewModelBase
     {
         if (closeTask.Task.IsCompleted)
             closeTask = new TaskCompletionSource();
-        
+
         IsDialogOpen = true;
     }
 
