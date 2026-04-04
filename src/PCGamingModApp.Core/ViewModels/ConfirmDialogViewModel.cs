@@ -55,7 +55,7 @@ public partial class ConfirmDialogViewModel : DialogViewModel
     }
 
     [RelayCommand(CanExecute = nameof(NotBusy))]
-    public async void Cancel()
+    protected virtual void Cancel()
     {
         Confirmed = false;
         Close();

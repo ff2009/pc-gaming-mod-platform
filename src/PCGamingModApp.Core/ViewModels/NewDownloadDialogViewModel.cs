@@ -26,8 +26,9 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
 
     [ObservableProperty] private string _destinationPath = string.Empty;
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(DownloadSize))]
-    private long _downloadFileSizeBytes = 0;
+    [NotifyPropertyChangedFor(nameof(DownloadSize))]
+    [NotifyPropertyChangedFor(nameof(DownloadStatistics))]
+    [ObservableProperty] private long _downloadFileSizeBytes = 0;
 
     [ObservableProperty] private string _iconText = "\xe4e0";
 
@@ -41,7 +42,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
 
     [ObservableProperty] private string _newDownloadUrl = string.Empty;
 
-    [ObservableProperty] private string _title = "Download";
+    [ObservableProperty] private string _title = "Add new downloads";
 
     [ObservableProperty] private SizeUnit _unit = SizeUnit.MB; // in bytes per second
 
@@ -89,25 +90,24 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
 
     partial void OnNewDownloadUrlChanged(string value)
     {
-        _ = GetMetadataURLsAsync(value);
+        _ = GetMetadataUrlsAsync(value);
     }
 
-    public bool NotBusy() => !Busy;
-
-    private async Task GetMetadataURLsAsync(string urls)
+    private async Task GetMetadataUrlsAsync(string urls)
     {
         string[] parts = urls.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 0) return;
 
         // Filter valid URLs upfront
         Regex regex = new Regex(
-            "(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})(\\.[a-zA-Z0-9]{2,})?");
-        var validUrls = parts.Where(url => regex.IsMatch(url)).ToArray();
+            @"(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})(\.[a-zA-Z0-9]{2,})?");
+        var validUrls = parts.Where(url => regex.IsMatch(url)).Distinct().ToArray();
         if (validUrls.Length == 0) return;
 
         // Show progress bar and reset progress
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
+            Busy = true;
             IsLoadingMetadata = true;
             MetadataProgress = 0;
             MetadataProgressMax = validUrls.Length;
@@ -135,7 +135,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
 
                     NewDownloadList.Add(newItem);
 
-                    MetadataProgress = index + 1;
+                    MetadataProgress = NewDownloadList.Count;
                     DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
                 });
 
@@ -157,10 +157,10 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
                     };
 
                     NewDownloadList.Add(failedItem);
-                    MetadataProgress = index + 1;
+                    MetadataProgress = NewDownloadList.Count;
                     DownloadFileSizeBytes = NewDownloadList.Sum(x => x.FileSizeInBytes);
                 });
-                return null;
+                return Task.CompletedTask;
             }
         });
 
@@ -172,6 +172,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         {
             IsLoadingMetadata = false;
             IsDownloadReady = NewDownloadList.Count == validUrls.Length;
+            Busy = false;
         });
     }
 
@@ -218,39 +219,6 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
     private void LoadData()
     {
         DestinationPath = _appPaths.Downloads;
-        var downloadListMock = new List<NewDownloadItemViewModel>()
-        {
-            new()
-            {
-                FileName = "OptiScaler_0.7.9.7z",
-                SavePath = $"{DestinationPath}\\OptiScaler_0.7.9.7z",
-                FileSizeInBytes = 123456789,
-                CreatedAt = DateTime.Now
-            },
-            new()
-            {
-                FileName = "Optiscaler_0.9.0-pre5 (20251031).7z",
-                SavePath = $"{DestinationPath}\\Optiscaler_0.9.0-pre5 (20251031).7z",
-                FileSizeInBytes = 324535560,
-                CreatedAt = DateTime.Now
-            },
-            new()
-            {
-                FileName = "dlssg-to-fsr3-0.130-738-0-130-1742150748.zip",
-                SavePath = $"{DestinationPath}\\dlssg-to-fsr3-0.130-738-0-130-1742150748.zip",
-                FileSizeInBytes = 23452352,
-                CreatedAt = DateTime.Now
-            },
-            new()
-            {
-                FileName = "FidelityFX-SDK-v1.1.4.zip",
-                SavePath = $"{DestinationPath}\\FidelityFX-SDK-v1.1.4.zip",
-                FileSizeInBytes = 223413453,
-                CreatedAt = DateTime.Now
-            },
-        };
-
-        NewDownloadList = new ObservableCollection<NewDownloadItemViewModel>(downloadListMock);
     }
 
 
@@ -281,7 +249,7 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
             NewDownloadList.Remove(download);
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(NotBusy))]
     private async Task StartDownloadLaterAsync()
     {
         await SaveDownloads();
@@ -289,10 +257,13 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         await ConfirmAsync();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(NotBusy))]
     private async Task StartNewDownload()
     {
         await SaveDownloads();
+
+        NewDownloadUrl = string.Empty;
+        NewDownloadList.Clear();
 
         await ConfirmAsync();
     }
@@ -302,9 +273,17 @@ public partial class NewDownloadDialogViewModel : ConfirmDialogViewModel
         List<Guid> downloadIds = new();
         foreach (var download in NewDownloadList)
         {
-            await _downloadOrchestrator.CreateDownloadAsync(download.Url, download.SavePath);
+            await _downloadOrchestrator.AddDownloadAsync(download.ToDataModel());
         }
 
         return downloadIds;
+    }
+
+    protected override void Cancel()
+    {
+        NewDownloadUrl = string.Empty;
+        NewDownloadList.Clear();
+        
+        base.Cancel();
     }
 }
